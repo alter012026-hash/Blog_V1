@@ -43,7 +43,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "24"
+          node-version: "20"
           cache: "npm"
 
       # ─────────────────────────────
@@ -89,17 +89,21 @@ jobs:
           fi
 
       # ─────────────────────────────
-      # Verificar mudanças
+      # Verificar mudanças (CORRIGIDO)
       # ─────────────────────────────
       - name: Verificar se há novos artigos
         id: check-changes
         run: |
-          if git diff --quiet HEAD -- posts/; then
+          git add posts/
+
+          if git diff --cached --quiet; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Nenhuma mudança detectada"
           else
             echo "has_changes=true" >> $GITHUB_OUTPUT
-            NEW_FILES=$(git diff --name-only HEAD -- posts/ | head -5 | tr '\n' ', ')
+            NEW_FILES=$(git diff --cached --name-only | head -5 | tr '\n' ', ')
             echo "new_files=$NEW_FILES" >> $GITHUB_OUTPUT
+            echo "✅ Mudanças detectadas: $NEW_FILES"
           fi
 
       # ─────────────────────────────
@@ -110,8 +114,6 @@ jobs:
         run: |
           git config --local user.email "bot@github.com"
           git config --local user.name "ArticleBot"
-
-          git add posts/
 
           TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
 
