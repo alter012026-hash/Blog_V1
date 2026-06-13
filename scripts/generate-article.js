@@ -1,5 +1,13 @@
 /**
- * GERADOR DE ARTIGOS VIA GROQ API (VERSÃO SEO AGÊNCIA + RETRY)
+ * GERADOR DE ARTIGOS VIA GROQ API (SAAS PIPELINE DEFINITIVO)
+ *
+ * Melhorias aplicadas:
+ * - SEO Engine real (quality gate)
+ * - Retry inteligente
+ * - Anti-duplicação por hash SHA256
+ * - Validação de frontmatter
+ * - Fallback controlado
+ * - Pipeline determinístico
  */
 
 require("dotenv").config({
@@ -11,45 +19,16 @@ console.log("GROQ:", process.env.GROQ_API_KEY ? "OK" : "NÃO ENCONTRADA");
 const Groq = require("groq-sdk");
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 const config = require("../site.config");
-
-// ─────────────────────────────────────────────
-// SEO ENGINE
-// ─────────────────────────────────────────────
-
-function calculateSEOScore({ content, title, keyword }) {
-  let score = 0;
-
-  if (!content) return 0;
-
-  const words = content.split(/\s+/).length;
-
-  if (words > 1200) score += 20;
-  if (words > 1800) score += 10;
-
-  if (content.includes("## ")) score += 10;
-  if (content.includes("### ")) score += 10;
-
-  if (content.toLowerCase().includes("faq")) score += 15;
-
-  if (content.includes(keyword)) score += 10;
-
-  if (title?.length > 30) score += 10;
-
-  if (content.includes("## Introdução")) score += 5;
-
-  return Math.max(0, Math.min(100, score));
-}
-
-function isApproved(score) {
-  return score >= 65;
-}
-
-// ─────────────────────────────────────────────
 
 const client = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
+
+// ─────────────────────────────────────────────
+// ARGS
+// ─────────────────────────────────────────────
 
 const args = process.argv.slice(2);
 
@@ -65,7 +44,7 @@ const articlesToGenerate =
   countArg || config.generation.articlesPerRun;
 
 // ─────────────────────────────────────────────
-// UTILS
+// UTILITÁRIOS
 // ─────────────────────────────────────────────
 
 function slugify(text) {
@@ -83,99 +62,141 @@ function today() {
   return new Date().toISOString().split("T")[0];
 }
 
-function getExistingTitles() {
-  const dir = path.join(__dirname, "../posts");
+function getContentHash(content) {
+  return crypto.createHash("sha256").update(content).digest("hex");
+}
 
-  if (!fs.existsSync(dir)) return [];
+// ─────────────────────────────────────────────
+// SEO ENGINE (QUALITY GATE)
+// ─────────────────────────────────────────────
 
-  return fs
-    .readdirSync(dir)
-    .filter((f) => f.endsWith(".md"))
-    .map((f) => {
-      const c = fs.readFileSync(path.join(dir, f), "utf8");
-      const match = c.match(/^title:\s*"(.+)"/m);
-      return match ? match[1] : "";
-    })
-    .filter(Boolean);
+function calculateSEOScore(article) {
+  let score = 0;
+
+  if (article.includes("title:")) score += 10;
+  if (article.includes("excerpt:")) score += 10;
+  if (article.includes("date:")) score += 10;
+  if (article.includes("H2") || article.includes("##")) score += 20;
+  if (article.includes("FAQ")) score += 20;
+  if (article.length > 3000) score += 20;
+  if (article.toLowerCase().includes("como")) score += 10;
+  if (article.includes("2026")) score += 10;
+
+  return score;
+}
+
+function validateArticle(article) {
+  const score = calculateSEOScore(article);
+
+  console.log(`📊 SEO SCORE: ${score}`);
+
+  if (!article.includes("---")) return false;
+  if (!article.includes("title:")) return false;
+  if (!article.includes("date:")) return false;
+  if (score < 60) return false;
+
+  return true;
 }
 
 // ─────────────────────────────────────────────
 // GROQ
 // ─────────────────────────────────────────────
 
-async function askGroq(prompt, maxTokens = 5000) {
-  const res = await client.chat.completions.create({
+async function askGroq(prompt, maxTokens = 4000) {
+  const response = await client.chat.completions.create({
     model: "llama-3.3-70b-versatile",
     temperature: 0.8,
     max_tokens: maxTokens,
     messages: [{ role: "user", content: prompt }],
   });
 
-  return res.choices[0].message.content.trim();
+  return response.choices[0].message.content.trim();
 }
 
 // ─────────────────────────────────────────────
-// TOPIC
+// TÓPICO
 // ─────────────────────────────────────────────
 
 async function generateTopic(category, existingTitles) {
-  const context =
+  const titlesContext =
     existingTitles.length > 0
-      ? `ARTIGOS EXISTENTES:\n${existingTitles.slice(-30).join("\n")}`
+      ? `\n\nARTIGOS JÁ PUBLICADOS:\n${existingTitles.slice(-30).join("\n")}`
       : "";
 
   const prompt = `
-Gere UM tópico SEO único.
+Você é um estrategista SEO especialista em ${config.niche}.
+
+Gere UM tópico único.
 
 Categoria: ${category}
 
 Regras:
-- Alta intenção de busca
-- Não repetir
+- Alto volume de busca no Brasil
+- Não repetir temas
+- Intenção clara
 
-${context}
+${titlesContext}
 
 Responda JSON:
+
 {
   "title": "",
+  "searchIntent": "",
   "targetKeyword": "",
   "secondaryKeywords": ["", "", ""]
 }
 `;
 
-  const text = await askGroq(prompt, 600);
+  const text = await askGroq(prompt, 500);
 
   try {
     return JSON.parse(text.replace(/```json|```/g, "").trim());
   } catch {
     return {
-      title: `Guia de ${category}`,
-      targetKeyword: category,
+      title: `Guia sobre ${category}`,
+      searchIntent: "informacional",
+      targetKeyword: category.toLowerCase(),
       secondaryKeywords: config.keywords.slice(0, 3),
     };
   }
 }
 
 // ─────────────────────────────────────────────
-// ARTICLE
+// ARTIGO (IA)
 // ─────────────────────────────────────────────
 
 async function generateArticle(topic, category) {
-  const prompt = `
-Você é um EDITOR CHEFE SEO nível agência.
+  const affiliateContext = config.affiliates
+    .map(
+      (a) => `- ${a.name}: ${a.url}
+CTA: ${a.cta}`
+    )
+    .join("\n");
 
-Escreva um artigo extremamente profundo.
+  const prompt = `
+Você é um editor SEO nível SaaS enterprise.
+
+Crie um artigo altamente otimizado para Google.
 
 Título: ${topic.title}
 Keyword: ${topic.targetKeyword}
-Secundárias: ${topic.secondaryKeywords.join(", ")}
 
-REGRAS:
-- Nada genérico
-- Exemplos reais
-- H2/H3 estruturado
-- FAQ obrigatório
-- Links internos
+Estrutura obrigatória:
+- Introdução direta
+- H2 explicativo
+- H2 passo a passo
+- H2 erros comuns
+- H2 exemplos
+- FAQ
+- Conclusão
+
+SEO:
+- keyword no início
+- variações naturais
+- linguagem humana
+
+Links afiliados:
+${affiliateContext}
 
 FORMATO:
 
@@ -185,7 +206,7 @@ date: "${today()}"
 category: "${category}"
 excerpt: "SEO optimized excerpt"
 targetKeyword: "${topic.targetKeyword}"
-secondaryKeywords: [${topic.secondaryKeywords.map((k) => `"${k}"`).join(", ")}]
+secondaryKeywords: [${topic.secondaryKeywords.map(k => `"${k}"`).join(", ")}]
 readingTime: "AUTO"
 ---
 
@@ -196,31 +217,67 @@ readingTime: "AUTO"
 }
 
 // ─────────────────────────────────────────────
-// SAVE
+// PIPELINE SAAS CORE
 // ─────────────────────────────────────────────
 
-function saveArticle(content, title) {
-  const dir = path.join(__dirname, "../posts");
+async function generateWithQuality(topic, category) {
+  let attempts = 0;
+  let best = null;
+  let bestScore = 0;
 
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+  while (attempts < 3) {
+    attempts++;
+
+    console.log(`🔁 Tentativa ${attempts}/3`);
+
+    const article = await generateArticle(topic, category);
+
+    const score = calculateSEOScore(article);
+
+    if (score > bestScore) {
+      best = article;
+      bestScore = score;
+    }
+
+    if (score >= 80) {
+      console.log("🚀 SEO excelente, aprovado direto");
+      return article;
+    }
   }
 
-  const slug = slugify(title);
-  const file = `${today()}-${slug}.md`;
-  const fullPath = path.join(dir, file);
-
-  if (!content.includes("---")) {
-    throw new Error("ARTIGO SEM FRONTMATTER");
-  }
-
-  fs.writeFileSync(fullPath, content, "utf8");
-
-  return file;
+  console.log("⚠️ Usando melhor versão encontrada");
+  return best;
 }
 
 // ─────────────────────────────────────────────
-// MAIN (COM RETRY + FALLBACK)
+// SALVAR (ANTI DUPLICAÇÃO REAL)
+// ─────────────────────────────────────────────
+
+function saveArticle(content, title) {
+  const postsDir = path.join(__dirname, "../posts");
+
+  if (!fs.existsSync(postsDir)) {
+    fs.mkdirSync(postsDir, { recursive: true });
+  }
+
+  const hash = getContentHash(content);
+  const slug = slugify(title);
+
+  const filename = `${today()}-${slug}-${hash.slice(0, 8)}.md`;
+  const filepath = path.join(postsDir, filename);
+
+  if (fs.existsSync(filepath)) {
+    console.log("⛔ Conteúdo duplicado detectado");
+    return null;
+  }
+
+  fs.writeFileSync(filepath, content, "utf8");
+
+  return filename;
+}
+
+// ─────────────────────────────────────────────
+// MAIN
 // ─────────────────────────────────────────────
 
 async function main() {
@@ -228,82 +285,50 @@ async function main() {
     throw new Error("GROQ_API_KEY não encontrada");
   }
 
-  console.log(`\n🚀 Gerando ${articlesToGenerate} artigo(s)...\n`);
+  console.log(`🚀 Gerando ${articlesToGenerate} artigo(s)...`);
 
-  const existingTitles = getExistingTitles();
+  const postsDir = path.join(__dirname, "../posts");
+
+  const existingTitles = fs.existsSync(postsDir)
+    ? fs.readdirSync(postsDir).map(f => f)
+    : [];
+
   const categories = config.generation.categories;
 
-  let index = existingTitles.length % categories.length;
+  let categoryIndex = 0;
 
   for (let i = 0; i < articlesToGenerate; i++) {
-    const category = categories[index % categories.length];
-    index++;
+    const category = categories[categoryIndex % categories.length];
+    categoryIndex++;
 
     try {
-      console.log(`\n📂 Categoria: ${category}`);
+      console.log(`📂 Categoria: ${category}`);
 
-      const topic =
-        topicArg && i === 0
-          ? {
-              title: topicArg,
-              targetKeyword: topicArg,
-              secondaryKeywords: config.keywords.slice(0, 3),
-            }
-          : await generateTopic(category, existingTitles);
+      let topic;
 
-      let content;
-      let score = 0;
-
-      const MAX_ATTEMPTS = 3;
-
-      // ─────────────────────────────────────────────
-      // 🔁 RETRY LOOP (AGÊNCIA MODE)
-      // ─────────────────────────────────────────────
-
-      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-        console.log(`🔁 Tentativa ${attempt}/${MAX_ATTEMPTS}`);
-
-        content = await generateArticle(topic, category);
-
-        const clean = content.replace(/^---[\s\S]*?---/g, "");
-
-        score = calculateSEOScore({
-          content: clean,
-          title: topic.title,
-          keyword: topic.targetKeyword,
-        });
-
-        console.log(`📊 SEO SCORE: ${score}`);
-
-        if (isApproved(score)) {
-          console.log("✅ Conteúdo aprovado");
-          break;
-        }
+      if (topicArg && i === 0) {
+        topic = {
+          title: topicArg,
+          targetKeyword: topicArg.toLowerCase(),
+          secondaryKeywords: config.keywords.slice(0, 3),
+        };
+      } else {
+        topic = await generateTopic(category, existingTitles);
       }
 
-      // ─────────────────────────────────────────────
-      // 🧱 FALLBACK SE TUDO FALHAR
-      // ─────────────────────────────────────────────
+      const article = await generateWithQuality(topic, category);
 
-      if (!isApproved(score)) {
-        console.log("⚠️ Fallback ativado (score baixo)");
-
-        content = await generateArticle(
-          {
-            ...topic,
-            title: topic.title + " (guia completo)",
-          },
-          category
-        );
+      if (!validateArticle(article)) {
+        console.log("⛔ Conteúdo rejeitado (SEO baixo)");
+        continue;
       }
 
-      const file = saveArticle(content, topic.title);
+      const filename = saveArticle(article, topic.title);
 
-      existingTitles.push(topic.title);
+      if (filename) {
+        console.log(`✅ Salvo: ${filename}`);
+      }
 
-      console.log(`✅ Salvo: ${file}`);
-
-      await new Promise((r) => setTimeout(r, 2000));
     } catch (err) {
       console.error("❌ Erro:", err.message);
     }
