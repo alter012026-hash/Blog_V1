@@ -7,9 +7,11 @@ node_modules/
 .next/
 out/
 
-# Environment variables — NUNCA commite isso
+# Environment variables — NUNCA commite esses arquivos
+.env
 .env.local
 .env.*.local
+# .env.example é seguro (sem chaves reais) — NÃO está aqui
 
 # Vercel
 .vercel
@@ -21,6 +23,6 @@ yarn-debug.log*
 # OS
 .DS_Store
 Thumbs.db
-.env
-.env.local
+
+# Scripts que contêm chaves hardcoded
 create-env.js
