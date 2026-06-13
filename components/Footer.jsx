@@ -1,5 +1,5 @@
 import Link from "next/link";
-import config from "../../site.config";
+import config from "../site.config";
 
 export default function Footer() {
   const year = new Date().getFullYear();

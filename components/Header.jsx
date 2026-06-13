@@ -1,6 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { useState } from "react";
-import config from "../../site.config";
+import config from "../site.config";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);

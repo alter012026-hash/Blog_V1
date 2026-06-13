@@ -1,30 +1,73 @@
-#!/usr/bin/env node
-
 /**
- * GERADOR DE ARTIGOS VIA ANTHROPIC API
- * 
- * Uso:
- *   node scripts/generate-article.js                    → gera N artigos (config)
- *   node scripts/generate-article.js --topic "tema"     → gera artigo sobre tema específico
- *   node scripts/generate-article.js --count 1          → gera 1 artigo
- * 
- * Requisito: ANTHROPIC_API_KEY no ambiente
+ * GERADOR DE ARTIGOS VIA GROQ API (VERSÃO SEO AGÊNCIA + RETRY)
  */
 
-const Anthropic = require("@anthropic-ai/sdk");
+require("dotenv").config({
+  path: require("path").resolve(__dirname, "../.env.local"),
+});
+
+console.log("GROQ:", process.env.GROQ_API_KEY ? "OK" : "NÃO ENCONTRADA");
+
+const Groq = require("groq-sdk");
 const fs = require("fs");
 const path = require("path");
 const config = require("../site.config");
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+// ─────────────────────────────────────────────
+// SEO ENGINE
+// ─────────────────────────────────────────────
 
-// ── Parsing de argumentos ──────────────────────────────────────────────────
+function calculateSEOScore({ content, title, keyword }) {
+  let score = 0;
+
+  if (!content) return 0;
+
+  const words = content.split(/\s+/).length;
+
+  if (words > 1200) score += 20;
+  if (words > 1800) score += 10;
+
+  if (content.includes("## ")) score += 10;
+  if (content.includes("### ")) score += 10;
+
+  if (content.toLowerCase().includes("faq")) score += 15;
+
+  if (content.includes(keyword)) score += 10;
+
+  if (title?.length > 30) score += 10;
+
+  if (content.includes("## Introdução")) score += 5;
+
+  return Math.max(0, Math.min(100, score));
+}
+
+function isApproved(score) {
+  return score >= 65;
+}
+
+// ─────────────────────────────────────────────
+
+const client = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
+});
+
 const args = process.argv.slice(2);
-const topicArg = args.includes("--topic") ? args[args.indexOf("--topic") + 1] : null;
-const countArg = args.includes("--count") ? parseInt(args[args.indexOf("--count") + 1]) : null;
-const articlesToGenerate = countArg || config.generation.articlesPerRun;
 
-// ── Utilitários ───────────────────────────────────────────────────────────
+const topicArg = args.includes("--topic")
+  ? args[args.indexOf("--topic") + 1]
+  : null;
+
+const countArg = args.includes("--count")
+  ? parseInt(args[args.indexOf("--count") + 1])
+  : null;
+
+const articlesToGenerate =
+  countArg || config.generation.articlesPerRun;
+
+// ─────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────
+
 function slugify(text) {
   return text
     .toLowerCase()
@@ -33,193 +76,240 @@ function slugify(text) {
     .replace(/[^a-z0-9\s-]/g, "")
     .trim()
     .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .slice(0, 80);
+    .slice(0, 90);
 }
 
 function today() {
   return new Date().toISOString().split("T")[0];
 }
 
-function pickRandom(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
 function getExistingTitles() {
-  const postsDir = path.join(__dirname, "../posts");
-  if (!fs.existsSync(postsDir)) return [];
-  return fs.readdirSync(postsDir)
-    .filter(f => f.endsWith(".md"))
-    .map(f => {
-      const content = fs.readFileSync(path.join(postsDir, f), "utf8");
-      const match = content.match(/^title:\s*"(.+)"/m);
+  const dir = path.join(__dirname, "../posts");
+
+  if (!fs.existsSync(dir)) return [];
+
+  return fs
+    .readdirSync(dir)
+    .filter((f) => f.endsWith(".md"))
+    .map((f) => {
+      const c = fs.readFileSync(path.join(dir, f), "utf8");
+      const match = c.match(/^title:\s*"(.+)"/m);
       return match ? match[1] : "";
     })
     .filter(Boolean);
 }
 
-// ── Prompt de geração de tópico ───────────────────────────────────────────
-async function generateTopic(category, existingTitles) {
-  const titlesContext = existingTitles.length > 0
-    ? `\n\nARTIGOS JÁ PUBLICADOS (não repita estes temas):\n${existingTitles.slice(-30).join("\n")}`
-    : "";
+// ─────────────────────────────────────────────
+// GROQ
+// ─────────────────────────────────────────────
 
-  const prompt = `Você é um estrategista de conteúdo SEO especializado em ${config.niche}.
-
-Gere UM tópico de artigo para a categoria "${category}" que:
-- Tenha alto volume de busca no Brasil
-- Responda uma dúvida real e específica do público
-- Tenha intenção de busca clara (informacional ou comercial)
-- Seja único e diferente dos artigos existentes
-- Use linguagem natural como as pessoas realmente pesquisam${titlesContext}
-
-Responda APENAS com um objeto JSON no formato:
-{
-  "title": "Título SEO do artigo (máx 65 caracteres)",
-  "searchIntent": "o que o leitor quer resolver",
-  "targetKeyword": "palavra-chave principal",
-  "secondaryKeywords": ["kw2", "kw3", "kw4"]
-}`;
-
-  const response = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 400,
+async function askGroq(prompt, maxTokens = 5000) {
+  const res = await client.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    temperature: 0.8,
+    max_tokens: maxTokens,
     messages: [{ role: "user", content: prompt }],
   });
 
-  const text = response.content[0].text.trim();
-  const clean = text.replace(/```json|```/g, "").trim();
-  return JSON.parse(clean);
+  return res.choices[0].message.content.trim();
 }
 
-// ── Prompt principal de artigo (E-E-A-T otimizado) ───────────────────────
-async function generateArticle(topic, category) {
-  const affiliateContext = config.affiliates
-    .map(a => `- ${a.name}: ${a.url} | Palavras-chave: ${a.keywords.join(", ")} | CTA: "${a.cta}"`)
-    .join("\n");
+// ─────────────────────────────────────────────
+// TOPIC
+// ─────────────────────────────────────────────
 
-  const prompt = `Você é um especialista em ${config.niche} com 10+ anos de experiência prática, escrevendo para o blog "${config.name}".
+async function generateTopic(category, existingTitles) {
+  const context =
+    existingTitles.length > 0
+      ? `ARTIGOS EXISTENTES:\n${existingTitles.slice(-30).join("\n")}`
+      : "";
 
-TAREFA: Escreva um artigo completo e profundo sobre:
-Título: ${topic.title}
-Intenção de busca: ${topic.searchIntent}
-Palavra-chave principal: ${topic.targetKeyword}
-Palavras-chave secundárias: ${topic.secondaryKeywords.join(", ")}
+  const prompt = `
+Gere UM tópico SEO único.
+
 Categoria: ${category}
-Tom: ${config.generation.tone}
-Público: ${config.generation.audienceLevel}
 
-DIRETRIZES DE QUALIDADE (E-E-A-T do Google):
-1. Demonstre EXPERIÊNCIA REAL: use exemplos concretos, números reais, situações do dia a dia brasileiro
-2. Demonstre EXPERTISE: explique o "porquê" por trás de cada recomendação
-3. Seja AUTORITATIVO: cite dados, pesquisas ou referências quando relevante
-4. Gere CONFIANÇA: reconheça limitações, não prometa resultados impossíveis
-5. Mínimo de ${config.generation.minWords} palavras com conteúdo denso e útil
-6. Use headers H2 e H3 semânticos com variações da palavra-chave
-7. Inclua exemplos práticos, cálculos ou comparações quando aplicável
-8. Termine com uma conclusão acionável e CTA natural
+Regras:
+- Alta intenção de busca
+- Não repetir
 
-LINKS DE AFILIADO (insira de forma natural e contextual, NUNCA forçada):
-${affiliateContext}
-- Insira no máximo 2 links de afiliado por artigo
-- Apenas quando o contexto for genuinamente relevante
-- Use o CTA fornecido próximo ao link
+${context}
 
-FORMATO DE SAÍDA (apenas o conteúdo abaixo, sem comentários):
+Responda JSON:
+{
+  "title": "",
+  "targetKeyword": "",
+  "secondaryKeywords": ["", "", ""]
+}
+`;
+
+  const text = await askGroq(prompt, 600);
+
+  try {
+    return JSON.parse(text.replace(/```json|```/g, "").trim());
+  } catch {
+    return {
+      title: `Guia de ${category}`,
+      targetKeyword: category,
+      secondaryKeywords: config.keywords.slice(0, 3),
+    };
+  }
+}
+
+// ─────────────────────────────────────────────
+// ARTICLE
+// ─────────────────────────────────────────────
+
+async function generateArticle(topic, category) {
+  const prompt = `
+Você é um EDITOR CHEFE SEO nível agência.
+
+Escreva um artigo extremamente profundo.
+
+Título: ${topic.title}
+Keyword: ${topic.targetKeyword}
+Secundárias: ${topic.secondaryKeywords.join(", ")}
+
+REGRAS:
+- Nada genérico
+- Exemplos reais
+- H2/H3 estruturado
+- FAQ obrigatório
+- Links internos
+
+FORMATO:
+
 ---
 title: "${topic.title}"
 date: "${today()}"
 category: "${category}"
-excerpt: "[descrição atraente de 155 caracteres máximo]"
+excerpt: "SEO optimized excerpt"
 targetKeyword: "${topic.targetKeyword}"
-secondaryKeywords: [${topic.secondaryKeywords.map(k => `"${k}"`).join(", ")}]
-readingTime: "[X min]"
+secondaryKeywords: [${topic.secondaryKeywords.map((k) => `"${k}"`).join(", ")}]
+readingTime: "AUTO"
 ---
 
-[CORPO DO ARTIGO EM MARKDOWN]`;
+## ARTIGO
+`;
 
-  const response = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 4000,
-    messages: [{ role: "user", content: prompt }],
-  });
-
-  return response.content[0].text;
+  return await askGroq(prompt, 5000);
 }
 
-// ── Salvar artigo ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// SAVE
+// ─────────────────────────────────────────────
+
 function saveArticle(content, title) {
-  const postsDir = path.join(__dirname, "../posts");
-  if (!fs.existsSync(postsDir)) fs.mkdirSync(postsDir, { recursive: true });
+  const dir = path.join(__dirname, "../posts");
 
-  const slug = slugify(title);
-  const filename = `${today()}-${slug}.md`;
-  const filepath = path.join(postsDir, filename);
-
-  // Evitar sobrescrever
-  if (fs.existsSync(filepath)) {
-    const alt = `${today()}-${slug}-${Date.now()}.md`;
-    fs.writeFileSync(path.join(postsDir, alt), content, "utf8");
-    return alt;
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
   }
 
-  fs.writeFileSync(filepath, content, "utf8");
-  return filename;
+  const slug = slugify(title);
+  const file = `${today()}-${slug}.md`;
+  const fullPath = path.join(dir, file);
+
+  if (!content.includes("---")) {
+    throw new Error("ARTIGO SEM FRONTMATTER");
+  }
+
+  fs.writeFileSync(fullPath, content, "utf8");
+
+  return file;
 }
 
-// ── Loop principal ────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// MAIN (COM RETRY + FALLBACK)
+// ─────────────────────────────────────────────
+
 async function main() {
-  console.log(`\n🚀 Gerando ${articlesToGenerate} artigo(s) para "${config.name}"...\n`);
+  if (!process.env.GROQ_API_KEY) {
+    throw new Error("GROQ_API_KEY não encontrada");
+  }
+
+  console.log(`\n🚀 Gerando ${articlesToGenerate} artigo(s)...\n`);
 
   const existingTitles = getExistingTitles();
   const categories = config.generation.categories;
-  let categoryIndex = existingTitles.length % categories.length; // rodízio
+
+  let index = existingTitles.length % categories.length;
 
   for (let i = 0; i < articlesToGenerate; i++) {
-    const category = categories[categoryIndex % categories.length];
-    categoryIndex++;
+    const category = categories[index % categories.length];
+    index++;
 
     try {
-      // 1. Gerar tópico
-      console.log(`[${i + 1}/${articlesToGenerate}] 🔍 Buscando tópico em "${category}"...`);
-      let topic;
-      
-      if (topicArg && i === 0) {
-        // Tópico manual
-        topic = {
-          title: topicArg,
-          searchIntent: "informação sobre o tema solicitado",
-          targetKeyword: topicArg.toLowerCase(),
-          secondaryKeywords: config.keywords.slice(0, 3),
-        };
-      } else {
-        topic = await generateTopic(category, existingTitles);
+      console.log(`\n📂 Categoria: ${category}`);
+
+      const topic =
+        topicArg && i === 0
+          ? {
+              title: topicArg,
+              targetKeyword: topicArg,
+              secondaryKeywords: config.keywords.slice(0, 3),
+            }
+          : await generateTopic(category, existingTitles);
+
+      let content;
+      let score = 0;
+
+      const MAX_ATTEMPTS = 3;
+
+      // ─────────────────────────────────────────────
+      // 🔁 RETRY LOOP (AGÊNCIA MODE)
+      // ─────────────────────────────────────────────
+
+      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+        console.log(`🔁 Tentativa ${attempt}/${MAX_ATTEMPTS}`);
+
+        content = await generateArticle(topic, category);
+
+        const clean = content.replace(/^---[\s\S]*?---/g, "");
+
+        score = calculateSEOScore({
+          content: clean,
+          title: topic.title,
+          keyword: topic.targetKeyword,
+        });
+
+        console.log(`📊 SEO SCORE: ${score}`);
+
+        if (isApproved(score)) {
+          console.log("✅ Conteúdo aprovado");
+          break;
+        }
       }
 
-      console.log(`    📝 Tópico: ${topic.title}`);
-      console.log(`    🎯 Keyword: ${topic.targetKeyword}`);
+      // ─────────────────────────────────────────────
+      // 🧱 FALLBACK SE TUDO FALHAR
+      // ─────────────────────────────────────────────
 
-      // 2. Gerar artigo
-      console.log(`    ✍️  Gerando artigo...`);
-      const content = await generateArticle(topic, category);
+      if (!isApproved(score)) {
+        console.log("⚠️ Fallback ativado (score baixo)");
 
-      // 3. Salvar
-      const filename = saveArticle(content, topic.title);
+        content = await generateArticle(
+          {
+            ...topic,
+            title: topic.title + " (guia completo)",
+          },
+          category
+        );
+      }
+
+      const file = saveArticle(content, topic.title);
+
       existingTitles.push(topic.title);
 
-      console.log(`    ✅ Salvo: posts/${filename}\n`);
+      console.log(`✅ Salvo: ${file}`);
 
-      // Delay entre requisições para não sobrecarregar a API
-      if (i < articlesToGenerate - 1) {
-        await new Promise(r => setTimeout(r, 3000));
-      }
-
+      await new Promise((r) => setTimeout(r, 2000));
     } catch (err) {
-      console.error(`    ❌ Erro ao gerar artigo ${i + 1}:`, err.message);
+      console.error("❌ Erro:", err.message);
     }
   }
 
-  console.log("✨ Geração concluída!\n");
+  console.log("\n✨ FINALIZADO");
 }
 
 main().catch(console.error);

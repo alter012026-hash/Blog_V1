@@ -1,5 +1,5 @@
 import "./globals.css";
-import config from "../../site.config";
+import config from "../site.config";
 
 export const metadata = {
   title: { default: config.name, template: `%s | ${config.name}` },

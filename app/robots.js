@@ -1,4 +1,4 @@
-import config from "../../site.config";
+import config from "../site.config";
 
 export default function robots() {
   return {

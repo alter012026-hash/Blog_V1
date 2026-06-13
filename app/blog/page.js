@@ -3,7 +3,7 @@ import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import PostCard from "../../components/PostCard";
 import { getAllPosts, getAllCategories } from "../../lib/posts";
-import config from "../../../site.config";
+import config from "../../site.config";
 
 export const revalidate = 3600;
 
