@@ -1,12 +1,12 @@
+
 /**
- * GERADOR DE ARTIGOS VIA GROQ + OPENROUTER (FALLBACK ESTÁVEL)
+ * GERADOR DE ARTIGOS — FALLBACK TRIPLO
+ * Groq (free) → Gemini Flash (free) → Anthropic (pago)
  */
 
 require("dotenv").config({
   path: require("path").resolve(__dirname, "../.env.local"),
 });
-
-console.log("GROQ:", process.env.GROQ_API_KEY ? "OK" : "NÃO ENCONTRADA");
 
 const Groq = require("groq-sdk");
 const fs = require("fs");
@@ -14,12 +14,15 @@ const path = require("path");
 const crypto = require("crypto");
 const config = require("../site.config");
 
-const client = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
-// 🔑 OPENROUTER (fallback)
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+console.log("GROQ:", GROQ_API_KEY ? "OK" : "NÃO ENCONTRADA");
+console.log("GEMINI:", GEMINI_API_KEY ? "OK" : "não configurada");
+console.log("ANTHROPIC:", ANTHROPIC_API_KEY ? "OK" : "não configurada");
+
+const groqClient = new Groq({ apiKey: GROQ_API_KEY });
 
 // ─────────────────────────────
 // ARGS
@@ -35,8 +38,7 @@ const countArg = args.includes("--count")
   ? parseInt(args[args.indexOf("--count") + 1])
   : null;
 
-const articlesToGenerate =
-  countArg || config.generation.articlesPerRun;
+const articlesToGenerate = countArg || config.generation.articlesPerRun;
 
 // ─────────────────────────────
 // UTIL
@@ -67,93 +69,144 @@ function getContentHash(content) {
 
 function calculateSEOScore(article) {
   let score = 0;
-
   if (article.includes("title:")) score += 10;
   if (article.includes("excerpt:")) score += 10;
   if (article.includes("date:")) score += 10;
-
   if (/^##\s+/m.test(article)) score += 25;
   if (article.includes("FAQ") || article.includes("Perguntas")) score += 15;
-
   if (article.length > 1500) score += 15;
-
   if (article.toLowerCase().includes("como")) score += 10;
   if (article.includes("2026") || article.includes("2025")) score += 5;
-
   return score;
 }
 
 function validateArticle(article) {
   const score = calculateSEOScore(article);
-
   console.log(`📊 SEO SCORE: ${score}`);
-
   if (!article.includes("---")) return false;
   if (!article.includes("title:")) return false;
   if (!article.includes("date:")) return false;
-
   if (score < 40) return false;
-
   return true;
 }
 
 // ─────────────────────────────
-// OPENROUTER
-// ─────────────────────────────
-
-async function askOpenRouter(prompt, maxTokens = 4000) {
-  try {
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-        "HTTP-Referer": "http://localhost",
-        "X-Title": "SEO Article Generator"
-      },
-      body: JSON.stringify({
-        model: "meta-llama/llama-3.1-70b-instruct",
-        temperature: 0.8,
-        max_tokens: maxTokens,
-        messages: [{ role: "user", content: prompt }]
-      })
-    });
-
-    if (!response.ok) {
-      const err = await response.text();
-      throw new Error(err);
-    }
-
-    const data = await response.json();
-
-    return data.choices?.[0]?.message?.content?.trim();
-  } catch (err) {
-    console.log("❌ OpenRouter falhou:", err.message);
-    throw err;
-  }
-}
-
-// ─────────────────────────────
-// GROQ + FALLBACK
+// PROVIDER 1 — GROQ (free)
+// Limite: 100k tokens/dia, 6k tokens/min
+// Console: console.groq.com
 // ─────────────────────────────
 
 async function askGroq(prompt, maxTokens = 4000) {
-  try {
-    const response = await client.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
-      temperature: 0.8,
+  if (!GROQ_API_KEY) throw new Error("GROQ_API_KEY não configurada");
+
+  const response = await groqClient.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    temperature: 0.8,
+    max_tokens: maxTokens,
+    messages: [{ role: "user", content: prompt }],
+  });
+
+  return response.choices[0].message.content.trim();
+}
+
+// ─────────────────────────────
+// PROVIDER 2 — GOOGLE GEMINI FLASH (free)
+// Limite: 1.500 req/dia, 1M tokens/min — mais generoso que Groq
+// Console: aistudio.google.com → Get API key
+// Secret: GEMINI_API_KEY
+// ─────────────────────────────
+
+async function askGemini(prompt, maxTokens = 4000) {
+  if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY não configurada");
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0.8,
+        maxOutputTokens: maxTokens,
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(err);
+  }
+
+  const data = await response.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+  if (!text) throw new Error("Gemini não retornou conteúdo");
+  return text.trim();
+}
+
+// ─────────────────────────────
+// PROVIDER 3 — ANTHROPIC (pago, fallback final)
+// Console: console.anthropic.com
+// Secret: ANTHROPIC_API_KEY
+// ─────────────────────────────
+
+async function askAnthropic(prompt, maxTokens = 4000) {
+  if (!ANTHROPIC_API_KEY) throw new Error("ANTHROPIC_API_KEY não configurada");
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": ANTHROPIC_API_KEY,
+      "anthropic-version": "2023-06-01",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "claude-haiku-4-5-20251001",
       max_tokens: maxTokens,
       messages: [{ role: "user", content: prompt }],
-    });
+    }),
+  });
 
-    return response.choices[0].message.content.trim();
-
-  } catch (err) {
-    console.log("⚠️ Groq falhou ou limite atingido:", err.message);
-
-    // 🔥 fallback garantido
-    return await askOpenRouter(prompt, maxTokens);
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(err);
   }
+
+  const data = await response.json();
+  const text = data.content?.[0]?.text;
+  if (!text) throw new Error("Anthropic não retornou conteúdo");
+  return text.trim();
+}
+
+// ─────────────────────────────
+// ORQUESTRADOR COM FALLBACK
+// ─────────────────────────────
+
+async function askAI(prompt, maxTokens = 4000) {
+  const providers = [
+    { name: "Groq", fn: () => askGroq(prompt, maxTokens), enabled: !!GROQ_API_KEY },
+    { name: "Gemini Flash", fn: () => askGemini(prompt, maxTokens), enabled: !!GEMINI_API_KEY },
+    { name: "Anthropic", fn: () => askAnthropic(prompt, maxTokens), enabled: !!ANTHROPIC_API_KEY },
+  ];
+
+  for (const provider of providers) {
+    if (!provider.enabled) {
+      console.log(`⏭️ ${provider.name}: chave não configurada, pulando`);
+      continue;
+    }
+
+    try {
+      const result = await provider.fn();
+      console.log(`✅ Gerado via ${provider.name}`);
+      return result;
+    } catch (err) {
+      console.log(`⚠️ ${provider.name} falhou: ${err.message.slice(0, 120)}`);
+      console.log(`🔄 Tentando próximo provider...`);
+    }
+  }
+
+  throw new Error("❌ Todos os providers falharam. Verifique os limites e configurações das APIs.");
 }
 
 // ─────────────────────────────
@@ -175,7 +228,7 @@ Responda JSON:
 }
 `;
 
-  const text = await askGroq(prompt, 500);
+  const text = await askAI(prompt, 500);
 
   try {
     return JSON.parse(text.replace(/```json|```/g, "").trim());
@@ -223,7 +276,7 @@ secondaryKeywords: [${topic.secondaryKeywords.map(k => `"${k}"`).join(", ")}]
 ## ARTIGO
 `;
 
-  return await askGroq(prompt, 4500);
+  return await askAI(prompt, 4500);
 }
 
 // ─────────────────────────────
@@ -237,11 +290,9 @@ async function generateWithQuality(topic, category) {
 
   while (attempts < 3) {
     attempts++;
-
     console.log(`🔁 Tentativa ${attempts}/3`);
 
     const article = await generateArticle(topic, category);
-
     const score = calculateSEOScore(article);
 
     if (score > bestScore) {
@@ -272,7 +323,6 @@ function saveArticle(content, title) {
 
   const hash = getContentHash(content);
   const slug = slugify(title);
-
   const filename = `${today()}-${slug}-${hash.slice(0, 8)}.md`;
   const filepath = path.join(postsDir, filename);
 
@@ -282,7 +332,6 @@ function saveArticle(content, title) {
   }
 
   fs.writeFileSync(filepath, content, "utf8");
-
   return filename;
 }
 
@@ -291,20 +340,15 @@ function saveArticle(content, title) {
 // ─────────────────────────────
 
 async function main() {
-  if (!process.env.GROQ_API_KEY) {
-    throw new Error("GROQ_API_KEY não encontrada");
+  if (!GROQ_API_KEY && !GEMINI_API_KEY && !ANTHROPIC_API_KEY) {
+    throw new Error("Nenhuma API key configurada. Configure ao menos GROQ_API_KEY ou GEMINI_API_KEY.");
   }
 
   console.log(`🚀 Gerando ${articlesToGenerate} artigo(s)...`);
 
   const postsDir = path.join(__dirname, "../posts");
-
-  const existingTitles = fs.existsSync(postsDir)
-    ? fs.readdirSync(postsDir)
-    : [];
-
+  const existingTitles = fs.existsSync(postsDir) ? fs.readdirSync(postsDir) : [];
   const categories = config.generation.categories;
-
   let categoryIndex = 0;
 
   for (let i = 0; i < articlesToGenerate; i++) {

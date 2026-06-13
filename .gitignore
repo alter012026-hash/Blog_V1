@@ -21,3 +21,6 @@ yarn-debug.log*
 # OS
 .DS_Store
 Thumbs.db
+.env
+.env.local
+create-env.js
