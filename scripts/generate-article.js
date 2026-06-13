@@ -7,13 +7,14 @@ const siteConfig = require("../site.config.js");
 
 // ─── CLI ─────────────────────────────────────────────────────────────
 const args = process.argv.slice(2);
+
 const topicArg = args.includes("--topic")
   ? args[args.indexOf("--topic") + 1]
   : null;
 
 const countArg = args.includes("--count")
   ? parseInt(args[args.indexOf("--count") + 1], 10)
-  : siteConfig.generation.articlesPerRun;
+  : siteConfig.generation.articlesPerRun || 1;
 
 // ─── Helpers ─────────────────────────────────────────────────────────
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -33,12 +34,19 @@ function randomItem(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-// ─── Gemini MODELS CORRIGIDOS ───────────────────────────────────────
+// ─── GEMINI MODELS CORRIGIDOS ───────────────────────────────────────
 const GEMINI_MODELS = [
   "gemini-2.0-flash",
   "gemini-1.5-flash-latest",
   "gemini-1.5-pro-latest",
 ];
+
+// ─── PROMPT ──────────────────────────────────────────────────────────
+function buildPrompt(topic) {
+  return `Escreva um artigo completo em português sobre: "${topic}".
+Inclua introdução, desenvolvimento e conclusão.
+Use linguagem clara e prática. Retorne em Markdown.`;
+}
 
 // ─── GROQ ────────────────────────────────────────────────────────────
 async function callGroq(prompt) {
@@ -96,7 +104,7 @@ async function callOpenRouter(prompt) {
   return data.choices[0].message.content;
 }
 
-// ─── GEMINI (CORRIGIDO) ─────────────────────────────────────────────
+// ─── GEMINI ──────────────────────────────────────────────────────────
 async function callGemini(prompt) {
   const key = process.env.GEMINI_API_KEY?.trim();
   if (!key) throw new Error("GEMINI_API_KEY ausente");
@@ -117,20 +125,9 @@ async function callGemini(prompt) {
         }),
       });
 
-      if (res.status === 429 || res.status === 503) {
-        console.warn(`⚠️ Gemini ${model} rate limit`);
-        continue;
-      }
-
-      if (res.status === 404) {
-        console.warn(`⚠️ Gemini ${model} não existe`);
-        continue;
-      }
-
-      if (!res.ok) {
-        console.warn(`⚠️ Gemini ${model} HTTP ${res.status}`);
-        continue;
-      }
+      if (res.status === 404) continue;
+      if (res.status === 429 || res.status === 503) continue;
+      if (!res.ok) continue;
 
       const data = await res.json();
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -139,8 +136,8 @@ async function callGemini(prompt) {
         console.log(`✅ Gemini usou: ${model}`);
         return text;
       }
-    } catch (e) {
-      console.warn(`⚠️ Gemini erro ${model}: ${e.message}`);
+    } catch (err) {
+      console.warn(`⚠️ Gemini ${model}: ${err.message}`);
     }
   }
 
@@ -155,23 +152,72 @@ async function generateWithFallback(prompt) {
     { name: "Gemini", fn: callGemini },
   ];
 
-  const errors = [];
-
   for (const p of providers) {
     try {
       console.log(`🔄 Tentando ${p.name}...`);
-
       const text = await p.fn(prompt);
-
       console.log(`✅ Gerado via ${p.name}`);
       return { text, provider: p.name };
-    } catch (e) {
-      console.warn(`❌ ${p.name}: ${e.message}`);
-      errors.push(`${p.name}: ${e.message}`);
-
-      await sleep(1500); // evita burst
+    } catch (err) {
+      console.warn(`❌ ${p.name}: ${err.message}`);
+      await sleep(1500);
     }
   }
 
-  throw new Error("FALHA TOTAL:\n" + errors.join("\n"));
+  throw new Error("Todos os provedores falharam");
 }
+
+// ─── SAVE ARTICLE ─────────────────────────────────────────────────────
+function saveArticle(markdown, topic) {
+  const postsDir = path.resolve(__dirname, "../posts");
+
+  if (!fs.existsSync(postsDir)) {
+    fs.mkdirSync(postsDir, { recursive: true });
+  }
+
+  const slug = slugify(topic);
+  const filePath = path.join(postsDir, `${slug}.md`);
+
+  fs.writeFileSync(filePath, markdown, "utf8");
+
+  return filePath;
+}
+
+// ─── MAIN ─────────────────────────────────────────────────────────────
+async function main() {
+  console.log("🔑 Chaves configuradas:");
+  console.log("GROQ:", !!process.env.GROQ_API_KEY);
+  console.log("OPENROUTER:", !!process.env.OPENROUTER_API_KEY);
+  console.log("GEMINI:", !!process.env.GEMINI_API_KEY);
+
+  console.log(`🚀 Iniciando geração de ${countArg} artigo(s)...\n`);
+
+  for (let i = 0; i < countArg; i++) {
+    const topic =
+      topicArg ||
+      randomItem([
+        "carreira de auditor fiscal vale a pena",
+        "como estudar para concursos públicos",
+        "melhores técnicas de estudo para aprovação",
+      ]);
+
+    console.log(`📝 Artigo ${i + 1}: ${topic}`);
+
+    const prompt = buildPrompt(topic);
+
+    const { text, provider } = await generateWithFallback(prompt);
+
+    const file = saveArticle(text, topic);
+
+    console.log(`💾 Salvo em: ${file}`);
+    console.log(`📡 Provider: ${provider}\n`);
+  }
+
+  console.log("✅ Finalizado com sucesso");
+}
+
+// ─── EXECUÇÃO ────────────────────────────────────────────────────────
+main().catch((err) => {
+  console.error("❌ ERRO FATAL:", err.message);
+  process.exit(1);
+});
