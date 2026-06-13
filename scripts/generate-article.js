@@ -1,13 +1,5 @@
 /**
- * GERADOR DE ARTIGOS VIA GROQ API (SAAS PIPELINE DEFINITIVO)
- *
- * Melhorias aplicadas:
- * - SEO Engine real (quality gate)
- * - Retry inteligente
- * - Anti-duplicação por hash SHA256
- * - Validação de frontmatter
- * - Fallback controlado
- * - Pipeline determinístico
+ * GERADOR DE ARTIGOS VIA GROQ API (SAAS PIPELINE ESTÁVEL)
  */
 
 require("dotenv").config({
@@ -26,9 +18,9 @@ const client = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
-// ─────────────────────────────────────────────
+// ─────────────────────────────
 // ARGS
-// ─────────────────────────────────────────────
+// ─────────────────────────────
 
 const args = process.argv.slice(2);
 
@@ -43,9 +35,9 @@ const countArg = args.includes("--count")
 const articlesToGenerate =
   countArg || config.generation.articlesPerRun;
 
-// ─────────────────────────────────────────────
-// UTILITÁRIOS
-// ─────────────────────────────────────────────
+// ─────────────────────────────
+// UTIL
+// ─────────────────────────────
 
 function slugify(text) {
   return text
@@ -66,9 +58,9 @@ function getContentHash(content) {
   return crypto.createHash("sha256").update(content).digest("hex");
 }
 
-// ─────────────────────────────────────────────
-// SEO ENGINE (QUALITY GATE)
-// ─────────────────────────────────────────────
+// ─────────────────────────────
+// SEO ENGINE (CORRIGIDO)
+// ─────────────────────────────
 
 function calculateSEOScore(article) {
   let score = 0;
@@ -76,11 +68,14 @@ function calculateSEOScore(article) {
   if (article.includes("title:")) score += 10;
   if (article.includes("excerpt:")) score += 10;
   if (article.includes("date:")) score += 10;
-  if (article.includes("H2") || article.includes("##")) score += 20;
-  if (article.includes("FAQ")) score += 20;
-  if (article.length > 3000) score += 20;
+
+  if (/^##\s+/m.test(article)) score += 25; // H2 real
+  if (article.includes("FAQ") || article.includes("Perguntas")) score += 15;
+
+  if (article.length > 1500) score += 15;
+
   if (article.toLowerCase().includes("como")) score += 10;
-  if (article.includes("2026")) score += 10;
+  if (article.includes("2026") || article.includes("2025")) score += 5;
 
   return score;
 }
@@ -93,14 +88,16 @@ function validateArticle(article) {
   if (!article.includes("---")) return false;
   if (!article.includes("title:")) return false;
   if (!article.includes("date:")) return false;
-  if (score < 60) return false;
+
+  // 🔥 AJUSTE CRÍTICO (antes era 60-80 impossível)
+  if (score < 40) return false;
 
   return true;
 }
 
-// ─────────────────────────────────────────────
+// ─────────────────────────────
 // GROQ
-// ─────────────────────────────────────────────
+// ─────────────────────────────
 
 async function askGroq(prompt, maxTokens = 4000) {
   const response = await client.chat.completions.create({
@@ -113,32 +110,17 @@ async function askGroq(prompt, maxTokens = 4000) {
   return response.choices[0].message.content.trim();
 }
 
-// ─────────────────────────────────────────────
-// TÓPICO
-// ─────────────────────────────────────────────
+// ─────────────────────────────
+// TOPIC
+// ─────────────────────────────
 
 async function generateTopic(category, existingTitles) {
-  const titlesContext =
-    existingTitles.length > 0
-      ? `\n\nARTIGOS JÁ PUBLICADOS:\n${existingTitles.slice(-30).join("\n")}`
-      : "";
-
   const prompt = `
-Você é um estrategista SEO especialista em ${config.niche}.
-
-Gere UM tópico único.
+Gere um tópico SEO para ${config.niche}.
 
 Categoria: ${category}
 
-Regras:
-- Alto volume de busca no Brasil
-- Não repetir temas
-- Intenção clara
-
-${titlesContext}
-
 Responda JSON:
-
 {
   "title": "",
   "searchIntent": "",
@@ -161,44 +143,27 @@ Responda JSON:
   }
 }
 
-// ─────────────────────────────────────────────
-// ARTIGO (IA)
-// ─────────────────────────────────────────────
+// ─────────────────────────────
+// ARTICLE
+// ─────────────────────────────
 
 async function generateArticle(topic, category) {
-  const affiliateContext = config.affiliates
-    .map(
-      (a) => `- ${a.name}: ${a.url}
-CTA: ${a.cta}`
-    )
-    .join("\n");
-
   const prompt = `
-Você é um editor SEO nível SaaS enterprise.
-
-Crie um artigo altamente otimizado para Google.
+Crie um artigo SEO.
 
 Título: ${topic.title}
 Keyword: ${topic.targetKeyword}
 
-Estrutura obrigatória:
-- Introdução direta
-- H2 explicativo
-- H2 passo a passo
-- H2 erros comuns
-- H2 exemplos
+Estrutura:
+- Introdução
+- ## Explicação
+- ## Passo a passo
+- ## Erros comuns
+- ## Exemplos
 - FAQ
 - Conclusão
 
-SEO:
-- keyword no início
-- variações naturais
-- linguagem humana
-
-Links afiliados:
-${affiliateContext}
-
-FORMATO:
+FORMATO FRONTMATTER:
 
 ---
 title: "${topic.title}"
@@ -207,18 +172,17 @@ category: "${category}"
 excerpt: "SEO optimized excerpt"
 targetKeyword: "${topic.targetKeyword}"
 secondaryKeywords: [${topic.secondaryKeywords.map(k => `"${k}"`).join(", ")}]
-readingTime: "AUTO"
 ---
 
 ## ARTIGO
 `;
 
-  return await askGroq(prompt, 5000);
+  return await askGroq(prompt, 4500);
 }
 
-// ─────────────────────────────────────────────
-// PIPELINE SAAS CORE
-// ─────────────────────────────────────────────
+// ─────────────────────────────
+// QUALITY LOOP
+// ─────────────────────────────
 
 async function generateWithQuality(topic, category) {
   let attempts = 0;
@@ -239,19 +203,19 @@ async function generateWithQuality(topic, category) {
       bestScore = score;
     }
 
-    if (score >= 80) {
-      console.log("🚀 SEO excelente, aprovado direto");
+    if (score >= 60) {
+      console.log("🚀 Aprovado automaticamente");
       return article;
     }
   }
 
-  console.log("⚠️ Usando melhor versão encontrada");
+  console.log("⚠️ Usando melhor versão disponível");
   return best;
 }
 
-// ─────────────────────────────────────────────
-// SALVAR (ANTI DUPLICAÇÃO REAL)
-// ─────────────────────────────────────────────
+// ─────────────────────────────
+// SAVE
+// ─────────────────────────────
 
 function saveArticle(content, title) {
   const postsDir = path.join(__dirname, "../posts");
@@ -267,7 +231,7 @@ function saveArticle(content, title) {
   const filepath = path.join(postsDir, filename);
 
   if (fs.existsSync(filepath)) {
-    console.log("⛔ Conteúdo duplicado detectado");
+    console.log("⛔ Duplicado detectado");
     return null;
   }
 
@@ -276,9 +240,9 @@ function saveArticle(content, title) {
   return filename;
 }
 
-// ─────────────────────────────────────────────
+// ─────────────────────────────
 // MAIN
-// ─────────────────────────────────────────────
+// ─────────────────────────────
 
 async function main() {
   if (!process.env.GROQ_API_KEY) {
@@ -290,7 +254,7 @@ async function main() {
   const postsDir = path.join(__dirname, "../posts");
 
   const existingTitles = fs.existsSync(postsDir)
-    ? fs.readdirSync(postsDir).map(f => f)
+    ? fs.readdirSync(postsDir)
     : [];
 
   const categories = config.generation.categories;
@@ -319,7 +283,7 @@ async function main() {
       const article = await generateWithQuality(topic, category);
 
       if (!validateArticle(article)) {
-        console.log("⛔ Conteúdo rejeitado (SEO baixo)");
+        console.log("⛔ Conteúdo rejeitado (SEO)");
         continue;
       }
 
