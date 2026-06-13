@@ -2,13 +2,13 @@ name: Gerar e Publicar Artigos
 
 on:
   schedule:
-    # Gera artigos 3x por dia (horários em UTC = BRT+3)
-    # 09:00 BRT = 12:00 UTC | 13:00 BRT = 16:00 UTC | 18:00 BRT = 21:00 UTC
+    # 09:00 BRT = 12:00 UTC
+    # 13:00 BRT = 16:00 UTC
+    # 18:00 BRT = 21:00 UTC
     - cron: "0 12 * * *"
     - cron: "0 16 * * *"
     - cron: "0 21 * * *"
 
-  # Permite rodar manualmente pelo GitHub UI
   workflow_dispatch:
     inputs:
       topic:
@@ -16,35 +16,58 @@ on:
         required: false
         default: ""
       count:
-        description: "Número de artigos (padrão: 1 por execução)"
+        description: "Número de artigos (padrão: 1)"
         required: false
         default: "1"
 
 jobs:
   generate-and-deploy:
     runs-on: ubuntu-latest
+
     permissions:
       contents: write
 
     steps:
+      # ─────────────────────────────────────────────
+      # 1. Checkout
+      # ─────────────────────────────────────────────
       - name: Checkout repositório
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
+      # ─────────────────────────────────────────────
+      # 2. Node
+      # ─────────────────────────────────────────────
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "npm"
 
+      # ─────────────────────────────────────────────
+      # 3. Instalar dependências
+      # ─────────────────────────────────────────────
       - name: Instalar dependências
         run: npm ci
 
+      # ─────────────────────────────────────────────
+      # 4. VALIDAR SE SECRETS EXISTEM (IMPORTANTE)
+      # ─────────────────────────────────────────────
+      - name: Validar GROQ API Key
+        run: |
+          if [ -z "${{ secrets.GROQ_API_KEY }}" ]; then
+            echo "❌ GROQ_API_KEY não configurada nos Secrets"
+            exit 1
+          fi
+
+      # ─────────────────────────────────────────────
+      # 5. GERAR ARTIGOS
+      # ─────────────────────────────────────────────
       - name: Gerar artigo(s)
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         run: |
           TOPIC="${{ github.event.inputs.topic }}"
           COUNT="${{ github.event.inputs.count || '1' }}"
@@ -55,6 +78,9 @@ jobs:
             node scripts/generate-article.js --count "$COUNT"
           fi
 
+      # ─────────────────────────────────────────────
+      # 6. VERIFICAR MUDANÇAS
+      # ─────────────────────────────────────────────
       - name: Verificar se há novos artigos
         id: check-changes
         run: |
@@ -66,6 +92,9 @@ jobs:
             echo "new_files=$NEW_FILES" >> $GITHUB_OUTPUT
           fi
 
+      # ─────────────────────────────────────────────
+      # 7. COMMIT AUTOMÁTICO
+      # ─────────────────────────────────────────────
       - name: Commit e push dos artigos gerados
         if: steps.check-changes.outputs.has_changes == 'true'
         run: |
@@ -73,34 +102,39 @@ jobs:
           git config --local user.name "ArticleBot"
 
           git add posts/
-          
+
           TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
+
           git commit -m "✍️ Artigos gerados automaticamente — $TIMESTAMP
 
-          Arquivos: ${{ steps.check-changes.outputs.new_files }}
-          
-          [skip ci se não houver mudanças no código]"
-          
+          Arquivos: ${{ steps.check-changes.outputs.new_files }}"
+
           git push
 
-      - name: Deploy no Vercel (via revalidate)
+      # ─────────────────────────────────────────────
+      # 8. DEPLOY VERCEL (OPCIONAL)
+      # ─────────────────────────────────────────────
+      - name: Deploy no Vercel
         if: steps.check-changes.outputs.has_changes == 'true'
         env:
           VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
         run: |
           if [ -n "$VERCEL_DEPLOY_HOOK" ]; then
-            echo "Disparando deploy no Vercel..."
-            curl -s -X POST "$VERCEL_DEPLOY_HOOK" | jq '.job.id // "Deploy disparado"'
+            echo "🚀 Disparando deploy no Vercel..."
+            curl -s -X POST "$VERCEL_DEPLOY_HOOK"
           else
-            echo "⚠️  VERCEL_DEPLOY_HOOK não configurado — configure nos Secrets do repositório"
+            echo "⚠️ VERCEL_DEPLOY_HOOK não configurado"
           fi
 
+      # ─────────────────────────────────────────────
+      # 9. RESUMO FINAL
+      # ─────────────────────────────────────────────
       - name: Resumo
         if: always()
         run: |
           if [ "${{ steps.check-changes.outputs.has_changes }}" == "true" ]; then
-            echo "✅ Artigo(s) gerado(s) e publicado(s) com sucesso"
+            echo "✅ Artigos gerados e publicados com sucesso"
             echo "📄 Arquivos: ${{ steps.check-changes.outputs.new_files }}"
           else
-            echo "⚠️  Nenhum artigo novo gerado nesta execução"
+            echo "⚠️ Nenhum artigo novo gerado"
           fi
