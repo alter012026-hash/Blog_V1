@@ -16,7 +16,6 @@ const siteConfig = {
   // --- NICHO ---
   niche: "concursos públicos",
 
-  // Palavras-chave principais do nicho
   keywords: [
     "concursos públicos",
     "edital",
@@ -45,35 +44,21 @@ const siteConfig = {
       id: "estrategia",
       name: "Estratégia Concursos",
       url: "https://www.estrategiaconcursos.com.br/",
-      keywords: [
-        "curso para concurso",
-        "apostila",
-        "pdf",
-        "questões",
-        "preparação",
-      ],
+      keywords: ["curso para concurso", "apostila", "pdf", "questões", "preparação"],
       cta: "Conheça os cursos do Estratégia Concursos",
     },
     {
       id: "gran",
       name: "Gran Cursos",
       url: "https://www.grancursosonline.com.br/",
-      keywords: [
-        "concursos públicos",
-        "curso online",
-        "questões comentadas",
-      ],
+      keywords: ["concursos públicos", "curso online", "questões comentadas"],
       cta: "Estude com o Gran Cursos",
     },
     {
       id: "qconcursos",
       name: "QConcursos",
       url: "https://www.qconcursos.com/",
-      keywords: [
-        "questões",
-        "simulados",
-        "banco de questões",
-      ],
+      keywords: ["questões", "simulados", "banco de questões"],
       cta: "Pratique com milhares de questões no QConcursos",
     },
   ],
@@ -89,16 +74,18 @@ const siteConfig = {
     },
   },
 
-  // --- GERAÇÃO DE ARTIGOS ---
+  // --- GERAÇÃO DE ARTIGOS (🔥 OTIMIZADO PARA NÃO ESTOURAR API) ---
   generation: {
-    articlesPerRun: 3,
+    // 🔴 PRINCIPAL AJUSTE (evita 429)
+    articlesPerRun: 1,
 
     tone:
-      "motivador, estratégico e didático — como um mentor experiente em concursos",
+      "didático, direto e estratégico — como um mentor experiente em concursos públicos",
 
-    audienceLevel: "iniciante a avançado",
+    audienceLevel: "iniciante a intermediário",
 
-    minWords: 1500,
+    // 🔥 reduz custo de tokens
+    minWords: 1200,
 
     categories: [
       "Editais",
@@ -118,7 +105,7 @@ const siteConfig = {
     googleSiteVerification: "",
   },
 
-  // --- MENU DE NAVEGAÇÃO ---
+  // --- MENU ---
   navigation: [
     { label: "Início", href: "/" },
     { label: "Concursos Abertos", href: "/blog?categoria=Concursos+Abertos" },

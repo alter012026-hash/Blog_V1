@@ -1,5 +1,5 @@
 /**
- * GERADOR DE ARTIGOS VIA GROQ API (SAAS PIPELINE ESTÁVEL)
+ * GERADOR DE ARTIGOS VIA GROQ + OPENROUTER (FALLBACK ESTÁVEL)
  */
 
 require("dotenv").config({
@@ -17,6 +17,9 @@ const config = require("../site.config");
 const client = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
+
+// 🔑 OPENROUTER (fallback)
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
 // ─────────────────────────────
 // ARGS
@@ -59,7 +62,7 @@ function getContentHash(content) {
 }
 
 // ─────────────────────────────
-// SEO ENGINE (CORRIGIDO)
+// SEO ENGINE
 // ─────────────────────────────
 
 function calculateSEOScore(article) {
@@ -69,7 +72,7 @@ function calculateSEOScore(article) {
   if (article.includes("excerpt:")) score += 10;
   if (article.includes("date:")) score += 10;
 
-  if (/^##\s+/m.test(article)) score += 25; // H2 real
+  if (/^##\s+/m.test(article)) score += 25;
   if (article.includes("FAQ") || article.includes("Perguntas")) score += 15;
 
   if (article.length > 1500) score += 15;
@@ -89,25 +92,68 @@ function validateArticle(article) {
   if (!article.includes("title:")) return false;
   if (!article.includes("date:")) return false;
 
-  // 🔥 AJUSTE CRÍTICO (antes era 60-80 impossível)
   if (score < 40) return false;
 
   return true;
 }
 
 // ─────────────────────────────
-// GROQ
+// OPENROUTER
+// ─────────────────────────────
+
+async function askOpenRouter(prompt, maxTokens = 4000) {
+  try {
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "http://localhost",
+        "X-Title": "SEO Article Generator"
+      },
+      body: JSON.stringify({
+        model: "meta-llama/llama-3.1-70b-instruct",
+        temperature: 0.8,
+        max_tokens: maxTokens,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.text();
+      throw new Error(err);
+    }
+
+    const data = await response.json();
+
+    return data.choices?.[0]?.message?.content?.trim();
+  } catch (err) {
+    console.log("❌ OpenRouter falhou:", err.message);
+    throw err;
+  }
+}
+
+// ─────────────────────────────
+// GROQ + FALLBACK
 // ─────────────────────────────
 
 async function askGroq(prompt, maxTokens = 4000) {
-  const response = await client.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-    temperature: 0.8,
-    max_tokens: maxTokens,
-    messages: [{ role: "user", content: prompt }],
-  });
+  try {
+    const response = await client.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      temperature: 0.8,
+      max_tokens: maxTokens,
+      messages: [{ role: "user", content: prompt }],
+    });
 
-  return response.choices[0].message.content.trim();
+    return response.choices[0].message.content.trim();
+
+  } catch (err) {
+    console.log("⚠️ Groq falhou ou limite atingido:", err.message);
+
+    // 🔥 fallback garantido
+    return await askOpenRouter(prompt, maxTokens);
+  }
 }
 
 // ─────────────────────────────
