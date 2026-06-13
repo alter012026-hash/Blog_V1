@@ -28,51 +28,59 @@ jobs:
       contents: write
 
     steps:
-      # ─────────────────────────────────────────────
-      # 1. Checkout
-      # ─────────────────────────────────────────────
+      # ─────────────────────────────
+      # Checkout
+      # ─────────────────────────────
       - name: Checkout repositório
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      # ─────────────────────────────────────────────
-      # 2. Node
-      # ─────────────────────────────────────────────
+      # ─────────────────────────────
+      # Node.js
+      # ─────────────────────────────
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "24"
           cache: "npm"
 
-      # ─────────────────────────────────────────────
-      # 3. Instalar dependências
-      # ─────────────────────────────────────────────
+      # ─────────────────────────────
+      # Dependências
+      # ─────────────────────────────
       - name: Instalar dependências
         run: npm ci
 
-      # ─────────────────────────────────────────────
-      # 4. VALIDAR SE SECRETS EXISTEM
-      # ─────────────────────────────────────────────
+      # ─────────────────────────────
+      # Validar secrets críticos
+      # ─────────────────────────────
       - name: Validar GROQ API Key
         run: |
           if [ -z "${{ secrets.GROQ_API_KEY }}" ]; then
-            echo "❌ GROQ_API_KEY não configurada nos Secrets"
+            echo "❌ GROQ_API_KEY não configurada"
             exit 1
           fi
 
-      # ─────────────────────────────────────────────
-      # 5. GERAR ARTIGOS
-      # ─────────────────────────────────────────────
+      # ─────────────────────────────
+      # Gerar artigos
+      # ─────────────────────────────
       - name: Gerar artigo(s)
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           TOPIC="${{ github.event.inputs.topic }}"
-          COUNT="${{ github.event.inputs.count || '1' }}"
+          COUNT="${{ github.event.inputs.count }}"
+
+          # fallback seguro para schedule (vazio)
+          if [ -z "$COUNT" ]; then
+            COUNT=1
+          fi
+
+          echo "🚀 Iniciando geração de $COUNT artigo(s)..."
 
           if [ -n "$TOPIC" ]; then
             node scripts/generate-article.js --topic "$TOPIC" --count "$COUNT"
@@ -80,9 +88,9 @@ jobs:
             node scripts/generate-article.js --count "$COUNT"
           fi
 
-      # ─────────────────────────────────────────────
-      # 6. VERIFICAR MUDANÇAS
-      # ─────────────────────────────────────────────
+      # ─────────────────────────────
+      # Verificar mudanças
+      # ─────────────────────────────
       - name: Verificar se há novos artigos
         id: check-changes
         run: |
@@ -94,9 +102,9 @@ jobs:
             echo "new_files=$NEW_FILES" >> $GITHUB_OUTPUT
           fi
 
-      # ─────────────────────────────────────────────
-      # 7. COMMIT AUTOMÁTICO
-      # ─────────────────────────────────────────────
+      # ─────────────────────────────
+      # Commit automático
+      # ─────────────────────────────
       - name: Commit e push dos artigos gerados
         if: steps.check-changes.outputs.has_changes == 'true'
         run: |
@@ -113,9 +121,9 @@ jobs:
 
           git push
 
-      # ─────────────────────────────────────────────
-      # 8. DEPLOY VERCEL (OPCIONAL)
-      # ─────────────────────────────────────────────
+      # ─────────────────────────────
+      # Deploy Vercel (opcional)
+      # ─────────────────────────────
       - name: Deploy no Vercel
         if: steps.check-changes.outputs.has_changes == 'true'
         env:
@@ -128,9 +136,9 @@ jobs:
             echo "⚠️ VERCEL_DEPLOY_HOOK não configurado"
           fi
 
-      # ─────────────────────────────────────────────
-      # 9. RESUMO FINAL
-      # ─────────────────────────────────────────────
+      # ─────────────────────────────
+      # Resumo final
+      # ─────────────────────────────
       - name: Resumo
         if: always()
         run: |
