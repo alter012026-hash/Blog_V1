@@ -1,49 +1,28 @@
-
+#!/usr/bin/env node
 /**
- * GERADOR DE ARTIGOS — FALLBACK TRIPLO
- * Groq (free) → Gemini Flash (free) → Anthropic (pago)
+ * generate-article.js
+ * Fallback automático: Groq → OpenRouter → Gemini
+ *
+ * Uso:
+ *   npm run generate-article
+ *   node scripts/generate-article.js --topic "como estudar direito" --count 2
  */
 
-require("dotenv").config({
-  path: require("path").resolve(__dirname, "../.env.local"),
-});
+// Lê .env.local SE existir; variáveis já no ambiente (GitHub Actions) têm prioridade
+require("dotenv").config({ path: ".env.local", override: false });
 
-const Groq = require("groq-sdk");
 const fs = require("fs");
 const path = require("path");
-const crypto = require("crypto");
-const config = require("../site.config");
+const siteConfig = require("../site.config.js");
 
-const GROQ_API_KEY = process.env.GROQ_API_KEY;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-
-console.log("GROQ:", GROQ_API_KEY ? "OK" : "NÃO ENCONTRADA");
-console.log("GEMINI:", GEMINI_API_KEY ? "OK" : "não configurada");
-console.log("ANTHROPIC:", ANTHROPIC_API_KEY ? "OK" : "não configurada");
-
-const groqClient = new Groq({ apiKey: GROQ_API_KEY });
-
-// ─────────────────────────────
-// ARGS
-// ─────────────────────────────
-
+// ─── CLI Args ─────────────────────────────────────────────────────────────────
 const args = process.argv.slice(2);
-
-const topicArg = args.includes("--topic")
-  ? args[args.indexOf("--topic") + 1]
-  : null;
-
+const topicArg = args.includes("--topic") ? args[args.indexOf("--topic") + 1] : null;
 const countArg = args.includes("--count")
-  ? parseInt(args[args.indexOf("--count") + 1])
-  : null;
+  ? parseInt(args[args.indexOf("--count") + 1], 10)
+  : siteConfig.generation.articlesPerRun;
 
-const articlesToGenerate = countArg || config.generation.articlesPerRun;
-
-// ─────────────────────────────
-// UTIL
-// ─────────────────────────────
-
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 function slugify(text) {
   return text
     .toLowerCase()
@@ -52,343 +31,266 @@ function slugify(text) {
     .replace(/[^a-z0-9\s-]/g, "")
     .trim()
     .replace(/\s+/g, "-")
-    .slice(0, 90);
+    .substring(0, 80);
 }
 
-function today() {
-  return new Date().toISOString().split("T")[0];
+function randomItem(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function getContentHash(content) {
-  return crypto.createHash("sha256").update(content).digest("hex");
+function buildTopic() {
+  if (topicArg) return topicArg;
+  const cat = randomItem(siteConfig.generation.categories);
+  const seeds = {
+    Editais: [
+      "como interpretar um edital de concurso público",
+      "o que observar no edital antes de se inscrever",
+      "diferenças entre editais estaduais e federais",
+    ],
+    "Técnicas de Estudo": [
+      "método pomodoro aplicado a concursos",
+      "como fazer resumos eficientes para concursos",
+      "revisão espaçada para concursos públicos",
+      "como memorizar legislação para provas",
+    ],
+    "Concursos Abertos": [
+      "melhores concursos públicos abertos este mês",
+      "concursos com mais vagas para iniciantes",
+    ],
+    "Materiais Gratuitos": [
+      "apostilas gratuitas para concursos públicos",
+      "sites com questões comentadas gratuitas",
+    ],
+    "Cronograma de Estudos": [
+      "como montar cronograma de estudos para concurso",
+      "cronograma de 6 meses para aprovação",
+    ],
+    "Carreiras Públicas": [
+      "carreira de auditor fiscal vale a pena",
+      "diferenças entre cargos de nível médio e superior",
+    ],
+    "Questões Comentadas": [
+      "como resolver questões de raciocínio lógico",
+      "estratégia para questões de português em concursos",
+    ],
+  };
+  const pool = seeds[cat] || [`dicas de ${cat} para concursos públicos`];
+  return randomItem(pool);
 }
 
-// ─────────────────────────────
-// SEO ENGINE
-// ─────────────────────────────
+function buildPrompt(topic) {
+  const { tone, audienceLevel, minWords } = siteConfig.generation;
+  return `Você é um especialista em ${siteConfig.niche}. Escreva um artigo completo em Markdown sobre: "${topic}".
 
-function calculateSEOScore(article) {
-  let score = 0;
-  if (article.includes("title:")) score += 10;
-  if (article.includes("excerpt:")) score += 10;
-  if (article.includes("date:")) score += 10;
-  if (/^##\s+/m.test(article)) score += 25;
-  if (article.includes("FAQ") || article.includes("Perguntas")) score += 15;
-  if (article.length > 1500) score += 15;
-  if (article.toLowerCase().includes("como")) score += 10;
-  if (article.includes("2026") || article.includes("2025")) score += 5;
-  return score;
+Requisitos:
+- Mínimo de ${minWords} palavras
+- Tom: ${tone}
+- Público: ${audienceLevel}
+- Estrutura: introdução, H2 com subtópicos, conclusão com CTA
+- Inclua uma lista de pontos práticos em pelo menos uma seção
+- NÃO use termos genéricos como "é importante notar que"
+- Escreva em português brasileiro informal mas profissional
+- Finalize com um parágrafo de conclusão e chamada para ação
+
+Retorne APENAS o Markdown, começando com o título (# Título).`;
 }
 
-function validateArticle(article) {
-  const score = calculateSEOScore(article);
-  console.log(`📊 SEO SCORE: ${score}`);
-  if (!article.includes("---")) return false;
-  if (!article.includes("title:")) return false;
-  if (!article.includes("date:")) return false;
-  if (score < 40) return false;
-  return true;
+function buildFrontmatter(title, topic, category) {
+  const now = new Date().toISOString().split("T")[0];
+  const slug = slugify(title || topic);
+  return {
+    slug,
+    frontmatter: `---
+title: "${title}"
+date: "${now}"
+category: "${category}"
+description: "Guia completo sobre ${topic} para quem quer passar em concursos públicos."
+tags: ["${siteConfig.niche}", "${category.toLowerCase()}"]
+---
+
+`,
+  };
 }
 
-// ─────────────────────────────
-// PROVIDER 1 — GROQ (free)
-// Limite: 100k tokens/dia, 6k tokens/min
-// Console: console.groq.com
-// ─────────────────────────────
-
-async function askGroq(prompt, maxTokens = 4000) {
-  if (!GROQ_API_KEY) throw new Error("GROQ_API_KEY não configurada");
-
-  const response = await groqClient.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-    temperature: 0.8,
-    max_tokens: maxTokens,
-    messages: [{ role: "user", content: prompt }],
-  });
-
-  return response.choices[0].message.content.trim();
+function extractTitle(markdown) {
+  const match = markdown.match(/^#\s+(.+)$/m);
+  return match ? match[1].trim() : null;
 }
 
-// ─────────────────────────────
-// PROVIDER 2 — GOOGLE GEMINI FLASH (free)
-// Limite: 1.500 req/dia, 1M tokens/min — mais generoso que Groq
-// Console: aistudio.google.com → Get API key
-// Secret: GEMINI_API_KEY
-// ─────────────────────────────
+// ─── Provider: Groq ───────────────────────────────────────────────────────────
+async function callGroq(prompt) {
+  const key = (process.env.GROQ_API_KEY || "").trim();
+  if (!key || key.includes("coloque_"))
+    throw new Error("GROQ_API_KEY não configurada");
 
-async function askGemini(prompt, maxTokens = 4000) {
-  if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY não configurada");
-
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-
-  const response = await fetch(url, {
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
     body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: 0.8,
-        maxOutputTokens: maxTokens,
-      },
+      model: "llama-3.3-70b-versatile",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 4096,
+      temperature: 0.7,
     }),
   });
 
-  if (!response.ok) {
-    const err = await response.text();
-    throw new Error(err);
-  }
-
-  const data = await response.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-  if (!text) throw new Error("Gemini não retornou conteúdo");
-  return text.trim();
+  if (res.status === 429) throw new Error("Groq: rate limit atingido (429)");
+  if (!res.ok) throw new Error(`Groq: erro HTTP ${res.status}`);
+  const data = await res.json();
+  return data.choices[0].message.content;
 }
 
-// ─────────────────────────────
-// PROVIDER 3 — ANTHROPIC (pago, fallback final)
-// Console: console.anthropic.com
-// Secret: ANTHROPIC_API_KEY
-// ─────────────────────────────
+// ─── Provider: OpenRouter ─────────────────────────────────────────────────────
+async function callOpenRouter(prompt) {
+  const key = (process.env.OPENROUTER_API_KEY || "").trim();
+  if (!key || key.includes("coloque_"))
+    throw new Error("OPENROUTER_API_KEY não configurada");
 
-async function askAnthropic(prompt, maxTokens = 4000) {
-  if (!ANTHROPIC_API_KEY) throw new Error("ANTHROPIC_API_KEY não configurada");
-
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
+  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
-      "x-api-key": ANTHROPIC_API_KEY,
-      "anthropic-version": "2023-06-01",
       "Content-Type": "application/json",
+      Authorization: `Bearer ${key}`,
+      "HTTP-Referer": siteConfig.url,
+      "X-Title": siteConfig.name,
     },
     body: JSON.stringify({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: maxTokens,
+      model: "meta-llama/llama-3.3-70b-instruct:free",
       messages: [{ role: "user", content: prompt }],
+      max_tokens: 4096,
+      temperature: 0.7,
     }),
   });
 
-  if (!response.ok) {
-    const err = await response.text();
-    throw new Error(err);
-  }
-
-  const data = await response.json();
-  const text = data.content?.[0]?.text;
-  if (!text) throw new Error("Anthropic não retornou conteúdo");
-  return text.trim();
+  if (res.status === 429 || res.status === 402)
+    throw new Error("OpenRouter: limite atingido");
+  if (!res.ok) throw new Error(`OpenRouter: erro HTTP ${res.status}`);
+  const data = await res.json();
+  if (data.error) throw new Error(`OpenRouter: ${data.error.message}`);
+  return data.choices[0].message.content;
 }
 
-// ─────────────────────────────
-// ORQUESTRADOR COM FALLBACK
-// ─────────────────────────────
+// ─── Provider: Gemini ─────────────────────────────────────────────────────────
+async function callGemini(prompt) {
+  const key = (process.env.GEMINI_API_KEY || "").trim();
+  if (!key) throw new Error("GEMINI_API_KEY não configurada");
 
-async function askAI(prompt, maxTokens = 4000) {
-  const providers = [
-    { name: "Groq", fn: () => askGroq(prompt, maxTokens), enabled: !!GROQ_API_KEY },
-    { name: "Gemini Flash", fn: () => askGemini(prompt, maxTokens), enabled: !!GEMINI_API_KEY },
-    { name: "Anthropic", fn: () => askAnthropic(prompt, maxTokens), enabled: !!ANTHROPIC_API_KEY },
-  ];
+  const models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
 
-  for (const provider of providers) {
-    if (!provider.enabled) {
-      console.log(`⏭️ ${provider.name}: chave não configurada, pulando`);
-      continue;
-    }
-
+  for (const model of models) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
     try {
-      const result = await provider.fn();
-      console.log(`✅ Gerado via ${provider.name}`);
-      return result;
-    } catch (err) {
-      console.log(`⚠️ ${provider.name} falhou: ${err.message.slice(0, 120)}`);
-      console.log(`🔄 Tentando próximo provider...`);
-    }
-  }
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.7, maxOutputTokens: 4096 },
+        }),
+      });
 
-  throw new Error("❌ Todos os providers falharam. Verifique os limites e configurações das APIs.");
-}
-
-// ─────────────────────────────
-// TOPIC
-// ─────────────────────────────
-
-async function generateTopic(category, existingTitles) {
-  const prompt = `
-Gere um tópico SEO para ${config.niche}.
-
-Categoria: ${category}
-
-Responda JSON:
-{
-  "title": "",
-  "searchIntent": "",
-  "targetKeyword": "",
-  "secondaryKeywords": ["", "", ""]
-}
-`;
-
-  const text = await askAI(prompt, 500);
-
-  try {
-    return JSON.parse(text.replace(/```json|```/g, "").trim());
-  } catch {
-    return {
-      title: `Guia sobre ${category}`,
-      searchIntent: "informacional",
-      targetKeyword: category.toLowerCase(),
-      secondaryKeywords: config.keywords.slice(0, 3),
-    };
-  }
-}
-
-// ─────────────────────────────
-// ARTICLE
-// ─────────────────────────────
-
-async function generateArticle(topic, category) {
-  const prompt = `
-Crie um artigo SEO.
-
-Título: ${topic.title}
-Keyword: ${topic.targetKeyword}
-
-Estrutura:
-- Introdução
-- ## Explicação
-- ## Passo a passo
-- ## Erros comuns
-- ## Exemplos
-- FAQ
-- Conclusão
-
-FORMATO FRONTMATTER:
-
----
-title: "${topic.title}"
-date: "${today()}"
-category: "${category}"
-excerpt: "SEO optimized excerpt"
-targetKeyword: "${topic.targetKeyword}"
-secondaryKeywords: [${topic.secondaryKeywords.map(k => `"${k}"`).join(", ")}]
----
-
-## ARTIGO
-`;
-
-  return await askAI(prompt, 4500);
-}
-
-// ─────────────────────────────
-// QUALITY LOOP
-// ─────────────────────────────
-
-async function generateWithQuality(topic, category) {
-  let attempts = 0;
-  let best = null;
-  let bestScore = 0;
-
-  while (attempts < 3) {
-    attempts++;
-    console.log(`🔁 Tentativa ${attempts}/3`);
-
-    const article = await generateArticle(topic, category);
-    const score = calculateSEOScore(article);
-
-    if (score > bestScore) {
-      best = article;
-      bestScore = score;
-    }
-
-    if (score >= 60) {
-      console.log("🚀 Aprovado automaticamente");
-      return article;
-    }
-  }
-
-  console.log("⚠️ Usando melhor versão disponível");
-  return best;
-}
-
-// ─────────────────────────────
-// SAVE
-// ─────────────────────────────
-
-function saveArticle(content, title) {
-  const postsDir = path.join(__dirname, "../posts");
-
-  if (!fs.existsSync(postsDir)) {
-    fs.mkdirSync(postsDir, { recursive: true });
-  }
-
-  const hash = getContentHash(content);
-  const slug = slugify(title);
-  const filename = `${today()}-${slug}-${hash.slice(0, 8)}.md`;
-  const filepath = path.join(postsDir, filename);
-
-  if (fs.existsSync(filepath)) {
-    console.log("⛔ Duplicado detectado");
-    return null;
-  }
-
-  fs.writeFileSync(filepath, content, "utf8");
-  return filename;
-}
-
-// ─────────────────────────────
-// MAIN
-// ─────────────────────────────
-
-async function main() {
-  if (!GROQ_API_KEY && !GEMINI_API_KEY && !ANTHROPIC_API_KEY) {
-    throw new Error("Nenhuma API key configurada. Configure ao menos GROQ_API_KEY ou GEMINI_API_KEY.");
-  }
-
-  console.log(`🚀 Gerando ${articlesToGenerate} artigo(s)...`);
-
-  const postsDir = path.join(__dirname, "../posts");
-  const existingTitles = fs.existsSync(postsDir) ? fs.readdirSync(postsDir) : [];
-  const categories = config.generation.categories;
-  let categoryIndex = 0;
-
-  for (let i = 0; i < articlesToGenerate; i++) {
-    const category = categories[categoryIndex % categories.length];
-    categoryIndex++;
-
-    try {
-      console.log(`📂 Categoria: ${category}`);
-
-      let topic;
-
-      if (topicArg && i === 0) {
-        topic = {
-          title: topicArg,
-          targetKeyword: topicArg.toLowerCase(),
-          secondaryKeywords: config.keywords.slice(0, 3),
-        };
-      } else {
-        topic = await generateTopic(category, existingTitles);
-      }
-
-      const article = await generateWithQuality(topic, category);
-
-      if (!validateArticle(article)) {
-        console.log("⛔ Conteúdo rejeitado (SEO)");
+      if (res.status === 429 || res.status === 503) {
+        console.warn(`  ⚠️  Gemini ${model}: rate limit, tentando próximo...`);
         continue;
       }
+      if (!res.ok) throw new Error(`Gemini ${model}: HTTP ${res.status}`);
 
-      const filename = saveArticle(article, topic.title);
-
-      if (filename) {
-        console.log(`✅ Salvo: ${filename}`);
-      }
-
+      const data = await res.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) throw new Error(`Gemini ${model}: resposta vazia`);
+      console.log(`  ✅ Gemini usou modelo: ${model}`);
+      return text;
     } catch (err) {
-      console.error("❌ Erro:", err.message);
+      if (models.indexOf(model) === models.length - 1) throw err;
+      console.warn(`  ⚠️  ${err.message}, tentando próximo modelo Gemini...`);
+    }
+  }
+  throw new Error("Gemini: todos os modelos falharam");
+}
+
+// ─── Fallback Chain ───────────────────────────────────────────────────────────
+async function generateWithFallback(prompt) {
+  const providers = [
+    { name: "Groq", fn: callGroq },
+    { name: "OpenRouter", fn: callOpenRouter },
+    { name: "Gemini", fn: callGemini },
+  ];
+
+  const errors = [];
+  for (const provider of providers) {
+    try {
+      console.log(`  🔄 Tentando ${provider.name}...`);
+      const text = await provider.fn(prompt);
+      console.log(`  ✅ Gerado via ${provider.name}`);
+      return { text, provider: provider.name };
+    } catch (err) {
+      console.warn(`  ❌ ${provider.name} falhou: ${err.message}`);
+      errors.push(`${provider.name}: ${err.message}`);
     }
   }
 
-  console.log("\n✨ FINALIZADO");
+  throw new Error(
+    `Todos os provedores falharam:\n${errors.map((e) => `  • ${e}`).join("\n")}`
+  );
 }
 
-main().catch(console.error);
+// ─── Save Article ─────────────────────────────────────────────────────────────
+function saveArticle(markdown, topic, category) {
+  const title = extractTitle(markdown) || topic;
+  const { slug, frontmatter } = buildFrontmatter(title, topic, category);
+  const postsDir = path.resolve(__dirname, "../posts");
+  if (!fs.existsSync(postsDir)) fs.mkdirSync(postsDir, { recursive: true });
+
+  const filePath = path.join(postsDir, `${slug}.md`);
+  fs.writeFileSync(filePath, frontmatter + markdown, "utf8");
+  return filePath;
+}
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
+async function main() {
+  // Diagnóstico de chaves (sem expor valores)
+  console.log("🔑 Chaves configuradas:");
+  console.log(`   GROQ_API_KEY:       ${process.env.GROQ_API_KEY ? "✅" : "❌ ausente"}`);
+  console.log(`   OPENROUTER_API_KEY: ${process.env.OPENROUTER_API_KEY ? "✅" : "❌ ausente"}`);
+  console.log(`   GEMINI_API_KEY:     ${process.env.GEMINI_API_KEY ? "✅" : "❌ ausente"}`);
+  console.log("");
+
+  console.log(`🚀 Iniciando geração de ${countArg} artigo(s)...\n`);
+
+  let successCount = 0;
+  let failCount = 0;
+
+  for (let i = 0; i < countArg; i++) {
+    const topic = buildTopic();
+    const category = randomItem(siteConfig.generation.categories);
+
+    console.log(`📝 Artigo ${i + 1}/${countArg}: "${topic}"`);
+    console.log(`   Categoria: ${category}`);
+
+    try {
+      const prompt = buildPrompt(topic);
+      const { text, provider } = await generateWithFallback(prompt);
+      const filePath = saveArticle(text, topic, category);
+      console.log(`   💾 Salvo em: ${path.relative(process.cwd(), filePath)}`);
+      console.log(`   📡 Provedor: ${provider}\n`);
+      successCount++;
+    } catch (err) {
+      console.error(`   🔴 FALHA TOTAL: ${err.message}\n`);
+      failCount++;
+    }
+
+    if (i < countArg - 1) {
+      console.log("   ⏳ Aguardando 3s...");
+      await new Promise((r) => setTimeout(r, 3000));
+    }
+  }
+
+  console.log("─".repeat(50));
+  console.log(`✅ Concluído: ${successCount} gerado(s), ${failCount} falha(s)`);
+  if (failCount > 0) process.exit(1);
+}
+
+main().catch((err) => {
+  console.error("Erro fatal:", err.message);
+  process.exit(1);
+});
