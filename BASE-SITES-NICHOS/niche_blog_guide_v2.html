@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #f9f8f5;
+    color: #1a1a1a;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 16px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    border-bottom: 1.5px solid #e0ddd6;
+    margin-bottom: 20px;
+    padding-bottom: 0;
+  }
+
+  .tab {
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    border: none;
+    background: none;
+    color: #888;
+    cursor: pointer;
+    border-bottom: 2.5px solid transparent;
+    margin-bottom: -1.5px;
+    border-radius: 4px 4px 0 0;
+    transition: color .15s;
+  }
+  .tab:hover { color: #333; background: #f0ede7; }
+  .tab.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #999;
+    margin-bottom: 10px;
+  }
+
+  .card {
+    background: #fff;
+    border: 1px solid #e8e4dc;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-body {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.6;
+  }
+
+  .step-list { display: flex; flex-direction: column; gap: 0; }
+  .step {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0ece4;
+  }
+  .step:last-child { border-bottom: none; }
+  .step-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #e8f0fe;
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step-title { font-size: 13px; font-weight: 600; color: #1a1a1a; margin-bottom: 3px; }
+  .step-desc { font-size: 13px; color: #555; line-height: 1.55; }
+
+  code {
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 12px;
+    background: #f0ede7;
+    border: 1px solid #e0ddd6;
+    border-radius: 4px;
+    padding: 1px 6px;
+    color: #333;
+  }
+
+  .code-block {
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 12px;
+    background: #1a1a1a;
+    color: #d4d0c8;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-top: 8px;
+    white-space: pre;
+    overflow-x: auto;
+    line-height: 1.6;
+  }
+
+  .tip {
+    background: #eff6ff;
+    border-left: 3px solid #2563eb;
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #1d4ed8;
+    margin: 12px 0;
+    line-height: 1.55;
+  }
+  .warn {
+    background: #fffbeb;
+    border-left: 3px solid #d97706;
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #92400e;
+    margin: 12px 0;
+    line-height: 1.55;
+  }
+  .success-box {
+    background: #f0fdf4;
+    border-left: 3px solid #16a34a;
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #166534;
+    margin: 12px 0;
+    line-height: 1.55;
+  }
+
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin: 10px 0;
+  }
+  .flow-box {
+    background: #f4f1eb;
+    border: 1px solid #e0ddd6;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #333;
+    white-space: nowrap;
+  }
+  .flow-box.blue { background: #e8f0fe; border-color: #c7d7fc; color: #1d4ed8; }
+  .flow-arrow { color: #bbb; font-size: 14px; }
+
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-top: 6px;
+  }
+  .badge-green { background: #dcfce7; color: #166534; }
+  .badge-blue { background: #e8f0fe; color: #1d4ed8; }
+  .badge-red { background: #fee2e2; color: #991b1b; }
+  .badge-yellow { background: #fef9c3; color: #854d0e; }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .timeline { padding-left: 22px; position: relative; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background: #e0ddd6;
+    border-radius: 2px;
+  }
+  .tl-item { position: relative; margin-bottom: 18px; }
+  .tl-dot {
+    position: absolute;
+    left: -18px;
+    top: 4px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #e0ddd6;
+    background: #f9f8f5;
+  }
+  .tl-dot.active-dot { background: #2563eb; border-color: #2563eb; }
+  .tl-month { font-size: 11px; font-weight: 700; color: #999; margin-bottom: 3px; text-transform: uppercase; letter-spacing: .05em; }
+  .tl-event { font-size: 13px; color: #444; line-height: 1.55; }
+
+  .ask-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid #e0ddd6;
+    border-radius: 6px;
+    padding: 6px 12px;
+    background: #fff;
+    color: #555;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: all .15s;
+  }
+  .ask-btn:hover { background: #f4f1eb; color: #222; border-color: #ccc; }
+
+  .sc-step {
+    display: flex;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid #f0ece4;
+    align-items: flex-start;
+  }
+  .sc-step:last-child { border-bottom: none; }
+  .sc-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #e8f0fe;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .sc-title { font-size: 13px; font-weight: 600; color: #1a1a1a; margin-bottom: 3px; }
+  .sc-desc { font-size: 13px; color: #555; line-height: 1.55; }
+
+  .metric-row {
+    display: flex;
+    gap: 8px;
+    margin: 10px 0;
+    flex-wrap: wrap;
+  }
+  .metric {
+    flex: 1;
+    min-width: 100px;
+    background: #f4f1eb;
+    border-radius: 8px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .metric-val { font-size: 20px; font-weight: 700; color: #1a1a1a; }
+  .metric-label { font-size: 11px; color: #888; margin-top: 2px; }
+
+  @media (max-width: 500px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .flow-box { font-size: 11px; padding: 4px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="tabs">
+  <button class="tab active" onclick="show('visao', this)">Visão geral</button>
+  <button class="tab" onclick="show('funciona', this)">Como funciona</button>
+  <button class="tab" onclick="show('deploy', this)">Como publicar</button>
+  <button class="tab" onclick="show('automatizar', this)">Automação</button>
+  <button class="tab" onclick="show('monetizar', this)">Monetização</button>
+  <button class="tab" onclick="show('cronograma', this)">Cronograma</button>
+  <button class="tab" onclick="show('searchconsole', this)">Search Console ✦</button>
+</div>
+
+<!-- VISÃO GERAL -->
+<div id="visao" class="panel active">
+  <div class="section-label">O negócio em uma frase</div>
+  <div class="card">
+    <div class="card-body" style="font-size:14px;line-height:1.75">
+      Você cria um blog de nicho, usa IA para produzir artigos no piloto automático, o Google envia visitantes orgânicos, e você ganha com anúncios e comissões de afiliado — sem estoque, sem produto, sem atendimento.
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:16px">As 4 partes do sistema</div>
+  <div class="card">
+    <div class="step-list">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <div class="step-title">Blog de nicho (Next.js na Vercel)</div>
+          <div class="step-desc">O site é a sua "loja". Focado num assunto específico — finanças, saúde, pets. Quanto mais nichado, mais fácil ranquear no Google.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <div class="step-title">Geração automática de artigos via IA</div>
+          <div class="step-desc">Um script chama a API do Claude 3× por dia, gera artigos com SEO otimizado e os salva automaticamente no repositório.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <div class="step-title">Tráfego orgânico pelo Google (SEO)</div>
+          <div class="step-desc">Artigos bem escritos aparecem nas buscas. Sem pagar por anúncios. Demora 3–6 meses para ganhar tração real.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div>
+          <div class="step-title">Receita: afiliados + AdSense</div>
+          <div class="step-desc">Visitante lê o artigo → clica num link de afiliado → você ganha comissão. Ou apenas lê e você ganha pelos anúncios exibidos.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="tip">Esse modelo é chamado de "niche site". O diferencial hoje é usar IA para escalar a produção de conteúdo sem custo fixo de equipe.</div>
+</div>
+
+<!-- COMO FUNCIONA -->
+<div id="funciona" class="panel">
+  <div class="section-label">Fluxo quando um artigo é gerado</div>
+  <div class="card">
+    <div class="flow-row">
+      <div class="flow-box">GitHub Actions</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box blue">API do Claude</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">Arquivo .md</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">Git commit</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box blue">Deploy Vercel</div>
+    </div>
+    <div class="card-body">Acontece automaticamente 3× por dia, sem você fazer nada.</div>
+  </div>
+
+  <div class="section-label" style="margin-top:16px">Fluxo quando alguém visita</div>
+  <div class="card">
+    <div class="flow-row">
+      <div class="flow-box">Busca no Google</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">Encontra seu artigo</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box blue">Lê o conteúdo</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">Clica no afiliado</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box blue">Comissão</div>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:16px">O que cada arquivo faz</div>
+  <div class="card">
+    <div class="step-list">
+      <div class="step">
+        <div class="step-num" style="background:#dcfce7;color:#166534">✓</div>
+        <div>
+          <div class="step-title"><code>site.config.js</code> — painel de controle</div>
+          <div class="step-desc">O único arquivo que você edita. Define nicho, nome, afiliados, AdSense. Todo o sistema usa esse arquivo.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#dcfce7;color:#166534">✓</div>
+        <div>
+          <div class="step-title"><code>scripts/generate-article.js</code> — o gerador</div>
+          <div class="step-desc">Chama a API do Claude com prompts otimizados para E-E-A-T (padrão anti-penalização do Google), salva o artigo em Markdown na pasta <code>posts/</code>.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#dcfce7;color:#166534">✓</div>
+        <div>
+          <div class="step-title"><code>.github/workflows/generate-articles.yml</code> — automação</div>
+          <div class="step-desc">Agenda a geração 3× por dia (9h, 13h, 18h BRT), faz commit e dispara deploy na Vercel.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#dcfce7;color:#166534">✓</div>
+        <div>
+          <div class="step-title"><code>app/sitemap.js</code> — visibilidade</div>
+          <div class="step-desc">Gera automaticamente o sitemap.xml com todos os artigos. O Google usa isso para indexar suas páginas.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="ask-btn" onclick="sendPrompt('Me explica o que é E-E-A-T e como os prompts do projeto evitam penalização do Google')">O que é E-E-A-T e como evita penalização? ↗</button>
+</div>
+
+<!-- COMO PUBLICAR -->
+<div id="deploy" class="panel">
+  <div class="section-label">Passo a passo para publicar</div>
+  <div class="card">
+    <div class="step-list">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <div class="step-title">Extraia o ZIP e configure</div>
+          <div class="step-desc">Abra <code>site.config.js</code> e edite com o seu nicho, nome e URL.</div>
+          <div class="code-block">name: "Seu Blog",
+niche: "seu nicho aqui",
+url: "https://seu-dominio.com.br"</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <div class="step-title">Crie conta gratuita na Vercel</div>
+          <div class="step-desc">Acesse <strong>vercel.com</strong>. É onde o blog vai ficar hospedado com SSL incluso e deploy automático.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <div class="step-title">Suba o projeto para o GitHub</div>
+          <div class="step-desc">Crie um repositório e faça o push:</div>
+          <div class="code-block">git init
+git add .
+git commit -m "primeiro commit"
+git remote add origin https://github.com/usuario/blog
+git push -u origin main</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div>
+          <div class="step-title">Conecte o GitHub na Vercel</div>
+          <div class="step-desc">No painel da Vercel → "Add New Project" → selecione o repositório → Deploy. O Next.js é detectado automaticamente.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div>
+          <div class="step-title">Adicione a chave da API</div>
+          <div class="step-desc">Vercel → seu projeto → Settings → Environment Variables:</div>
+          <div class="code-block">ANTHROPIC_API_KEY = sk-ant-sua-chave-aqui</div>
+          <div class="step-desc" style="margin-top:6px">Obtenha em <strong>console.anthropic.com → API Keys</strong>.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">6</div>
+        <div>
+          <div class="step-title">Gere os primeiros artigos localmente</div>
+          <div class="step-desc">Teste antes de ativar a automação:</div>
+          <div class="code-block">npm install
+ANTHROPIC_API_KEY=sua_chave npm run generate-article</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">7</div>
+        <div>
+          <div class="step-title">Configure os Secrets no GitHub</div>
+          <div class="step-desc">GitHub → repositório → Settings → Secrets → Actions → New secret:</div>
+          <div class="code-block">ANTHROPIC_API_KEY → sua chave Anthropic
+VERCEL_DEPLOY_HOOK → URL do Vercel</div>
+          <div class="step-desc" style="margin-top:6px">Deploy Hook: Vercel → Projeto → Settings → Git → Deploy Hooks.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="tip">Após o deploy inicial, cada artigo gerado pela pipeline aparece no blog em menos de 2 minutos.</div>
+  <button class="ask-btn" onclick="sendPrompt('Como compro um domínio e conecto na Vercel? Passo a passo.')">Como conectar um domínio próprio? ↗</button>
+</div>
+
+<!-- AUTOMAÇÃO -->
+<div id="automatizar" class="panel">
+  <div class="section-label">Horários de execução automática</div>
+  <div class="card">
+    <div class="flow-row">
+      <div class="flow-box blue">09:00 BRT</div>
+      <div class="flow-box blue">13:00 BRT</div>
+      <div class="flow-box blue">18:00 BRT</div>
+    </div>
+    <div class="card-body">1 artigo por execução → 3 artigos por dia → ~90/mês → ~1.000/ano</div>
+  </div>
+
+  <div class="section-label" style="margin-top:16px">O que acontece em cada execução</div>
+  <div class="card">
+    <div class="step-list">
+      <div class="step"><div class="step-num" style="font-size:11px;background:#f4f1eb;color:#555">1</div><div><div class="step-desc">GitHub Actions acorda o workflow no horário programado</div></div></div>
+      <div class="step"><div class="step-num" style="font-size:11px;background:#f4f1eb;color:#555">2</div><div><div class="step-desc">Lê os artigos já publicados para não repetir temas</div></div></div>
+      <div class="step"><div class="step-num" style="font-size:11px;background:#f4f1eb;color:#555">3</div><div><div class="step-desc">Pede ao Claude para gerar um tópico com alta busca no nicho</div></div></div>
+      <div class="step"><div class="step-num" style="font-size:11px;background:#f4f1eb;color:#555">4</div><div><div class="step-desc">Pede o artigo completo (1.200+ palavras) com SEO e links de afiliado contextuais</div></div></div>
+      <div class="step"><div class="step-num" style="font-size:11px;background:#f4f1eb;color:#555">5</div><div><div class="step-desc">Salva o .md, faz commit e push no GitHub</div></div></div>
+      <div class="step"><div class="step-num" style="font-size:11px;background:#f4f1eb;color:#555">6</div><div><div class="step-desc">Dispara deploy na Vercel → artigo no ar em ~1 minuto</div></div></div>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:16px">Disparo manual (quando quiser)</div>
+  <div class="card">
+    <div class="card-body">GitHub → repositório → aba <strong>Actions</strong> → "Gerar e Publicar Artigos" → <strong>Run workflow</strong></div>
+    <div class="code-block">Opções disponíveis:
+- topic: "como guardar dinheiro no Brasil"
+- count: 1, 2 ou 3 artigos por execução</div>
+  </div>
+
+  <div class="warn">Custo de API: ~$0.01–0.02 por artigo com Claude Sonnet. 90 artigos/mês ≈ $1.50–2.00/mês (~R$10/mês).</div>
+</div>
+
+<!-- MONETIZAÇÃO -->
+<div id="monetizar" class="panel">
+  <div class="section-label">Fontes de receita</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">🔗 Afiliados</div>
+      <div class="card-body">Comissão por conversão. Melhor fonte. Funciona com pouco tráfego se o nicho for bem escolhido.</div>
+      <span class="badge badge-green">Renda variável alta</span>
+    </div>
+    <div class="card">
+      <div class="card-title">📢 Google AdSense</div>
+      <div class="card-body">Pago por visualização e clique. Precisa de volume. Ative com moderação para não poluir.</div>
+      <span class="badge badge-blue">Renda passiva</span>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:16px">Plataformas por nicho</div>
+  <div class="card">
+    <div class="step-list">
+      <div class="step">
+        <div>
+          <div class="step-title">💰 Finanças pessoais</div>
+          <div class="step-desc">Nubank, XP, Rico, Inter, Easynvest — comissão por conta aberta. CPC muito alto no Google Ads, vale a pena focar aqui.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <div class="step-title">🏥 Saúde e bem-estar</div>
+          <div class="step-desc">iHerb, Amazon, Hotmart (cursos). Ticket médio alto em suplementos e programas de saúde.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <div class="step-title">💻 Tecnologia e SaaS</div>
+          <div class="step-desc">Hostinger, Shopify, Semrush, Canva Pro — comissões <strong>recorrentes mensais</strong> são as mais valiosas a longo prazo.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div>
+          <div class="step-title">📚 Cursos e infoprodutos</div>
+          <div class="step-desc">Hotmart, Kiwify, Eduzz — 20 a 50% de comissão por venda. Melhor caminho se o nicho for educação.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="warn">O AdSense exige aprovação manual. O Google analisa o site e pode levar dias ou semanas. Requisitos: conteúdo original, site funcional, sem violações de políticas.</div>
+  <button class="ask-btn" onclick="sendPrompt('Quais nichos têm maior CPC e menor concorrência no Brasil para começar agora?')">Quais nichos são mais lucrativos no Brasil? ↗</button>
+</div>
+
+<!-- CRONOGRAMA -->
+<div id="cronograma" class="panel">
+  <div class="section-label">O que esperar em cada fase</div>
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot active-dot"></div>
+      <div class="tl-month">Semana 1 — Setup</div>
+      <div class="tl-event">Configure o blog, suba na Vercel, ative a pipeline. Publique os primeiros 20 artigos manualmente para dar volume inicial ao Google.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-month">Mês 1–2 — Invisibilidade</div>
+      <div class="tl-event">O Google ainda não conhece o site. Zero tráfego orgânico. A pipeline continua gerando. Envie o sitemap para o Search Console.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-month">Mês 3–4 — Primeiros sinais</div>
+      <div class="tl-event">Primeiras impressões no Search Console. Artigos aparecem em posições 20–50. Sem receita ainda, mas o sinal está chegando.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-month">Mês 5–6 — Tráfego real</div>
+      <div class="tl-event">Artigos sobem para a primeira página. Primeiros visitantes orgânicos. Primeiras comissões de afiliado aparecem.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-month">Mês 7–12 — Crescimento composto</div>
+      <div class="tl-event">Com 300–500+ artigos, o tráfego cresce exponencialmente. Otimize os artigos na página 2 do Google para subir mais rápido.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-month">Mês 12+ — Replicação</div>
+      <div class="tl-event">Replique o modelo em outro nicho. Mesmo código, diferente <code>site.config.js</code>. Cada site tem potencial de receita independente.</div>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:20px">Fatores de sucesso</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title" style="color:#166534">✅ Aceleram o crescimento</div>
+      <div class="card-body" style="font-size:12px;line-height:1.8">
+        • Nicho com baixa concorrência<br>
+        • Artigos longos (1.500+ palavras)<br>
+        • Palavras-chave de cauda longa<br>
+        • Search Console ativo desde o dia 1<br>
+        • Revisão periódica dos artigos gerados
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="color:#991b1b">⚠️ Atrasam ou penalizam</div>
+      <div class="card-body" style="font-size:12px;line-height:1.8">
+        • Nicho saturado (finanças genérico)<br>
+        • Artigos curtos e rasos<br>
+        • Conteúdo repetitivo ou duplicado<br>
+        • Site sem identidade clara<br>
+        • Não enviar o sitemap ao Google
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SEARCH CONSOLE -->
+<div id="searchconsole" class="panel">
+  <div class="section-label">Por que o Search Console é essencial</div>
+  <div class="card">
+    <div class="card-body">O Google Search Console é o painel gratuito do Google que mostra quais artigos seus estão aparecendo nas buscas, em que posição, quantos cliques você recebe — e quais páginas estão sendo ignoradas. Sem ele você publica no escuro.</div>
+  </div>
+
+  <div class="metric-row">
+    <div class="metric">
+      <div class="metric-val">📊</div>
+      <div class="metric-label">Impressões por artigo</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val">🎯</div>
+      <div class="metric-label">Posição média</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val">🔍</div>
+      <div class="metric-label">Palavras-chave reais</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val">⚠️</div>
+      <div class="metric-label">Erros de indexação</div>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:16px">Passo a passo para ativar</div>
+  <div class="card">
+    <div class="sc-step">
+      <div class="sc-icon">🌐</div>
+      <div>
+        <div class="sc-title">1. Acesse o Search Console</div>
+        <div class="sc-desc">Vá em <strong>search.google.com/search-console</strong> e entre com sua conta Google. Clique em "Adicionar propriedade".</div>
+      </div>
+    </div>
+    <div class="sc-step">
+      <div class="sc-icon">🏷️</div>
+      <div>
+        <div class="sc-title">2. Escolha o tipo de propriedade</div>
+        <div class="sc-desc">Selecione <strong>"Prefixo de URL"</strong> (mais fácil). Digite a URL exata do seu blog: <code>https://seu-dominio.com.br</code></div>
+      </div>
+    </div>
+    <div class="sc-step">
+      <div class="sc-icon">✅</div>
+      <div>
+        <div class="sc-title">3. Verifique a propriedade via HTML</div>
+        <div class="sc-desc">O Google vai te dar uma metatag. Copie o código de verificação (parece com <code>abc123xyz</code>) e cole em <code>site.config.js</code>:</div>
+        <div class="code-block">// site.config.js → seção seo:
+googleSiteVerification: "abc123xyz-seu-codigo-aqui"</div>
+        <div class="sc-desc" style="margin-top:6px">Faça deploy → volte ao Search Console → clique em <strong>Verificar</strong>.</div>
+      </div>
+    </div>
+    <div class="sc-step">
+      <div class="sc-icon">🗺️</div>
+      <div>
+        <div class="sc-title">4. Envie o Sitemap</div>
+        <div class="sc-desc">No menu lateral do Search Console → <strong>Sitemaps</strong> → campo "Adicionar novo sitemap" → digite:</div>
+        <div class="code-block">sitemap.xml</div>
+        <div class="sc-desc" style="margin-top:6px">Clique em <strong>Enviar</strong>. O Google vai agora descobrir todos os seus artigos automaticamente.</div>
+      </div>
+    </div>
+    <div class="sc-step">
+      <div class="sc-icon">🔄</div>
+      <div>
+        <div class="sc-title">5. Solicite indexação dos primeiros artigos (opcional)</div>
+        <div class="sc-desc">Menu lateral → <strong>Inspeção de URL</strong> → cole a URL de um artigo → clique em <strong>"Solicitar indexação"</strong>. Faça isso nos primeiros 10–20 artigos para acelerar.</div>
+      </div>
+    </div>
+    <div class="sc-step">
+      <div class="sc-icon">📈</div>
+      <div>
+        <div class="sc-title">6. Aguarde 3–7 dias e analise</div>
+        <div class="sc-desc">Vá em <strong>Desempenho → Resultados da Pesquisa</strong>. Você vai ver impressões, cliques, CTR e posição média por página e por palavra-chave.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:16px">O que monitorar semanalmente</div>
+  <div class="card">
+    <div class="step-list">
+      <div class="step">
+        <div class="step-num" style="background:#fef9c3;color:#854d0e;font-size:16px;width:28px;height:28px">📍</div>
+        <div>
+          <div class="step-title">Artigos na posição 8–20 (ouro escondido)</div>
+          <div class="step-desc">Esses artigos estão quase na primeira página. Uma pequena melhoria no conteúdo pode dobrar o tráfego. Priorize eles.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#fef9c3;color:#854d0e;font-size:16px;width:28px;height:28px">🔍</div>
+        <div>
+          <div class="step-title">Palavras-chave reais que trouxeram visitas</div>
+          <div class="step-desc">O Google mostra exatamente o que as pessoas digitaram para chegar no seu site. Use essas palavras para criar novos artigos relacionados.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num" style="background:#fef9c3;color:#854d0e;font-size:16px;width:28px;height:28px">⚠️</div>
+        <div>
+          <div class="step-title">Erros de cobertura</div>
+          <div class="step-desc">Menu <strong>Cobertura</strong> mostra páginas que o Google tentou indexar mas encontrou erro. Corrija imediatamente — cada erro é dinheiro perdido.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="success-box">Após 60–90 dias com o Search Console ativo, você vai ter dados suficientes para saber quais artigos têm potencial e onde focar a energia de otimização.</div>
+
+  <button class="ask-btn" onclick="sendPrompt('Quais artigos devo otimizar primeiro com base nos dados do Search Console?')">Como priorizar otimizações com os dados do Search Console? ↗</button>
+  <button class="ask-btn" onclick="sendPrompt('Como melhorar um artigo que está na posição 10-20 do Google para subir para o top 5?')" style="margin-left:8px">Como melhorar artigos na posição 10–20? ↗</button>
+</div>
+
+<script>
+  function show(id, tab) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    tab.classList.add('active');
+  }
+</script>
+
+</body>
+</html>

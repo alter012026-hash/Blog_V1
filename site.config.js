@@ -1,0 +1,133 @@
+// ============================================================
+// CONFIGURAÇÃO CENTRAL DO BLOG
+// Nicho: Concursos Públicos
+// ============================================================
+
+const siteConfig = {
+  // --- IDENTIDADE DO BLOG ---
+  name: "Aprovado Já",
+  tagline: "Estratégias, editais e preparação para sua aprovação",
+  description:
+    "Conteúdo completo sobre concursos públicos, editais, técnicas de estudo, materiais gratuitos e dicas para conquistar sua vaga.",
+  url: "https://seu-dominio.com.br",
+  locale: "pt_BR",
+  language: "pt-BR",
+
+  // --- NICHO ---
+  niche: "concursos públicos",
+
+  // Palavras-chave principais do nicho
+  keywords: [
+    "concursos públicos",
+    "edital",
+    "apostila para concurso",
+    "como passar em concurso",
+    "técnicas de estudo",
+    "concurso prefeitura",
+    "concurso federal",
+    "concurso polícia",
+    "concurso bancário",
+    "cronograma de estudos",
+    "questões comentadas",
+    "aprovação em concurso",
+  ],
+
+  // --- AUTOR ---
+  author: {
+    name: "Equipe Aprovado Já",
+    bio: "Especialistas em preparação para concursos públicos e técnicas de aprendizagem.",
+    avatar: "/avatar.jpg",
+  },
+
+  // --- AFILIADOS ---
+  affiliates: [
+    {
+      id: "estrategia",
+      name: "Estratégia Concursos",
+      url: "https://www.estrategiaconcursos.com.br/",
+      keywords: [
+        "curso para concurso",
+        "apostila",
+        "pdf",
+        "questões",
+        "preparação",
+      ],
+      cta: "Conheça os cursos do Estratégia Concursos",
+    },
+    {
+      id: "gran",
+      name: "Gran Cursos",
+      url: "https://www.grancursosonline.com.br/",
+      keywords: [
+        "concursos públicos",
+        "curso online",
+        "questões comentadas",
+      ],
+      cta: "Estude com o Gran Cursos",
+    },
+    {
+      id: "qconcursos",
+      name: "QConcursos",
+      url: "https://www.qconcursos.com/",
+      keywords: [
+        "questões",
+        "simulados",
+        "banco de questões",
+      ],
+      cta: "Pratique com milhares de questões no QConcursos",
+    },
+  ],
+
+  // --- ADSENSE ---
+  adsense: {
+    enabled: true,
+    publisherId: "ca-pub-XXXXXXXXXXXXXXXX",
+    slots: {
+      header: "1234567890",
+      inArticle: "0987654321",
+      sidebar: "1122334455",
+    },
+  },
+
+  // --- GERAÇÃO DE ARTIGOS ---
+  generation: {
+    articlesPerRun: 3,
+
+    tone:
+      "motivador, estratégico e didático — como um mentor experiente em concursos",
+
+    audienceLevel: "iniciante a avançado",
+
+    minWords: 1500,
+
+    categories: [
+      "Editais",
+      "Técnicas de Estudo",
+      "Concursos Abertos",
+      "Materiais Gratuitos",
+      "Cronograma de Estudos",
+      "Carreiras Públicas",
+      "Questões Comentadas",
+    ],
+  },
+
+  // --- SEO ---
+  seo: {
+    twitterHandle: "@aprovadoja",
+    ogImage: "/og-default.jpg",
+    googleSiteVerification: "",
+  },
+
+  // --- MENU DE NAVEGAÇÃO ---
+  navigation: [
+    { label: "Início", href: "/" },
+    { label: "Concursos Abertos", href: "/blog?categoria=Concursos+Abertos" },
+    { label: "Editais", href: "/blog?categoria=Editais" },
+    { label: "Técnicas de Estudo", href: "/blog?categoria=Técnicas+de+Estudo" },
+    { label: "Materiais Gratuitos", href: "/blog?categoria=Materiais+Gratuitos" },
+    { label: "Carreiras Públicas", href: "/blog?categoria=Carreiras+Públicas" },
+    { label: "Sobre", href: "/sobre" },
+  ],
+};
+
+module.exports = siteConfig;

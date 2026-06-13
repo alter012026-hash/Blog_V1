@@ -1,0 +1,106 @@
+name: Gerar e Publicar Artigos
+
+on:
+  schedule:
+    # Gera artigos 3x por dia (horários em UTC = BRT+3)
+    # 09:00 BRT = 12:00 UTC | 13:00 BRT = 16:00 UTC | 18:00 BRT = 21:00 UTC
+    - cron: "0 12 * * *"
+    - cron: "0 16 * * *"
+    - cron: "0 21 * * *"
+
+  # Permite rodar manualmente pelo GitHub UI
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: "Tópico específico (opcional)"
+        required: false
+        default: ""
+      count:
+        description: "Número de artigos (padrão: 1 por execução)"
+        required: false
+        default: "1"
+
+jobs:
+  generate-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repositório
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Gerar artigo(s)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          TOPIC="${{ github.event.inputs.topic }}"
+          COUNT="${{ github.event.inputs.count || '1' }}"
+
+          if [ -n "$TOPIC" ]; then
+            node scripts/generate-article.js --topic "$TOPIC" --count "$COUNT"
+          else
+            node scripts/generate-article.js --count "$COUNT"
+          fi
+
+      - name: Verificar se há novos artigos
+        id: check-changes
+        run: |
+          if git diff --quiet HEAD -- posts/; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            NEW_FILES=$(git diff --name-only HEAD -- posts/ | head -5 | tr '\n' ', ')
+            echo "new_files=$NEW_FILES" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit e push dos artigos gerados
+        if: steps.check-changes.outputs.has_changes == 'true'
+        run: |
+          git config --local user.email "bot@github.com"
+          git config --local user.name "ArticleBot"
+
+          git add posts/
+          
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
+          git commit -m "✍️ Artigos gerados automaticamente — $TIMESTAMP
+
+          Arquivos: ${{ steps.check-changes.outputs.new_files }}
+          
+          [skip ci se não houver mudanças no código]"
+          
+          git push
+
+      - name: Deploy no Vercel (via revalidate)
+        if: steps.check-changes.outputs.has_changes == 'true'
+        env:
+          VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: |
+          if [ -n "$VERCEL_DEPLOY_HOOK" ]; then
+            echo "Disparando deploy no Vercel..."
+            curl -s -X POST "$VERCEL_DEPLOY_HOOK" | jq '.job.id // "Deploy disparado"'
+          else
+            echo "⚠️  VERCEL_DEPLOY_HOOK não configurado — configure nos Secrets do repositório"
+          fi
+
+      - name: Resumo
+        if: always()
+        run: |
+          if [ "${{ steps.check-changes.outputs.has_changes }}" == "true" ]; then
+            echo "✅ Artigo(s) gerado(s) e publicado(s) com sucesso"
+            echo "📄 Arquivos: ${{ steps.check-changes.outputs.new_files }}"
+          else
+            echo "⚠️  Nenhum artigo novo gerado nesta execução"
+          fi

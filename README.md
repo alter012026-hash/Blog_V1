@@ -1,0 +1,171 @@
+# 🚀 Niche Blog — Blog Automatizado com IA
+
+Blog de nicho em Next.js 14 com geração automática de artigos via Claude (Anthropic), SEO on-page completo, suporte a AdSense e links de afiliado.
+
+---
+
+## Stack
+
+- **Next.js 14** (App Router)
+- **Claude claude-sonnet-4-20250514** para geração de conteúdo
+- **GitHub Actions** para automação (3 artigos/dia)
+- **Vercel** para deploy
+- **Markdown** como CMS (zero banco de dados)
+
+---
+
+## Setup em 5 Passos
+
+### 1. Clone e instale
+
+```bash
+git clone https://github.com/seu-usuario/seu-repo
+cd seu-repo
+npm install
+```
+
+### 2. Configure o blog
+
+Edite **`site.config.js`** — é o único arquivo que você precisa mudar:
+
+```js
+name: "Seu Blog",
+niche: "seu nicho aqui",
+url: "https://seu-dominio.com.br",
+// adicione seus links de afiliado...
+```
+
+### 3. Configure as variáveis de ambiente
+
+```bash
+cp .env.example .env.local
+# Edite .env.local com sua ANTHROPIC_API_KEY
+```
+
+Obtenha sua chave em: https://console.anthropic.com/
+
+### 4. Gere os primeiros artigos
+
+```bash
+# Gera 3 artigos (padrão do config)
+npm run generate-article
+
+# Gera 1 artigo sobre tema específico
+node scripts/generate-article.js --topic "como guardar dinheiro" --count 1
+```
+
+### 5. Rode e faça deploy
+
+```bash
+npm run dev          # Desenvolvimento local
+npm run build        # Build de produção
+```
+
+**Deploy na Vercel:**
+1. Importe o repositório em [vercel.com](https://vercel.com)
+2. Adicione `ANTHROPIC_API_KEY` nas Environment Variables da Vercel
+3. Deploy automático a cada push
+
+---
+
+## Automação com GitHub Actions
+
+A pipeline roda 3x por dia e gera 1 artigo por execução.
+
+### Configurar Secrets no GitHub
+
+Vá em **Settings → Secrets and variables → Actions** e adicione:
+
+| Secret | Valor |
+|--------|-------|
+| `ANTHROPIC_API_KEY` | Sua chave da Anthropic |
+| `VERCEL_DEPLOY_HOOK` | URL do Deploy Hook da Vercel (opcional) |
+
+### Obter o Vercel Deploy Hook
+
+1. No dashboard da Vercel, acesse seu projeto
+2. **Settings → Git → Deploy Hooks**
+3. Crie um hook chamado "github-actions"
+4. Copie a URL e cole no Secret `VERCEL_DEPLOY_HOOK`
+
+### Rodar manualmente
+
+Na aba **Actions** do GitHub → **Gerar e Publicar Artigos** → **Run workflow**
+
+---
+
+## Estrutura do Projeto
+
+```
+niche-blog/
+├── app/                    # Next.js App Router
+│   ├── page.js             # Homepage
+│   ├── blog/
+│   │   ├── page.js         # Listagem de artigos
+│   │   └── [slug]/page.js  # Artigo individual
+│   ├── sitemap.js          # Sitemap dinâmico
+│   └── robots.js           # robots.txt
+├── components/             # Componentes React
+│   ├── Header.jsx
+│   ├── Footer.jsx
+│   ├── PostCard.jsx
+│   ├── SEO.jsx
+│   └── AdSense.jsx
+├── lib/
+│   └── posts.js            # Leitura de artigos Markdown
+├── posts/                  # ← Artigos gerados ficam aqui
+├── scripts/
+│   └── generate-article.js # Script de geração
+├── .github/workflows/
+│   └── generate-articles.yml
+└── site.config.js          # ← CONFIGURE AQUI
+```
+
+---
+
+## Configurar AdSense
+
+1. Crie conta em [Google AdSense](https://adsense.google.com)
+2. Adicione seu site e aguarde aprovação (pode levar dias)
+3. Após aprovado, insira seu Publisher ID em `site.config.js`:
+   ```js
+   adsense: {
+     enabled: true,
+     publisherId: "ca-pub-XXXXXXXXXXXXXXXX",
+   }
+   ```
+
+---
+
+## Boas Práticas de SEO Implementadas
+
+- ✅ Metadata dinâmica por página (title, description, OG, Twitter)
+- ✅ JSON-LD structured data (Article schema)
+- ✅ Sitemap.xml automático
+- ✅ robots.txt
+- ✅ Canonical URLs
+- ✅ Tempo de leitura e contagem de palavras
+- ✅ Posts relacionados por categoria
+- ✅ Headers semânticos (H1→H2→H3)
+- ✅ Filtro por categoria
+
+---
+
+## Replicar para Outros Nichos
+
+Para criar um novo blog em outro nicho:
+
+1. Faça fork ou clone do repositório
+2. Edite **apenas** `site.config.js` com o novo nicho
+3. Apague os artigos em `posts/` (ou mantenha como base)
+4. Configure novo repositório no GitHub + novo projeto na Vercel
+
+Cada blog é independente. Mesma base de código, configuração diferente.
+
+---
+
+## Aviso Legal
+
+Artigos gerados por IA devem ser revisados antes da publicação em escala. O Google penaliza conteúdo sem valor ou experiência real (E-E-A-T). Os prompts do sistema foram otimizados para gerar conteúdo de qualidade, mas revisão humana periódica é recomendada.
+
+Links de afiliado devem ser declarados conforme exigências do CONAR e boas práticas de transparência.
