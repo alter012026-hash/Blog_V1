@@ -53,7 +53,7 @@ jobs:
         run: npm ci
 
       # ─────────────────────────────────────────────
-      # 4. VALIDAR SE SECRETS EXISTEM (IMPORTANTE)
+      # 4. VALIDAR SE SECRETS EXISTEM
       # ─────────────────────────────────────────────
       - name: Validar GROQ API Key
         run: |
@@ -68,6 +68,7 @@ jobs:
       - name: Gerar artigo(s)
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
           TOPIC="${{ github.event.inputs.topic }}"
           COUNT="${{ github.event.inputs.count || '1' }}"
