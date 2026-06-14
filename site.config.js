@@ -9,7 +9,7 @@ const siteConfig = {
   tagline: "Estratégias, editais e preparação para sua aprovação",
   description:
     "Conteúdo completo sobre concursos públicos, editais, técnicas de estudo, materiais gratuitos e dicas para conquistar sua vaga.",
-  url: "https://seu-dominio.com.br",
+  url: "https://blog-v1-beta.vercel.app",
   locale: "pt_BR",
   language: "pt-BR",
 
@@ -118,4 +118,4 @@ const siteConfig = {
   ],
 };
 
-module.exports = siteConfig;
+export default siteConfig;

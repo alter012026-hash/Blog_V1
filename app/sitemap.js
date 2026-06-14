@@ -8,7 +8,7 @@ function safeDate(date) {
 
 export default function sitemap() {
   const posts = getAllPosts();
-  const siteUrl = config.url;
+  const siteUrl = config.url.replace(/\/$/, "");
 
   const staticPages = [
     {
