@@ -1,5 +1,13 @@
-# Carreira de Auditor Fiscal: Vale a Pena?
-======================================================
+---
+title: "Carreira de Auditor Fiscal: Vale a Pena?"
+date: "2026-06-13"
+category: "Carreiras Públicas"
+excerpt: "Descubra tudo sobre a carreira de auditor fiscal: salário, estabilidade, desafios e como se preparar para o concurso."
+targetKeyword: "carreira de auditor fiscal"
+secondaryKeywords: ["auditor fiscal salário", "concurso auditor fiscal", "carreira pública"]
+readingTime: ""
+---
+
 
 ## Introdução
 A carreira de auditor fiscal é uma escolha profissional que pode ser muito gratificante para aqueles que têm interesse em finanças, contabilidade e direito. Neste artigo, vamos explorar se a carreira de auditor fiscal vale a pena, considerando os aspectos positivos e negativos, as oportunidades e os desafios.
