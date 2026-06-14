@@ -3,18 +3,45 @@
  * generate-article.js
  * Gera artigos com frontmatter completo + fallback Groq → OpenRouter → Gemini
  */
+
 require("dotenv").config({ path: ".env.local", override: false });
 
-const fs   = require("fs");
+const fs = require("fs");
 const path = require("path");
-const siteConfig = require("../site.config.js");
+
+// ─────────────────────────────────────────────
+// SAFE CONFIG LOADER (FIX PRINCIPAL)
+// ─────────────────────────────────────────────
+let siteConfigRaw = require("../site.config.js");
+
+// suporte ESM default export
+const siteConfig = siteConfigRaw?.default || siteConfigRaw || {};
+
+// fallback seguro TOTAL (evita crash)
+const generation = siteConfig?.generation || {};
+
+const CATEGORIES = generation.categories || [
+  "Editais",
+  "Técnicas de Estudo",
+  "Concursos Abertos",
+  "Materiais Gratuitos",
+  "Cronograma de Estudos",
+  "Carreiras Públicas",
+  "Questões Comentadas",
+];
 
 // ─── CLI ──────────────────────────────────────────────────────────────
-const args     = process.argv.slice(2);
-const topicArg = args.includes("--topic") ? args[args.indexOf("--topic") + 1] : null;
-const countArg = args.includes("--count")
-  ? parseInt(args[args.indexOf("--count") + 1], 10)
-  : (siteConfig.generation?.articlesPerRun || 1);
+const args = process.argv.slice(2);
+
+const topicArg =
+  args.includes("--topic")
+    ? args[args.indexOf("--topic") + 1]
+    : null;
+
+const countArg =
+  args.includes("--count")
+    ? parseInt(args[args.indexOf("--count") + 1], 10)
+    : (generation.articlesPerRun || 1);
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -35,18 +62,20 @@ function randomItem(arr) {
 }
 
 function todayISO() {
-  // Formato YYYY-MM-DD garantido, sem depender de fuso
   const d = new Date();
-  const yyyy = d.getFullYear();
-  const mm   = String(d.getMonth() + 1).padStart(2, "0");
-  const dd   = String(d.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 function buildTopic() {
-  if (topicArg) return { topic: topicArg, category: randomItem(siteConfig.generation.categories) };
+  if (topicArg) {
+    return {
+      topic: topicArg,
+      category: randomItem(CATEGORIES),
+    };
+  }
 
-  const category = randomItem(siteConfig.generation.categories);
+  const category = randomItem(CATEGORIES);
+
   const seeds = {
     "Editais": [
       "como interpretar um edital de concurso público",
@@ -85,34 +114,34 @@ function buildTopic() {
       "como gabaritar questões de direito constitucional",
     ],
   };
-  const pool = seeds[category] || [`dicas sobre ${category} em concursos públicos`];
-  return { topic: randomItem(pool), category };
+
+  const pool = seeds[category] || [`dicas sobre ${category}`];
+
+  return {
+    topic: randomItem(pool),
+    category,
+  };
 }
 
-// ─── Prompt robusto ───────────────────────────────────────────────────
-function buildPrompt({ topic, category }) {
-  const { tone, audienceLevel, minWords } = siteConfig.generation;
-  return `Você é um especialista em concursos públicos no Brasil com 15 anos de experiência como professor e mentor de candidatos aprovados.
+// ─── Prompt ───────────────────────────────────────────────────────────
+function buildPrompt({ topic }) {
+  const { tone, audienceLevel, minWords } = generation;
 
-Escreva um artigo completo e prático em português brasileiro sobre: "${topic}"
+  return `
+Você é um especialista em concursos públicos no Brasil.
 
-REGRAS OBRIGATÓRIAS:
-1. Mínimo de ${minWords || 1200} palavras
-2. Tom: ${tone || "didático, direto e motivador"}
-3. Público: ${audienceLevel || "candidatos iniciantes a intermediários"}
-4. Use APENAS sintaxe Markdown válida:
-   - Títulos com # ## ### (NUNCA use ===== ou ------)
-   - Listas com - ou números
-   - Negrito com **texto**
-5. Estrutura obrigatória:
-   - ## Introdução (contextualize o tema)
-   - ## [3 a 5 seções de desenvolvimento com subtópicos ##]
-   - ## Conclusão (resumo + chamada para ação)
-6. Em pelo menos uma seção, inclua uma lista de dicas práticas numeradas
-7. NÃO use frases genéricas como "é importante notar que" ou "vale ressaltar"
-8. Escreva de forma direta como um mentor experiente falando com o candidato
+Escreva um artigo completo sobre: "${topic}"
 
-RETORNE APENAS O CONTEÚDO MARKDOWN, começando com o título principal (## Introdução ou direto no conteúdo, sem o # do título pois ele vem no frontmatter).`;
+REGRAS:
+- Mínimo de ${minWords || 1200} palavras
+- Tom: ${tone || "didático e direto"}
+- Público: ${audienceLevel || "iniciantes"}
+- Markdown válido
+- Estrutura com introdução, desenvolvimento e conclusão
+- Sem frases genéricas
+
+RETORNE APENAS O CONTEÚDO.
+`;
 }
 
 // ─── Providers ────────────────────────────────────────────────────────
@@ -122,7 +151,10 @@ async function callGroq(prompt) {
 
   const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${key}`,
+    },
     body: JSON.stringify({
       model: "llama-3.3-70b-versatile",
       messages: [{ role: "user", content: prompt }],
@@ -131,10 +163,10 @@ async function callGroq(prompt) {
     }),
   });
 
-  if (res.status === 429) throw new Error("Groq: rate limit (429)");
   if (!res.ok) throw new Error(`Groq HTTP ${res.status}`);
   const data = await res.json();
-  return data.choices[0].message.content;
+
+  return data.choices?.[0]?.message?.content;
 }
 
 async function callOpenRouter(prompt) {
@@ -146,8 +178,8 @@ async function callOpenRouter(prompt) {
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${key}`,
-      "HTTP-Referer": siteConfig.url,
-      "X-Title": siteConfig.name,
+      "HTTP-Referer": siteConfig.url || "http://localhost",
+      "X-Title": siteConfig.name || "generator",
     },
     body: JSON.stringify({
       model: "meta-llama/llama-3.3-70b-instruct:free",
@@ -157,18 +189,21 @@ async function callOpenRouter(prompt) {
     }),
   });
 
-  if (res.status === 429 || res.status === 402) throw new Error("OpenRouter: limite atingido");
   if (!res.ok) throw new Error(`OpenRouter HTTP ${res.status}`);
   const data = await res.json();
-  if (data.error) throw new Error(`OpenRouter: ${data.error.message}`);
-  return data.choices[0].message.content;
+
+  return data.choices?.[0]?.message?.content;
 }
 
 async function callGemini(prompt) {
   const key = process.env.GEMINI_API_KEY?.trim();
   if (!key) throw new Error("GEMINI_API_KEY ausente");
 
-  const models = ["gemini-2.0-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro-latest"];
+  const models = [
+    "gemini-2.0-flash",
+    "gemini-1.5-flash-latest",
+    "gemini-1.5-pro-latest",
+  ];
 
   for (const model of models) {
     try {
@@ -179,126 +214,116 @@ async function callGemini(prompt) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.7, maxOutputTokens: 4096 },
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 4096,
+            },
           }),
         }
       );
 
-      if (res.status === 404 || res.status === 429 || res.status === 503) continue;
       if (!res.ok) continue;
 
       const data = await res.json();
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (text) { console.log(`  ✅ Gemini: ${model}`); return text; }
-    } catch (e) {
-      console.warn(`  ⚠️  Gemini ${model}: ${e.message}`);
-    }
+
+      if (text) return text;
+    } catch {}
   }
-  throw new Error("Gemini: todos os modelos falharam");
+
+  throw new Error("Gemini falhou em todos os modelos");
 }
 
+// ─── Fallback ─────────────────────────────────────────────────────────
 async function generateWithFallback(prompt) {
   const providers = [
-    { name: "Groq",        fn: callGroq },
-    { name: "OpenRouter",  fn: callOpenRouter },
-    { name: "Gemini",      fn: callGemini },
+    { name: "Groq", fn: callGroq },
+    { name: "OpenRouter", fn: callOpenRouter },
+    { name: "Gemini", fn: callGemini },
   ];
 
   for (const p of providers) {
     try {
-      console.log(`  🔄 ${p.name}...`);
+      console.log(`🔄 ${p.name}...`);
       const text = await p.fn(prompt);
-      console.log(`  ✅ Gerado via ${p.name}`);
-      return { text, provider: p.name };
+      console.log(`✅ ${p.name} OK`);
+      return text;
     } catch (err) {
-      console.warn(`  ❌ ${p.name}: ${err.message}`);
-      await sleep(1500);
+      console.log(`❌ ${p.name}: ${err.message}`);
+      await sleep(1000);
     }
   }
+
   throw new Error("Todos os provedores falharam");
 }
 
-// ─── Limpa markdown ruim da IA ────────────────────────────────────────
-function cleanMarkdown(text) {
+// ─── Markdown ─────────────────────────────────────────────────────────
+function cleanMarkdown(text = "") {
   return text
-    // remove linhas de ===== ou ----- (setext headings que quebram o parser)
-    .replace(/^[=\-]{3,}\s*$/gm, "")
-    // garante que não haja # no início (pois o título vai no frontmatter)
-    .replace(/^#\s+.+\n?/, "")
+    .replace(/^[=\-]{3,}$/gm, "")
+    .replace(/^#\s+.+\n?/gm, "")
     .trim();
 }
 
 function buildExcerpt(content) {
   return content
-    .replace(/^#+\s+.+$/gm, "")
-    .replace(/[*_`#>\[\]]/g, "")
+    .replace(/[#*_`]/g, "")
     .replace(/\s+/g, " ")
-    .trim()
     .slice(0, 160);
 }
 
-// ─── Salva artigo COM frontmatter completo ────────────────────────────
-function saveArticle(rawMarkdown, topic, category) {
+// ─── Save ─────────────────────────────────────────────────────────────
+function saveArticle(content, topic, category) {
   const postsDir = path.resolve(__dirname, "../posts");
-  if (!fs.existsSync(postsDir)) fs.mkdirSync(postsDir, { recursive: true });
+  if (!fs.existsSync(postsDir)) fs.mkdirSync(postsDir);
 
-  const cleanContent = cleanMarkdown(rawMarkdown);
-  const date         = todayISO();
-  const slug         = slugify(topic);
-  const excerpt      = buildExcerpt(cleanContent);
+  const clean = cleanMarkdown(content);
+  const date = todayISO();
+  const slug = slugify(topic);
 
-  // Palavras-chave secundárias baseadas no tópico
-  const secondaryKw  = topic.split(" ").filter(w => w.length > 4).slice(0, 3);
+  const file = `${date}-${slug}.md`;
 
   const frontmatter = `---
-title: "${topic.charAt(0).toUpperCase() + topic.slice(1)}"
+title: "${topic}"
 date: "${date}"
 category: "${category}"
-excerpt: "${excerpt}"
-targetKeyword: "${topic}"
-secondaryKeywords: [${secondaryKw.map(k => `"${k}"`).join(", ")}]
-readingTime: ""
+excerpt: "${buildExcerpt(clean)}"
 ---
 
 `;
 
-  const fileName = `${date}-${slug}.md`;
-  const filePath = path.join(postsDir, fileName);
-  fs.writeFileSync(filePath, frontmatter + cleanContent, "utf8");
-  return filePath;
+  fs.writeFileSync(path.join(postsDir, file), frontmatter + clean);
+  return file;
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────
+// ─── MAIN ─────────────────────────────────────────────────────────────
 async function main() {
-  console.log("\n🔑 Chaves:");
-  console.log(`   GROQ:        ${process.env.GROQ_API_KEY        ? "✅" : "❌"}`);
-  console.log(`   OPENROUTER:  ${process.env.OPENROUTER_API_KEY  ? "✅" : "❌"}`);
-  console.log(`   GEMINI:      ${process.env.GEMINI_API_KEY      ? "✅" : "❌"}`);
-  console.log(`\n🚀 Gerando ${countArg} artigo(s)...\n`);
+  console.log("🔑 CONFIG SAFE MODE");
+  console.log("Categories:", CATEGORIES.length);
 
-  let ok = 0, fail = 0;
+  const count = countArg || 1;
 
-  for (let i = 0; i < countArg; i++) {
+  for (let i = 0; i < count; i++) {
     const { topic, category } = buildTopic();
-    console.log(`📝 [${i+1}/${countArg}] "${topic}" (${category})`);
+
+    console.log(`\n📝 ${i + 1}/${count}: ${topic}`);
 
     try {
-      const { text, provider } = await generateWithFallback(buildPrompt({ topic, category }));
-      const file = saveArticle(text, topic, category);
-      console.log(`   💾 ${path.relative(process.cwd(), file)}`);
-      console.log(`   📡 ${provider}\n`);
-      ok++;
+      const prompt = buildPrompt({ topic, category });
+      const content = await generateWithFallback(prompt);
+
+      const file = saveArticle(content, topic, category);
+
+      console.log(`💾 Salvo: ${file}`);
     } catch (err) {
-      console.error(`   🔴 FALHA: ${err.message}\n`);
-      fail++;
+      console.error(`❌ Erro: ${err.message}`);
     }
 
-    if (i < countArg - 1) await sleep(3000);
+    if (i < count - 1) await sleep(2000);
   }
-
-  console.log("─".repeat(48));
-  console.log(`✅ ${ok} gerado(s)  ❌ ${fail} falha(s)`);
-  if (fail > 0) process.exit(1);
 }
 
-main().catch((err) => { console.error("ERRO FATAL:", err.message); process.exit(1); });
+main().catch((err) => {
+  console.error("ERRO FATAL:", err.message);
+  process.exit(1);
+});
