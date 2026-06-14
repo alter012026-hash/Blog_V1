@@ -2,7 +2,7 @@
 title: "carreira de auditor fiscal: salário e perspectivas"
 date: "2026-06-14"
 category: "Carreiras Públicas"
-excerpt: "A carreira de Auditor Fiscal é uma das mais procuradas e respeitadas no Brasil, devido ao seu alto nível de estabilidade, remuneração e prestígio. Se você..."
+excerpt: " Introdução A carreira de Auditor Fiscal é uma das mais procuradas e respeitadas no Brasil, devido ao seu alto nível de estabilidade, remuneração e prestígio. S"
 ---
 
 ## Introdução

@@ -2,7 +2,7 @@
 title: "melhores concursos para iniciantes em 2026"
 date: "2026-06-14"
 category: "Concursos Abertos"
-excerpt: "Se você está começando sua jornada em concursos públicos no Brasil, é fundamental entender que a escolha do concurso certo pode ser um fator decisivo para..."
+excerpt: " Introdução Se você está começando sua jornada em concursos públicos no Brasil, é fundamental entender que a escolha do concurso certo pode ser um fator decisiv"
 ---
 
 ## Introdução
