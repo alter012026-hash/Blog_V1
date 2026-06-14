@@ -2,7 +2,7 @@
 title: "O que verificar antes de se inscrever em um edital"
 date: "2026-06-14"
 category: "Editais"
-excerpt: "Se você está se preparando para concursos públicos no Brasil, saber o que verificar antes de se inscrever em um edital é fundamental para o seu sucesso. Com 15 "
+excerpt: "Se você está se preparando para concursos públicos no Brasil, saber o que verificar antes de se inscrever em um edital é fundamental para o seu sucesso. Co..."
 targetKeyword: "o que verificar antes de se inscrever em um edital"
 secondaryKeywords: ["verificar", "antes", "inscrever"]
 readingTime: ""

@@ -2,7 +2,7 @@
 title: "Estratégia para questões de português em concursos públicos"
 date: "2026-06-14"
 category: "Questões Comentadas"
-excerpt: "Você está se preparando para um concurso público e sabe que as questões de português são fundamentais para seu sucesso. Com 15 anos de experiência como professo"
+excerpt: "Você está se preparando para um concurso público e sabe que as questões de português são fundamentais para seu sucesso. Com 15 anos de experiência como pro..."
 targetKeyword: "estratégia para questões de português em concursos públicos"
 secondaryKeywords: ["estratégia", "questões", "português"]
 readingTime: ""

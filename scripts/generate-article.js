@@ -266,10 +266,34 @@ function cleanMarkdown(text = "") {
 }
 
 function buildExcerpt(content) {
-  return content
-    .replace(/[#*_`]/g, "")
-    .replace(/\s+/g, " ")
-    .slice(0, 160);
+  const lines = content.split("\n");
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    // Pula linhas vazias, títulos (##), listas, blocos de código e tabelas
+    if (!trimmed) continue;
+    if (trimmed.startsWith("#")) continue;
+    if (/^[-*+>|`]/.test(trimmed)) continue;
+
+    // Remove markdown inline
+    const clean = trimmed
+      .replace(/\*\*(.+?)\*\*/g, "$1")
+      .replace(/\*(.+?)\*/g, "$1")
+      .replace(/__(.+?)__/g, "$1")
+      .replace(/_(.+?)_/g, "$1")
+      .replace(/\[(.+?)\]\(.+?\)/g, "$1")
+      .replace(/`(.+?)`/g, "$1")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (clean.length > 50) {
+      const excerpt = clean.slice(0, 155).trim();
+      return excerpt.length < clean.length ? excerpt + "..." : excerpt;
+    }
+  }
+
+  // fallback seguro
+  return content.replace(/[#*_`>\-\[\]]/g, "").replace(/\s+/g, " ").trim().slice(0, 155);
 }
 
 // ─── Save ─────────────────────────────────────────────────────────────

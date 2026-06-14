@@ -114,6 +114,19 @@ jobs:
             curl -s -X POST "$VERCEL_DEPLOY_HOOK"
           fi
 
+      # ── Aguarda Vercel terminar o deploy antes de pingar ──
+      - name: Wait for deploy
+        if: steps.changes.outputs.has_changes == 'true'
+        run: sleep 60
+
+      # ── Notifica Google, Bing, Yandex e DuckDuckGo ──────
+      - name: Ping indexing (IndexNow + Google)
+        if: steps.changes.outputs.has_changes == 'true'
+        env:
+          INDEXNOW_KEY:              ${{ secrets.INDEXNOW_KEY }}
+          GOOGLE_SERVICE_ACCOUNT_B64: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_B64 }}
+        run: node scripts/ping-indexing.js --new
+
       - name: Summary
         if: always()
         run: |
