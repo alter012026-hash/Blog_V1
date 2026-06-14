@@ -1,121 +1,147 @@
 name: Gerar e Publicar Artigos
 
 on:
-  schedule:
-    - cron: "0 12 * * *"
-    - cron: "0 16 * * *"
-    - cron: "0 21 * * *"
+schedule:
+- cron: "0 12 * * *"
+- cron: "0 16 * * *"
+- cron: "0 21 * * *"
 
-  workflow_dispatch:
-    inputs:
-      topic:
-        description: "Tópico específico (opcional)"
-        required: false
-        default: ""
-      count:
-        description: "Número de artigos"
-        required: false
-        default: "1"
+workflow_dispatch:
+inputs:
+topic:
+description: "Tópico específico (opcional)"
+required: false
+default: ""
+count:
+description: "Número de artigos"
+required: false
+default: "1"
 
-# 🔒 EVITA EXECUÇÕES DUPLICADAS
 concurrency:
-  group: article-generator
-  cancel-in-progress: false
+group: article-generator
+cancel-in-progress: false
 
 jobs:
-  generate:
-    runs-on: ubuntu-latest
+generate:
+runs-on: ubuntu-latest
 
-    permissions:
-      contents: write
+```
+permissions:
+  contents: write
 
+env:
+  TZ: America/Sao_Paulo
+
+steps:
+  - name: Checkout
+    uses: actions/checkout@v4
+    with:
+      fetch-depth: 0
+
+  - name: Setup Node
+    uses: actions/setup-node@v4
+    with:
+      node-version: "20"
+      cache: "npm"
+
+  - name: Install dependencies
+    run: npm ci
+
+  - name: Validate secrets
+    run: |
+      test -n "${{ secrets.GROQ_API_KEY }}" || (echo "Missing GROQ_API_KEY" && exit 1)
+
+  - name: Generate articles
     env:
-      TZ: America/Sao_Paulo
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+    run: |
+      set -e
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      TOPIC="${{ github.event.inputs.topic }}"
+      COUNT="${{ github.event.inputs.count }}"
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
+      if [ -z "$COUNT" ]; then
+        COUNT=1
+      fi
 
-      - name: Install dependencies
-        run: npm ci
+      echo "🚀 Gerando $COUNT artigo(s)"
+      echo "🕒 Execução local: $(date)"
 
-      - name: Validate secrets
-        run: |
-          test -n "${{ secrets.GROQ_API_KEY }}" || (echo "Missing GROQ_API_KEY" && exit 1)
+      if [ -n "$TOPIC" ]; then
+        node scripts/generate-article.js --topic "$TOPIC" --count "$COUNT"
+      else
+        node scripts/generate-article.js --count "$COUNT"
+      fi
 
-      - name: Generate articles
-        env:
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: |
-          set -e
+  - name: Check changes
+    id: changes
+    run: |
+      git add posts/
 
-          TOPIC="${{ github.event.inputs.topic }}"
-          COUNT="${{ github.event.inputs.count }}"
+      if git diff --cached --quiet; then
+        echo "has_changes=false" >> $GITHUB_OUTPUT
+        echo "⚠️ Nenhum artigo novo gerado"
+        exit 0
+      fi
 
-          if [ -z "$COUNT" ]; then
-            COUNT=1
-          fi
+      echo "has_changes=true" >> $GITHUB_OUTPUT
 
-          echo "🚀 Gerando $COUNT artigo(s)"
-          echo "🕒 Execução local: $(date)"
+      echo "new_files<<EOF" >> $GITHUB_OUTPUT
+      git diff --cached --name-only | head -10 >> $GITHUB_OUTPUT
+      echo "EOF" >> $GITHUB_OUTPUT
 
-          if [ -n "$TOPIC" ]; then
-            node scripts/generate-article.js --topic "$TOPIC" --count "$COUNT"
-          else
-            node scripts/generate-article.js --count "$COUNT"
-          fi
+  - name: Commit & Push
+    if: steps.changes.outputs.has_changes == 'true'
+    run: |
+      set -e
 
-      - name: Check changes
-        id: changes
-        run: |
-          git add posts/
+      git config user.name "ArticleBot"
+      git config user.email "bot@github.com"
 
-          if git diff --cached --quiet; then
-            echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "⚠️ Nenhum artigo novo gerado"
+      DATE=$(date "+%Y-%m-%d %H:%M:%S %Z")
+
+      git commit -m "✍️ Artigos automáticos — $DATE"
+
+      echo "🔄 Sincronizando com remoto..."
+
+      for i in 1 2 3; do
+        echo "Tentativa $i"
+
+        git fetch origin main
+
+        if git pull --rebase origin main; then
+
+          if git push origin main; then
+            echo "✅ Push realizado com sucesso"
             exit 0
           fi
 
-          echo "has_changes=true" >> $GITHUB_OUTPUT
-          echo "new_files<<EOF" >> $GITHUB_OUTPUT
-          git diff --cached --name-only | head -10 >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+        fi
 
-      - name: Commit & push
-        if: steps.changes.outputs.has_changes == 'true'
-        run: |
-          git config user.name "ArticleBot"
-          git config user.email "bot@github.com"
+        echo "⚠️ Conflito detectado. Nova tentativa em 10s..."
+        sleep 10
+      done
 
-          DATE=$(date "+%Y-%m-%d %H:%M:%S %Z")
+      echo "❌ Não foi possível enviar após 3 tentativas"
+      exit 1
 
-          git commit -m "✍️ Artigos automáticos — $DATE"
+  - name: Deploy Vercel
+    if: steps.changes.outputs.has_changes == 'true'
+    env:
+      VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+    run: |
+      if [ -n "$VERCEL_DEPLOY_HOOK" ]; then
+        echo "🚀 Disparando deploy Vercel..."
+        curl -s -X POST "$VERCEL_DEPLOY_HOOK"
+      fi
 
-          git push
-
-      - name: Deploy Vercel
-        if: steps.changes.outputs.has_changes == 'true'
-        env:
-          VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
-        run: |
-          if [ -n "$VERCEL_DEPLOY_HOOK" ]; then
-            curl -s -X POST "$VERCEL_DEPLOY_HOOK"
-          fi
-
-      - name: Summary
-        if: always()
-        run: |
-          echo "==== EXECUTION SUMMARY ===="
-          echo "Time: $(date)"
-          echo "Changes: ${{ steps.changes.outputs.has_changes }}"
+  - name: Summary
+    if: always()
+    run: |
+      echo "==== EXECUTION SUMMARY ===="
+      echo "Time: $(date)"
+      echo "Changes: ${{ steps.changes.outputs.has_changes }}"
+```
