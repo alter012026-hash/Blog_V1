@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documentação — Rede de Blogs IA</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+  :root {
+    --primary: #1B3A6B; --primary-light: #2D5A9E; --accent: #F59E0B;
+    --success: #10B981; --danger: #EF4444; --purple: #8B5CF6;
+    --bg: #F8FAFC; --surface: #fff; --surface-2: #EFF6FF;
+    --text: #0F172A; --text-muted: #64748B; --border: #E2E8F0;
+    --radius: 12px; --shadow: 0 4px 16px rgba(27,58,107,0.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+  a { color: var(--primary); }
+
+  /* NAV */
+  .sidenav {
+    position: fixed; top: 0; left: 0; width: 240px; height: 100vh;
+    background: var(--primary); color: #fff; padding: 28px 0; overflow-y: auto;
+    z-index: 100; display: flex; flex-direction: column;
+  }
+  .sidenav-logo { padding: 0 24px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 16px; }
+  .sidenav-logo h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1rem; font-weight: 800; color: #fff; }
+  .sidenav-logo p { font-size: 0.72rem; color: rgba(255,255,255,0.5); margin-top: 4px; }
+  .nav-section { padding: 8px 24px 4px; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-top: 8px; }
+  .nav-link { display: flex; align-items: center; gap: 8px; padding: 9px 24px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: all 0.15s; }
+  .nav-link:hover, .nav-link.active { color: #fff; background: rgba(255,255,255,0.1); }
+  .nav-link .icon { font-size: 1rem; width: 20px; }
+
+  /* MAIN */
+  .main { margin-left: 240px; min-height: 100vh; }
+  .page-header { background: linear-gradient(135deg, var(--primary-dark, #122A50) 0%, var(--primary) 100%); color: #fff; padding: 48px 48px 40px; }
+  .page-header h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
+  .page-header p { color: rgba(255,255,255,0.7); margin-top: 8px; font-size: 1rem; }
+  .content { padding: 40px 48px; max-width: 960px; }
+
+  /* SECTION */
+  .doc-section { margin-bottom: 56px; scroll-margin-top: 24px; }
+  .section-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.35rem; font-weight: 800; color: var(--text); margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--border); letter-spacing: -0.02em; display: flex; align-items: center; gap: 10px; }
+  .section-title .badge { font-size: 0.65rem; font-weight: 700; padding: 3px 10px; border-radius: 99px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .badge-new { background: rgba(16,185,129,0.12); color: var(--success); }
+  .badge-config { background: rgba(245,158,11,0.12); color: #D97706; }
+
+  /* CARDS */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .card-icon { font-size: 1.5rem; margin-bottom: 10px; }
+  .card h4 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
+  .card p { font-size: 0.83rem; color: var(--text-muted); line-height: 1.6; }
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-primary { border-left: 4px solid var(--primary); }
+  .card-success { border-left: 4px solid var(--success); }
+  .card-purple { border-left: 4px solid var(--purple); }
+
+  /* FILE TREE */
+  .file-tree { background: #0F172A; border-radius: var(--radius); padding: 24px; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; line-height: 2; color: #94A3B8; }
+  .file-tree .dir { color: #60A5FA; font-weight: 600; }
+  .file-tree .file { color: #E2E8F0; }
+  .file-tree .comment { color: #475569; font-style: italic; }
+  .file-tree .changed { color: #34D399; }
+  .file-tree .important { color: #FBBF24; font-weight: 600; }
+
+  /* CODE */
+  .code-block { background: #0F172A; border-radius: var(--radius); padding: 20px 24px; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; line-height: 1.8; color: #E2E8F0; overflow-x: auto; margin: 16px 0; }
+  .code-block .key { color: #60A5FA; }
+  .code-block .val { color: #34D399; }
+  .code-block .str { color: #FBBF24; }
+  .code-block .comment { color: #475569; }
+
+  /* FLOW */
+  .flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 20px 0; }
+  .flow-step { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 18px; font-size: 0.83rem; font-weight: 600; display: flex; align-items: center; gap: 8px; box-shadow: var(--shadow); }
+  .flow-arrow { color: var(--text-muted); font-size: 1.2rem; }
+  .step-icon { font-size: 1.1rem; }
+  .step-blue { border-top: 3px solid var(--primary); }
+  .step-amber { border-top: 3px solid var(--accent); }
+  .step-green { border-top: 3px solid var(--success); }
+  .step-purple { border-top: 3px solid var(--purple); }
+
+  /* TABLE */
+  .doc-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 16px 0; }
+  .doc-table th { background: var(--primary); color: #fff; padding: 10px 16px; text-align: left; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; }
+  .doc-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .doc-table tr:hover td { background: var(--surface-2); }
+  .doc-table code { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; background: var(--surface-2); padding: 2px 6px; border-radius: 4px; color: var(--primary); }
+
+  /* ALERT */
+  .alert { border-radius: var(--radius); padding: 16px 20px; margin: 16px 0; font-size: 0.875rem; display: flex; gap: 12px; align-items: flex-start; }
+  .alert-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+  .alert-info { background: var(--surface-2); border: 1px solid rgba(27,58,107,0.15); }
+  .alert-warn { background: #FFFBEB; border: 1px solid rgba(245,158,11,0.3); }
+  .alert-success { background: #F0FDF4; border: 1px solid rgba(16,185,129,0.3); }
+  .alert strong { font-weight: 700; }
+
+  /* PILL */
+  .pill { display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 99px; }
+  .pill-blue { background: var(--surface-2); color: var(--primary); border: 1px solid rgba(27,58,107,0.15); }
+  .pill-green { background: #F0FDF4; color: #166534; border: 1px solid rgba(16,185,129,0.2); }
+  .pill-amber { background: #FFFBEB; color: #92400E; border: 1px solid rgba(245,158,11,0.25); }
+  .pill-red { background: #FFF1F2; color: #9F1239; border: 1px solid rgba(244,63,94,0.2); }
+
+  /* NICHOS */
+  .nicho-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+  .nicho-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .nicho-card h5 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+  .nicho-card p { font-size: 0.78rem; color: var(--text-muted); }
+  .nicho-card .earn { font-size: 0.72rem; font-weight: 700; color: var(--success); }
+
+  /* ROADMAP */
+  .roadmap { display: flex; flex-direction: column; gap: 16px; }
+  .roadmap-item { display: flex; gap: 16px; align-items: flex-start; }
+  .roadmap-dot { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+  .dot-done { background: var(--success); color: #fff; }
+  .dot-now { background: var(--accent); color: var(--text); }
+  .dot-next { background: var(--border); color: var(--text-muted); }
+  .roadmap-text h5 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; }
+  .roadmap-text p { font-size: 0.82rem; color: var(--text-muted); }
+
+  @media (max-width: 768px) {
+    .sidenav { display: none; }
+    .main { margin-left: 0; }
+    .content { padding: 24px 20px; }
+    .page-header { padding: 32px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidenav">
+  <div class="sidenav-logo">
+    <h2>📋 Docs — Blog IA</h2>
+    <p>Rede de Blogs Automatizados</p>
+  </div>
+
+  <span class="nav-section">Visão Geral</span>
+  <a href="#visao" class="nav-link"><span class="icon">🗺️</span> Como funciona</a>
+  <a href="#estrutura" class="nav-link"><span class="icon">📁</span> Estrutura do projeto</a>
+  <a href="#fluxo" class="nav-link"><span class="icon">🔄</span> Fluxo de automação</a>
+
+  <span class="nav-section">Configuração</span>
+  <a href="#site-config" class="nav-link"><span class="icon">⚙️</span> site.config.js</a>
+  <a href="#env" class="nav-link"><span class="icon">🔑</span> Variáveis de ambiente</a>
+  <a href="#secrets" class="nav-link"><span class="icon">🔒</span> GitHub Secrets</a>
+
+  <span class="nav-section">Geração de Conteúdo</span>
+  <a href="#geracao" class="nav-link"><span class="icon">🤖</span> Script de geração</a>
+  <a href="#fallback" class="nav-link"><span class="icon">🔁</span> Fallback de APIs</a>
+  <a href="#frontmatter" class="nav-link"><span class="icon">📄</span> Frontmatter</a>
+
+  <span class="nav-section">Deploy</span>
+  <a href="#workflow" class="nav-link"><span class="icon">⚡</span> GitHub Actions</a>
+  <a href="#vercel" class="nav-link"><span class="icon">🚀</span> Vercel</a>
+  <a href="#seo" class="nav-link"><span class="icon">📈</span> SEO & Search Console</a>
+
+  <span class="nav-section">Monetização</span>
+  <a href="#adsense" class="nav-link"><span class="icon">💰</span> AdSense</a>
+  <a href="#afiliados" class="nav-link"><span class="icon">🔗</span> Afiliados</a>
+
+  <span class="nav-section">Escalar</span>
+  <a href="#nichos" class="nav-link"><span class="icon">🌐</span> Novos nichos</a>
+  <a href="#roadmap" class="nav-link"><span class="icon">🗓️</span> Roadmap</a>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="page-header">
+    <h1>📋 Documentação — Rede de Blogs com IA</h1>
+    <p>Tudo que você precisa para operar, escalar e monetizar sua rede de blogs automatizados.</p>
+  </div>
+
+  <div class="content">
+
+    <!-- VISÃO GERAL -->
+    <section class="doc-section" id="visao">
+      <h2 class="section-title">🗺️ Como funciona</h2>
+      <div class="cards-grid">
+        <div class="card card-primary">
+          <div class="card-icon">🤖</div>
+          <h4>IA gera o conteúdo</h4>
+          <p>Groq, OpenRouter ou Gemini escrevem artigos completos com SEO, frontmatter e markdown limpo automaticamente.</p>
+        </div>
+        <div class="card card-accent">
+          <div class="card-icon">⚡</div>
+          <h4>GitHub Actions publica</h4>
+          <p>Workflow diário faz commit dos artigos novos e dispara o redeploy na Vercel. Você não precisa fazer nada.</p>
+        </div>
+        <div class="card card-success">
+          <div class="card-icon">💰</div>
+          <h4>Blog gera receita</h4>
+          <p>AdSense exibe anúncios nos artigos. Links de afiliado inseridos automaticamente pelo contexto das palavras-chave.</p>
+        </div>
+        <div class="card card-purple">
+          <div class="card-icon">🌐</div>
+          <h4>Escala para N nichos</h4>
+          <p>Mesmo código, só muda o <code>site.config.js</code>. Cada nicho = novo repo + novo projeto Vercel.</p>
+        </div>
+      </div>
+
+      <div class="alert alert-info">
+        <span class="alert-icon">💡</span>
+        <div><strong>Blog atual:</strong> "Aprovado Já" — nicho de concursos públicos. Stack: Next.js 14 + Markdown como CMS + GitHub Actions + Vercel.</div>
+      </div>
+    </section>
+
+    <!-- ESTRUTURA -->
+    <section class="doc-section" id="estrutura">
+      <h2 class="section-title">📁 Estrutura do projeto</h2>
+      <div class="file-tree">
+        <div><span class="dir">blog-de-concursos/</span></div>
+        <div>&nbsp;&nbsp;<span class="dir">app/</span> <span class="comment">← Next.js App Router</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="important">page.js</span> <span class="comment">← Homepage (hero + artigos)</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">blog/</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">page.js</span> <span class="comment">← Listagem com filtro por categoria</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">[slug]/</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">page.js</span> <span class="comment">← Artigo individual</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">layout.js</span> <span class="comment">← SEO global, AdSense, Google Verification</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="changed">globals.css</span> <span class="comment">← Design system completo (modificado)</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">sitemap.js</span> <span class="comment">← Sitemap dinâmico automático</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">robots.js</span> <span class="comment">← robots.txt</span></div>
+        <div>&nbsp;&nbsp;<span class="dir">components/</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="changed">Header.jsx</span> <span class="comment">← Nav com drawer mobile (modificado)</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="changed">PostCard.jsx</span> <span class="comment">← Card com cores por categoria + data fix (modificado)</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="changed">Footer.jsx</span> <span class="comment">← Rodapé responsivo (modificado)</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">AdSense.jsx</span> <span class="comment">← Wrapper de anúncios</span></div>
+        <div>&nbsp;&nbsp;<span class="dir">lib/</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">posts.js</span> <span class="comment">← Leitura de Markdown, datas, slugs</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">seo-engine.js</span> <span class="comment">← Score SEO do artigo</span></div>
+        <div>&nbsp;&nbsp;<span class="dir">posts/</span> <span class="comment">← Artigos gerados ficam aqui (.md)</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">2026-06-13-*.md</span> <span class="comment">← Formato: YYYY-MM-DD-slug.md</span></div>
+        <div>&nbsp;&nbsp;<span class="dir">scripts/</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="important">generate-article.js</span> <span class="comment">← Script principal de geração</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">validate-posts.js</span> <span class="comment">← Valida frontmatter dos posts</span></div>
+        <div>&nbsp;&nbsp;<span class="dir">.github/workflows/</span></div>
+        <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="important">generate-articles.yml</span> <span class="comment">← Automação diária</span></div>
+        <div>&nbsp;&nbsp;<span class="important">site.config.js</span> <span class="comment">← ⭐ ÚNICO ARQUIVO QUE VOCÊ EDITA POR NICHO</span></div>
+        <div>&nbsp;&nbsp;<span class="file">.env.local</span> <span class="comment">← Chaves API (nunca vai pro Git)</span></div>
+        <div>&nbsp;&nbsp;<span class="file">.env.example</span> <span class="comment">← Template seguro (vai pro Git)</span></div>
+      </div>
+      <p style="font-size:0.8rem;color:var(--text-muted);margin-top:10px;">🟢 Verde = arquivos modificados nessa sessão &nbsp;|&nbsp; 🟡 Amarelo = arquivos críticos</p>
+    </section>
+
+    <!-- FLUXO -->
+    <section class="doc-section" id="fluxo">
+      <h2 class="section-title">🔄 Fluxo de automação</h2>
+      <div class="flow">
+        <div class="flow-step step-blue"><span class="step-icon">⏰</span> Cron 3x/dia</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step step-blue"><span class="step-icon">⚡</span> GitHub Actions</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step step-amber"><span class="step-icon">🤖</span> Groq / OpenRouter / Gemini</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step step-green"><span class="step-icon">📄</span> Artigo .md gerado</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step step-green"><span class="step-icon">📦</span> Git commit + push</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step step-purple"><span class="step-icon">🚀</span> Vercel deploy</div>
+        <span class="flow-arrow">→</span>
+        <div class="flow-step step-green"><span class="step-icon">🌐</span> Artigo no ar</div>
+      </div>
+
+      <table class="doc-table" style="margin-top:20px;">
+        <thead><tr><th>Horário (BRT)</th><th>O que acontece</th><th>Resultado</th></tr></thead>
+        <tbody>
+          <tr><td>03:00</td><td>Workflow dispara, gera 1 artigo</td><td>Post publicado</td></tr>
+          <tr><td>09:00</td><td>Workflow dispara, gera 1 artigo</td><td>Post publicado</td></tr>
+          <tr><td>15:00</td><td>Workflow dispara, gera 1 artigo</td><td>Post publicado</td></tr>
+          <tr><td>Qualquer hora</td><td>Disparo manual via GitHub Actions</td><td>Post com tópico específico</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- SITE CONFIG -->
+    <section class="doc-section" id="site-config">
+      <h2 class="section-title">⚙️ site.config.js <span class="badge badge-config">Único arquivo que muda por nicho</span></h2>
+      <div class="alert alert-warn">
+        <span class="alert-icon">⚠️</span>
+        <div>Este é o <strong>único arquivo que você precisa editar</strong> para criar um novo blog em outro nicho. Todo o resto do código é reaproveitado.</div>
+      </div>
+      <table class="doc-table">
+        <thead><tr><th>Campo</th><th>Descrição</th><th>Exemplo atual</th></tr></thead>
+        <tbody>
+          <tr><td><code>name</code></td><td>Nome do blog</td><td>Aprovado Já</td></tr>
+          <tr><td><code>niche</code></td><td>Nicho para o prompt da IA</td><td>concursos públicos</td></tr>
+          <tr><td><code>url</code></td><td>URL de produção</td><td>https://aprovadoja.com.br</td></tr>
+          <tr><td><code>affiliates[]</code></td><td>Links de afiliado com palavras-chave</td><td>Estratégia, Gran, QConcursos</td></tr>
+          <tr><td><code>adsense.publisherId</code></td><td>ID do AdSense</td><td>ca-pub-XXXXXXXX</td></tr>
+          <tr><td><code>generation.categories[]</code></td><td>Categorias dos artigos gerados</td><td>Editais, Técnicas de Estudo...</td></tr>
+          <tr><td><code>generation.minWords</code></td><td>Mínimo de palavras por artigo</td><td>1200</td></tr>
+          <tr><td><code>seo.googleSiteVerification</code></td><td>Código do Search Console</td><td>(preencher após verificação)</td></tr>
+          <tr><td><code>navigation[]</code></td><td>Links do menu</td><td>Início, Blog, Sobre...</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ENV -->
+    <section class="doc-section" id="env">
+      <h2 class="section-title">🔑 Variáveis de ambiente</h2>
+      <p style="margin-bottom:16px;font-size:0.9rem;color:var(--text-muted);">Ficam no arquivo <code>.env.local</code> na raiz do projeto. <strong>Nunca vai pro Git</strong> (está no .gitignore).</p>
+      <div class="code-block">
+        <span class="comment"># Groq (prioridade 1) — https://console.groq.com</span><br>
+        <span class="key">GROQ_API_KEY</span>=gsk_...<br><br>
+        <span class="comment"># OpenRouter (prioridade 2) — https://openrouter.ai/keys</span><br>
+        <span class="key">OPENROUTER_API_KEY</span>=sk-or-v1-...<br><br>
+        <span class="comment"># Gemini (fallback final) — https://aistudio.google.com/app/apikey</span><br>
+        <span class="key">GEMINI_API_KEY</span>=AIza...<br><br>
+        <span class="comment"># URL do site (para o Next.js)</span><br>
+        <span class="key">NEXT_PUBLIC_SITE_URL</span>=https://aprovadoja.com.br
+      </div>
+    </section>
+
+    <!-- SECRETS -->
+    <section class="doc-section" id="secrets">
+      <h2 class="section-title">🔒 GitHub Secrets</h2>
+      <p style="margin-bottom:16px;font-size:0.9rem;color:var(--text-muted);">Vá em <strong>Settings → Secrets and variables → Actions</strong> no repositório e adicione:</p>
+      <table class="doc-table">
+        <thead><tr><th>Secret</th><th>Onde obter</th><th>Obrigatório?</th></tr></thead>
+        <tbody>
+          <tr><td><code>GROQ_API_KEY</code></td><td>console.groq.com</td><td><span class="pill pill-green">✅ Sim</span></td></tr>
+          <tr><td><code>OPENROUTER_API_KEY</code></td><td>openrouter.ai/keys</td><td><span class="pill pill-amber">Recomendado</span></td></tr>
+          <tr><td><code>GEMINI_API_KEY</code></td><td>aistudio.google.com</td><td><span class="pill pill-amber">Recomendado</span></td></tr>
+          <tr><td><code>VERCEL_DEPLOY_HOOK</code></td><td>Vercel → Settings → Git → Deploy Hooks</td><td><span class="pill pill-amber">Recomendado</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- GERAÇÃO -->
+    <section class="doc-section" id="geracao">
+      <h2 class="section-title">🤖 Script de geração</h2>
+      <p style="margin-bottom:16px;font-size:0.9rem;">Arquivo: <code>scripts/generate-article.js</code></p>
+      <div class="cards-grid">
+        <div class="card card-primary">
+          <h4>Uso básico</h4>
+          <div class="code-block" style="margin-top:8px;font-size:0.78rem;">npm run generate-article</div>
+          <p style="margin-top:8px;">Gera 1 artigo com tópico aleatório baseado nas categorias do config.</p>
+        </div>
+        <div class="card card-accent">
+          <h4>Tópico específico</h4>
+          <div class="code-block" style="margin-top:8px;font-size:0.78rem;">node scripts/generate-article.js<br>  --topic "como passar na OAB"<br>  --count 2</div>
+        </div>
+      </div>
+
+      <div class="alert alert-success">
+        <span class="alert-icon">✅</span>
+        <div><strong>Fix aplicado:</strong> O script agora sempre salva o artigo com frontmatter completo (<code>title</code>, <code>date</code>, <code>category</code>, <code>excerpt</code>) e limpa markdown inválido gerado pela IA (<code>===</code>, <code>---</code> soltos).</div>
+      </div>
+    </section>
+
+    <!-- FALLBACK -->
+    <section class="doc-section" id="fallback">
+      <h2 class="section-title">🔁 Cadeia de fallback de APIs</h2>
+      <div class="flow">
+        <div class="flow-step step-blue"><span class="step-icon">1️⃣</span> Groq<br><small style="font-weight:400;color:var(--text-muted)">llama-3.3-70b</small></div>
+        <span class="flow-arrow">→ falhou? →</span>
+        <div class="flow-step step-amber"><span class="step-icon">2️⃣</span> OpenRouter<br><small style="font-weight:400;color:var(--text-muted)">llama free</small></div>
+        <span class="flow-arrow">→ falhou? →</span>
+        <div class="flow-step step-purple"><span class="step-icon">3️⃣</span> Gemini<br><small style="font-weight:400;color:var(--text-muted)">2.0-flash → 1.5-flash → 1.5-pro</small></div>
+      </div>
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-top:8px;">Se todos falharem, o workflow retorna erro e você é notificado pelo GitHub por e-mail.</p>
+    </section>
+
+    <!-- FRONTMATTER -->
+    <section class="doc-section" id="frontmatter">
+      <h2 class="section-title">📄 Formato do frontmatter</h2>
+      <p style="margin-bottom:12px;font-size:0.9rem;">Todo arquivo <code>.md</code> em <code>posts/</code> deve ter este cabeçalho:</p>
+      <div class="code-block">
+        <span class="str">---</span><br>
+        <span class="key">title:</span> <span class="str">"Título do artigo"</span><br>
+        <span class="key">date:</span> <span class="str">"2026-06-14"</span> <span class="comment">← formato YYYY-MM-DD obrigatório</span><br>
+        <span class="key">category:</span> <span class="str">"Técnicas de Estudo"</span> <span class="comment">← deve estar nas categories do config</span><br>
+        <span class="key">excerpt:</span> <span class="str">"Resumo de até 160 caracteres..."</span><br>
+        <span class="key">targetKeyword:</span> <span class="str">"palavra-chave principal"</span><br>
+        <span class="key">secondaryKeywords:</span> <span class="val">["kw2", "kw3"]</span><br>
+        <span class="key">readingTime:</span> <span class="str">""</span> <span class="comment">← calculado automaticamente pelo lib/posts.js</span><br>
+        <span class="str">---</span>
+      </div>
+      <div class="alert alert-warn">
+        <span class="alert-icon">⚠️</span>
+        <div><strong>Nome do arquivo:</strong> sempre no formato <code>YYYY-MM-DD-slug-do-titulo.md</code>. Arquivos sem data no nome resultam em "Invalid Date" nos cards.</div>
+      </div>
+    </section>
+
+    <!-- WORKFLOW -->
+    <section class="doc-section" id="workflow">
+      <h2 class="section-title">⚡ GitHub Actions</h2>
+      <p style="margin-bottom:16px;font-size:0.9rem;">Arquivo: <code>.github/workflows/generate-articles.yml</code></p>
+      <table class="doc-table">
+        <thead><tr><th>Etapa</th><th>O que faz</th></tr></thead>
+        <tbody>
+          <tr><td>Checkout</td><td>Clona o repositório com histórico completo</td></tr>
+          <tr><td>Setup Node 20</td><td>Instala Node.js com cache de dependências</td></tr>
+          <tr><td>npm ci</td><td>Instala dependências exatas do package-lock.json</td></tr>
+          <tr><td>Validate secrets</td><td>Falha rápido se GROQ_API_KEY estiver ausente</td></tr>
+          <tr><td>Generate articles</td><td>Roda o script com as chaves como env vars</td></tr>
+          <tr><td>Check changes</td><td>Verifica se algum .md novo foi criado</td></tr>
+          <tr><td>Commit & push</td><td>Faz commit automático como "ArticleBot"</td></tr>
+          <tr><td>Deploy Vercel</td><td>Dispara o webhook de redeploy (se configurado)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- VERCEL -->
+    <section class="doc-section" id="vercel">
+      <h2 class="section-title">🚀 Vercel — Deploy</h2>
+      <div class="cards-grid">
+        <div class="card card-primary">
+          <h4>1. Conectar repositório</h4>
+          <p>vercel.com → Add New Project → importe o repositório GitHub → Deploy.</p>
+        </div>
+        <div class="card card-accent">
+          <h4>2. Deploy Hook</h4>
+          <p>Settings → Git → Deploy Hooks → crie "github-actions" → copie a URL → adicione como Secret <code>VERCEL_DEPLOY_HOOK</code> no GitHub.</p>
+        </div>
+        <div class="card card-success">
+          <h4>3. Domínio</h4>
+          <p>Settings → Domains → adicione seu domínio. Atualize o DNS no registrador apontando para Vercel.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEO -->
+    <section class="doc-section" id="seo">
+      <h2 class="section-title">📈 SEO & Google Search Console</h2>
+      <div class="roadmap" style="margin-bottom:20px;">
+        <div class="roadmap-item">
+          <div class="roadmap-dot dot-done">✓</div>
+          <div class="roadmap-text"><h5>Metadata dinâmica</h5><p>title, description, OG tags gerados por artigo automaticamente via layout.js.</p></div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-dot dot-done">✓</div>
+          <div class="roadmap-text"><h5>Sitemap.xml automático</h5><p>Gerado pelo Next.js a cada artigo novo. URL: /sitemap.xml</p></div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-dot dot-done">✓</div>
+          <div class="roadmap-text"><h5>robots.txt</h5><p>Arquivo /robots.txt configurado para indexação total.</p></div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-dot dot-now">→</div>
+          <div class="roadmap-text"><h5>Search Console</h5><p>Cole o código em <code>site.config.js → seo.googleSiteVerification</code>. Depois submeta /sitemap.xml.</p></div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-dot dot-next">○</div>
+          <div class="roadmap-text"><h5>Indexação</h5><p>Primeiros artigos aparecem no Google em 2-4 semanas após submissão do sitemap.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ADSENSE -->
+    <section class="doc-section" id="adsense">
+      <h2 class="section-title">💰 Google AdSense</h2>
+      <div class="alert alert-info">
+        <span class="alert-icon">ℹ️</span>
+        <div>O AdSense exige aprovação do site antes de exibir anúncios. Geralmente leva 2-4 semanas e requer conteúdo suficiente (mínimo ~20-30 artigos) e domínio próprio configurado.</div>
+      </div>
+      <table class="doc-table">
+        <thead><tr><th>Etapa</th><th>Como fazer</th></tr></thead>
+        <tbody>
+          <tr><td>1. Criar conta</td><td>adsense.google.com com a conta Google</td></tr>
+          <tr><td>2. Adicionar site</td><td>Cole a URL do domínio no AdSense</td></tr>
+          <tr><td>3. Aguardar aprovação</td><td>Continue gerando conteúdo enquanto aguarda</td></tr>
+          <tr><td>4. Inserir Publisher ID</td><td><code>site.config.js → adsense.publisherId</code> = <code>ca-pub-XXXXXXXX</code></td></tr>
+          <tr><td>5. Inserir Slot IDs</td><td><code>adsense.slots.header</code>, <code>inArticle</code>, <code>sidebar</code></td></tr>
+          <tr><td>6. Deploy</td><td>Commit + push → anúncios aparecem automaticamente</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- AFILIADOS -->
+    <section class="doc-section" id="afiliados">
+      <h2 class="section-title">🔗 Links de afiliado</h2>
+      <p style="margin-bottom:16px;font-size:0.9rem;">Configure em <code>site.config.js → affiliates[]</code>. Cada afiliado tem palavras-chave que disparam o link no contexto do artigo.</p>
+      <div class="code-block">
+        <span class="val">affiliates</span>: [<br>
+        &nbsp;&nbsp;{<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">id:</span> <span class="str">"estrategia"</span>,<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">name:</span> <span class="str">"Estratégia Concursos"</span>,<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">url:</span> <span class="str">"https://estrategiaconcursos.com.br/?ref=SEU_ID"</span>, <span class="comment">← seu link de afiliado</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">keywords:</span> [<span class="str">"apostila"</span>, <span class="str">"curso"</span>, <span class="str">"questões"</span>],<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">cta:</span> <span class="str">"Conheça os cursos do Estratégia Concursos"</span>,<br>
+        &nbsp;&nbsp;},<br>
+        ],
+      </div>
+      <div class="alert alert-warn">
+        <span class="alert-icon">⚠️</span>
+        <div><strong>CONAR:</strong> Declare links de afiliado com aviso "Este post contém links de afiliado" conforme exigido. Inclua no Footer ou no topo dos artigos.</div>
+      </div>
+    </section>
+
+    <!-- NICHOS -->
+    <section class="doc-section" id="nichos">
+      <h2 class="section-title">🌐 Novos nichos — Como escalar</h2>
+      <div class="alert alert-success">
+        <span class="alert-icon">🚀</span>
+        <div><strong>Processo para criar um novo blog:</strong> fork do repo → edita só o site.config.js → novo repositório GitHub → novo projeto Vercel → adiciona os Secrets → pronto.</div>
+      </div>
+
+      <h4 style="margin:20px 0 12px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;">Nichos com alto potencial de monetização no Brasil:</h4>
+      <div class="nicho-grid">
+        <div class="nicho-card">
+          <h5>⚖️ Direito & OAB</h5>
+          <p>Cursos OAB, materiais jurídicos, livros de direito</p>
+          <span class="earn">💰 Alto — muitos afiliados</span>
+        </div>
+        <div class="nicho-card">
+          <h5>💊 Saúde & Bem-estar</h5>
+          <p>Suplementos, planos de saúde, apps de treino</p>
+          <span class="earn">💰💰 Muito alto — AdSense paga bem</span>
+        </div>
+        <div class="nicho-card">
+          <h5>💻 Tecnologia & Cursos</h5>
+          <p>Udemy, Alura, AWS, certificações</p>
+          <span class="earn">💰💰 Muito alto — comissões altas</span>
+        </div>
+        <div class="nicho-card">
+          <h5>🏠 Finanças Pessoais</h5>
+          <p>Nubank, bancos, investimentos, XP</p>
+          <span class="earn">💰💰💰 Altíssimo — melhor RPM</span>
+        </div>
+        <div class="nicho-card">
+          <h5>👶 Maternidade & Bebê</h5>
+          <p>Amazon, produtos infantis, seguros</p>
+          <span class="earn">💰 Alto — audiência fiel</span>
+        </div>
+        <div class="nicho-card">
+          <h5>🎮 Games & Entretenimento</h5>
+          <p>Steam, consoles, acessórios</p>
+          <span class="earn">💰 Médio-alto — volume alto</span>
+        </div>
+        <div class="nicho-card">
+          <h5>🍳 Gastronomia & Receitas</h5>
+          <p>iFood, utensílios, cursos de culinária</p>
+          <span class="earn">💰 Médio — volume enorme</span>
+        </div>
+        <div class="nicho-card">
+          <h5>✈️ Viagens</h5>
+          <p>Booking, Airbnb, passagens aéreas</p>
+          <span class="earn">💰💰 Alto — sazonalidade</span>
+        </div>
+      </div>
+
+      <h4 style="margin:24px 0 12px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;">Checklist para novo nicho:</h4>
+      <table class="doc-table">
+        <thead><tr><th>Passo</th><th>Ação</th><th>Tempo estimado</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Fork do repositório atual no GitHub</td><td>2 min</td></tr>
+          <tr><td>2</td><td>Editar <code>site.config.js</code> com novo nicho</td><td>10 min</td></tr>
+          <tr><td>3</td><td>Apagar pasta <code>posts/</code> (artigos do nicho anterior)</td><td>1 min</td></tr>
+          <tr><td>4</td><td>Criar projeto na Vercel apontando pro novo repo</td><td>5 min</td></tr>
+          <tr><td>5</td><td>Adicionar os 3 Secrets de API no novo repo</td><td>5 min</td></tr>
+          <tr><td>6</td><td>Configurar domínio na Vercel</td><td>10 min</td></tr>
+          <tr><td>7</td><td>Disparar workflow manual para gerar primeiros artigos</td><td>2 min</td></tr>
+          <tr><td><strong>Total</strong></td><td></td><td><strong>~35 min por blog</strong></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ROADMAP -->
+    <section class="doc-section" id="roadmap">
+      <h2 class="section-title">🗓️ Roadmap</h2>
+      <div class="roadmap">
+        <div class="roadmap-item">
+          <div class="roadmap-dot dot-done">✓</div>
+          <div class="roadmap-text"><h5>Base do projeto</h5><p>Next.js 14 + Markdown CMS + design system moderno + responsivo.</p></div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-dot dot-done">✓</div>
+          <div class="roadmap-text"><h5>Automação com fallback</h5><p>GitHub Actions 3x/dia + Groq → OpenRouter → Gemini sem intervenção manual.</p></div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-dot dot-done">✓</div>
+          <div class="roadmap-text"><h5>SEO técnico</h5><p>Sitemap, robots.txt, metadata dinâmica, Search Console configurado.</p></div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-dot dot-now">→</div>
+          <div class="roadmap-text"><h5>Monetização (agora)</h5><p>Aguardar aprovação AdSense + inserir links de afiliado com ID próprio.</p></div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-dot dot-next">○</div>
+          <div class="roadmap-text"><h5>Escalar para 3-5 nichos</h5><p>Criar novos blogs seguindo o checklist. Meta: 5 blogs ativos gerando conteúdo em 30 dias.</p></div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-dot dot-next">○</div>
+          <div class="roadmap-text"><h5>Página Admin</h5><p>Interface para gerenciar afiliados, acompanhar artigos e métricas sem abrir código.</p></div>
+        </div>
+        <div class="roadmap-item">
+          <div class="roadmap-dot dot-next">○</div>
+          <div class="roadmap-text"><h5>Primeiros R$</h5><p>Com 30+ artigos e tráfego orgânico, AdSense começa a gerar receita passiva.</p></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+  // Highlight nav link based on scroll
+  const sections = document.querySelectorAll('.doc-section');
+  const navLinks = document.querySelectorAll('.nav-link');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 80) current = s.id; });
+    navLinks.forEach(l => {
+      l.classList.remove('active');
+      if (l.getAttribute('href') === '#' + current) l.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
