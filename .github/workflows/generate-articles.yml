@@ -2,9 +2,10 @@ name: Gerar e Publicar Artigos
 
 on:
   schedule:
-    - cron: "0 12 * * *"
-    - cron: "0 16 * * *"
-    - cron: "0 21 * * *"
+  - cron: "0 12 * * *"
+  - cron: "0 16 * * *"
+  - cron: "0 21 * * *"
+  - cron: "0 22 * * *"
 
   workflow_dispatch:
     inputs:
