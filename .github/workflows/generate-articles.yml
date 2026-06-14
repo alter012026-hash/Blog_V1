@@ -2,9 +2,6 @@ name: Gerar e Publicar Artigos
 
 on:
   schedule:
-    # 09:00 BRT = 12:00 UTC
-    # 13:00 BRT = 16:00 UTC
-    # 18:00 BRT = 21:00 UTC
     - cron: "0 12 * * *"
     - cron: "0 16 * * *"
     - cron: "0 21 * * *"
@@ -16,71 +13,62 @@ on:
         required: false
         default: ""
       count:
-        description: "Número de artigos (padrão: 1)"
+        description: "Número de artigos"
         required: false
         default: "1"
 
+# 🔒 EVITA EXECUÇÕES DUPLICADAS
+concurrency:
+  group: article-generator
+  cancel-in-progress: false
+
 jobs:
-  generate-and-deploy:
+  generate:
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
 
+    env:
+      TZ: America/Sao_Paulo
+
     steps:
-      # ─────────────────────────────
-      # Checkout
-      # ─────────────────────────────
-      - name: Checkout repositório
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
-      # ─────────────────────────────
-      # Node.js
-      # ─────────────────────────────
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "npm"
 
-      # ─────────────────────────────
-      # Dependências
-      # ─────────────────────────────
-      - name: Instalar dependências
+      - name: Install dependencies
         run: npm ci
 
-      # ─────────────────────────────
-      # Validar secrets críticos
-      # ─────────────────────────────
-      - name: Validar GROQ API Key
+      - name: Validate secrets
         run: |
-          if [ -z "${{ secrets.GROQ_API_KEY }}" ]; then
-            echo "❌ GROQ_API_KEY não configurada"
-            exit 1
-          fi
+          test -n "${{ secrets.GROQ_API_KEY }}" || (echo "Missing GROQ_API_KEY" && exit 1)
 
-      # ─────────────────────────────
-      # Gerar artigos
-      # ─────────────────────────────
-      - name: Gerar artigo(s)
+      - name: Generate articles
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
+          set -e
+
           TOPIC="${{ github.event.inputs.topic }}"
           COUNT="${{ github.event.inputs.count }}"
 
-          # fallback seguro para schedule (vazio)
           if [ -z "$COUNT" ]; then
             COUNT=1
           fi
 
-          echo "🚀 Iniciando geração de $COUNT artigo(s)..."
+          echo "🚀 Gerando $COUNT artigo(s)"
+          echo "🕒 Execução local: $(date)"
 
           if [ -n "$TOPIC" ]; then
             node scripts/generate-article.js --topic "$TOPIC" --count "$COUNT"
@@ -88,65 +76,46 @@ jobs:
             node scripts/generate-article.js --count "$COUNT"
           fi
 
-      # ─────────────────────────────
-      # Verificar mudanças (CORRIGIDO)
-      # ─────────────────────────────
-      - name: Verificar se há novos artigos
-        id: check-changes
+      - name: Check changes
+        id: changes
         run: |
           git add posts/
 
           if git diff --cached --quiet; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "⚠️ Nenhuma mudança detectada"
-          else
-            echo "has_changes=true" >> $GITHUB_OUTPUT
-            NEW_FILES=$(git diff --cached --name-only | head -5 | tr '\n' ', ')
-            echo "new_files=$NEW_FILES" >> $GITHUB_OUTPUT
-            echo "✅ Mudanças detectadas: $NEW_FILES"
+            echo "⚠️ Nenhum artigo novo gerado"
+            exit 0
           fi
 
-      # ─────────────────────────────
-      # Commit automático
-      # ─────────────────────────────
-      - name: Commit e push dos artigos gerados
-        if: steps.check-changes.outputs.has_changes == 'true'
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+          echo "new_files<<EOF" >> $GITHUB_OUTPUT
+          git diff --cached --name-only | head -10 >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Commit & push
+        if: steps.changes.outputs.has_changes == 'true'
         run: |
-          git config --local user.email "bot@github.com"
-          git config --local user.name "ArticleBot"
+          git config user.name "ArticleBot"
+          git config user.email "bot@github.com"
 
-          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M UTC")
+          DATE=$(date "+%Y-%m-%d %H:%M:%S %Z")
 
-          git commit -m "✍️ Artigos gerados automaticamente — $TIMESTAMP
-
-          Arquivos: ${{ steps.check-changes.outputs.new_files }}"
+          git commit -m "✍️ Artigos automáticos — $DATE"
 
           git push
 
-      # ─────────────────────────────
-      # Deploy Vercel (opcional)
-      # ─────────────────────────────
-      - name: Deploy no Vercel
-        if: steps.check-changes.outputs.has_changes == 'true'
+      - name: Deploy Vercel
+        if: steps.changes.outputs.has_changes == 'true'
         env:
           VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
         run: |
           if [ -n "$VERCEL_DEPLOY_HOOK" ]; then
-            echo "🚀 Disparando deploy no Vercel..."
             curl -s -X POST "$VERCEL_DEPLOY_HOOK"
-          else
-            echo "⚠️ VERCEL_DEPLOY_HOOK não configurado"
           fi
 
-      # ─────────────────────────────
-      # Resumo final
-      # ─────────────────────────────
-      - name: Resumo
+      - name: Summary
         if: always()
         run: |
-          if [ "${{ steps.check-changes.outputs.has_changes }}" == "true" ]; then
-            echo "✅ Artigos gerados e publicados com sucesso"
-            echo "📄 Arquivos: ${{ steps.check-changes.outputs.new_files }}"
-          else
-            echo "⚠️ Nenhum artigo novo gerado"
-          fi
+          echo "==== EXECUTION SUMMARY ===="
+          echo "Time: $(date)"
+          echo "Changes: ${{ steps.changes.outputs.has_changes }}"
