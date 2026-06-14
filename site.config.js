@@ -102,7 +102,8 @@ const siteConfig = {
   seo: {
     twitterHandle: "@aprovadoja",
     ogImage: "/og-default.jpg",
-    googleSiteVerification: "",
+    googleSiteVerification: "nDeb5-psmng92z4Vz42zy1ozm6NZKUR-5_vkJFu1AqM",
+    
   },
 
   // --- MENU ---
