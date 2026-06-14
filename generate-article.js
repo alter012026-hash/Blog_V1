@@ -93,7 +93,7 @@ Requisitos:
 - Mínimo de ${minWords} palavras
 - Tom: ${tone}
 - Público: ${audienceLevel}
-- Estrutura: introdução, H2 com subtópicos, conclusão com CTA
+- Estrutura:H2 com subtópicos, conclusão com CTA
 - Inclua lista prática em pelo menos uma seção
 - Português brasileiro natural e direto
 - NÃO use frases genéricas
