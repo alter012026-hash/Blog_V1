@@ -113,9 +113,8 @@ async function getGoogleAccessToken() {
 
   // Aceita JSON em base64 (variável de ambiente) ou path para arquivo
   if (process.env.GOOGLE_SERVICE_ACCOUNT_B64) {
-    serviceAccountJson = JSON.parse(
-      Buffer.from(process.env.GOOGLE_SERVICE_ACCOUNT_B64, "base64").toString("utf8")
-    );
+    const raw = Buffer.from(process.env.GOOGLE_SERVICE_ACCOUNT_B64, "base64").toString("utf8");
+    serviceAccountJson = JSON.parse(raw);
   } else if (process.env.GOOGLE_SERVICE_ACCOUNT_PATH) {
     serviceAccountJson = JSON.parse(
       fs.readFileSync(process.env.GOOGLE_SERVICE_ACCOUNT_PATH, "utf8")
@@ -124,7 +123,10 @@ async function getGoogleAccessToken() {
     return null;
   }
 
-  const { client_email, private_key } = serviceAccountJson;
+  const { client_email, private_key: rawKey } = serviceAccountJson;
+
+  // Garante que \n literais (vindos de env vars ou base64) virem quebras reais
+  const private_key = rawKey.replace(/\\n/g, "\n");
 
   const now   = Math.floor(Date.now() / 1000);
   const claim = {
@@ -205,21 +207,15 @@ async function pingGoogle(urls) {
   console.log(`  📊 Google: ${ok} OK | ${errs} erros`);
 }
 
-// ── Sitemap ping (fallback clássico para Google) ──────────────────────────────
+// ── Sitemap ping (Google descontinuou o endpoint em 2023) ────────────────────
 async function pingSitemapGoogle() {
-  const sitemapUrl = encodeURIComponent(`${SITE_URL}/sitemap.xml`);
-  const pingUrl    = `https://www.google.com/ping?sitemap=${sitemapUrl}`;
-
-  try {
-    const res = await fetch(pingUrl);
-    if (res.status === 200) {
-      console.log(`\n  ✅ Sitemap ping Google → OK`);
-    } else {
-      console.log(`\n  ⚠️  Sitemap ping Google → ${res.status}`);
-    }
-  } catch (err) {
-    console.log(`\n  ❌ Sitemap ping Google → ${err.message}`);
-  }
+  // NOTA: O Google descontinuou o endpoint google.com/ping em jun/2023.
+  // Ele sempre retorna 404. A forma correta é submeter via Google Search Console
+  // ou usar a Google Indexing API abaixo.
+  // Mantemos esta função apenas para logar a situação sem gerar erro falso.
+  console.log("\n  ℹ️  Sitemap ping Google → descontinuado desde jun/2023.");
+  console.log("     → Submeta o sitemap manualmente em: https://search.google.com/search-console");
+  console.log(`     → Sitemap URL: ${SITE_URL}/sitemap.xml`);
 }
 
 // ── MAIN ──────────────────────────────────────────────────────────────────────

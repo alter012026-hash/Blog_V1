@@ -814,7 +814,13 @@ a { transition: color 0.15s; }
   transition: all 0.2s ease;
 }
 
-  .nav--open { display: flex; }
+  .nav--open {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateY(0) !important;
+  }
 
   .nav-link {
     color: rgba(255,255,255,0.75);
@@ -890,24 +896,21 @@ a { transition: color 0.15s; }
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
 /* =========================
-   FIX MENU MOBILE
+   FIX MENU MOBILE — z-index
    ========================= */
 
 @media (max-width: 768px) {
+  .header {
+    z-index: 10000;
+    position: sticky;
+  }
+
   .nav {
     z-index: 9999;
   }
 
-  .nav--open {
-    display: flex !important;
-  }
-
   .menu-toggle {
-    z-index: 10000;
+    z-index: 10001;
     position: relative;
-  }
-
-  .header {
-    z-index: 10000;
   }
 }
