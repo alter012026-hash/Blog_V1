@@ -792,20 +792,27 @@ a { transition: color 0.15s; }
 
 @media (max-width: 768px) {
   .nav {
-    display: none;
-    position: fixed;
-    top: 64px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(15,23,42,0.97);
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: stretch;
-    padding: 24px 20px;
-    gap: 4px;
-    overflow-y: auto;
-  }
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15,23,42,0.97);
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  padding: 24px 20px;
+  gap: 4px;
+  overflow-y: auto;
+
+  /* CORREÇÃO */
+  display: flex;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+}
 
   .nav--open { display: flex; }
 
