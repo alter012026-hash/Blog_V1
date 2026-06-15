@@ -882,3 +882,25 @@ a { transition: color 0.15s; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
+/* =========================
+   FIX MENU MOBILE
+   ========================= */
+
+@media (max-width: 768px) {
+  .nav {
+    z-index: 9999;
+  }
+
+  .nav--open {
+    display: flex !important;
+  }
+
+  .menu-toggle {
+    z-index: 10000;
+    position: relative;
+  }
+
+  .header {
+    z-index: 10000;
+  }
+}
