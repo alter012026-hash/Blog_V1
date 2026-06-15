@@ -9,46 +9,70 @@ function readConfigRaw() {
   return fs.readFileSync(CONFIG_PATH, "utf8");
 }
 
-function patchField(raw, field, value) {
-  const escaped = String(value).replace(/"/g, '\\"');
-  const regex = new RegExp(`(${field}\\s*:\\s*)"[^"]*"`, "g");
-  return raw.replace(regex, `$1"${escaped}"`);
+// Extrai o valor de uma chave string no JS: key: "valor"
+function extract(raw, key) {
+  // Escapa caracteres especiais de regex no nome da chave
+  const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const m = raw.match(new RegExp(`(?:^|[,{\\n])\\s*${escaped}\\s*:\\s*"([^"]*)"`, "m"));
+  return m ? m[1] : "";
+}
+
+// Extrai boolean: key: true|false
+function extractBool(raw, key) {
+  const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const m = raw.match(new RegExp(`(?:^|[,{\\n])\\s*${escaped}\\s*:\\s*(true|false)`, "m"));
+  return m ? m[1] === "true" : false;
+}
+
+// Substitui o valor de uma chave string (primeira ocorrência)
+function patchString(raw, key, value) {
+  const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const val = String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  return raw.replace(
+    new RegExp(`((?:^|[,{\\n])\\s*${escaped}\\s*:\\s*)"[^"]*"`, "m"),
+    `$1"${val}"`
+  );
 }
 
 export async function GET() {
   if (!checkAdminAuth()) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
-  // Importa dinamicamente para pegar os valores atuais
-  const configPath = path.join(process.cwd(), "site.config.js");
-  // Lê e extrai campos básicos via regex (evita cache do require)
-  const raw = readConfigRaw();
 
-  const extract = (key) => {
-    const m = raw.match(new RegExp(`${key}\\s*:\\s*"([^"]*)"`));
-    return m ? m[1] : "";
-  };
+  try {
+    const raw = readConfigRaw();
 
-  const extractBool = (key) => {
-    const m = raw.match(new RegExp(`${key}\\s*:\\s*(true|false)`));
-    return m ? m[1] === "true" : false;
-  };
+    // Extrai o bloco author separadamente para pegar o name dentro dele
+    const authorBlock = raw.match(/author\s*:\s*\{([^}]+)\}/s)?.[1] || "";
+    const authorName = authorBlock.match(/name\s*:\s*"([^"]*)"/)?.[1] || "";
+    const authorBio  = authorBlock.match(/bio\s*:\s*"([^"]*)"/)?.[1] || "";
 
-  return NextResponse.json({
-    name: extract("name"),
-    tagline: extract("tagline"),
-    description: extract("description"),
-    url: extract("url"),
-    twitterHandle: extract("twitterHandle"),
-    googleSiteVerification: extract("googleSiteVerification"),
-    adsenseEnabled: extractBool("enabled"),
-    adsensePublisherId: extract("publisherId"),
-    adsenseSlotHeader: extract("header"),
-    adsenseSlotInArticle: extract("inArticle"),
-    adsenseSlotSidebar: extract("sidebar"),
-    authorName: extract("author.*?name") || extract("name"),
-    authorBio: extract("bio"),
-  });
+    // Extrai o bloco adsense separadamente
+    const adsenseBlock = raw.match(/adsense\s*:\s*\{([^}]+(?:\{[^}]*\}[^}]*)*)\}/s)?.[1] || "";
+    const slotsBlock   = adsenseBlock.match(/slots\s*:\s*\{([^}]+)\}/s)?.[1] || "";
+
+    return NextResponse.json({
+      // Identidade
+      name:                  extract(raw, "name"),
+      tagline:               extract(raw, "tagline"),
+      description:           extract(raw, "description"),
+      url:                   extract(raw, "url"),
+      // SEO
+      twitterHandle:         extract(raw, "twitterHandle"),
+      googleSiteVerification: extract(raw, "googleSiteVerification"),
+      // Autor
+      authorName,
+      authorBio,
+      // AdSense
+      adsenseEnabled:        extractBool(adsenseBlock, "enabled"),
+      adsensePublisherId:    extract(adsenseBlock, "publisherId"),
+      adsenseSlotHeader:     extract(slotsBlock, "header"),
+      adsenseSlotInArticle:  extract(slotsBlock, "inArticle"),
+      adsenseSlotSidebar:    extract(slotsBlock, "sidebar"),
+    });
+  } catch (err) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }
 
 export async function POST(request) {
@@ -59,33 +83,54 @@ export async function POST(request) {
     const data = await request.json();
     let raw = readConfigRaw();
 
-    const stringFields = [
-      "name", "tagline", "description", "url",
-      "twitterHandle", "googleSiteVerification",
-      "publisherId", "bio",
-    ];
-
-    for (const field of stringFields) {
-      if (data[field] !== undefined) {
-        raw = patchField(raw, field, data[field]);
-      }
+    // Campos de string simples no nível raiz
+    for (const key of ["tagline", "description", "url", "twitterHandle", "googleSiteVerification"]) {
+      if (data[key] !== undefined) raw = patchString(raw, key, data[key]);
     }
 
-    // Adsense slots
+    // name: existe no root E dentro de author — patcheia só a primeira (root)
+    if (data.name !== undefined) {
+      const val = String(data.name).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+      raw = raw.replace(/(^\s*name\s*:\s*)"[^"]*"/m, `$1"${val}"`);
+    }
+
+    // author.name e author.bio — substitui dentro do bloco author
+    if (data.authorName !== undefined || data.authorBio !== undefined) {
+      raw = raw.replace(
+        /(author\s*:\s*\{[^}]*name\s*:\s*)"[^"]*"/s,
+        (m) => data.authorName !== undefined
+          ? m.replace(/(name\s*:\s*)"[^"]*"/, `$1"${data.authorName.replace(/"/g, '\\"')}"`)
+          : m
+      );
+      raw = raw.replace(
+        /(author\s*:\s*\{[^}]*bio\s*:\s*)"[^"]*"/s,
+        (m) => data.authorBio !== undefined
+          ? m.replace(/(bio\s*:\s*)"[^"]*"/, `$1"${data.authorBio.replace(/"/g, '\\"')}"`)
+          : m
+      );
+    }
+
+    // publisherId dentro do bloco adsense
+    if (data.adsensePublisherId !== undefined) {
+      const val = data.adsensePublisherId.replace(/"/g, '\\"');
+      raw = raw.replace(/(publisherId\s*:\s*)"[^"]*"/, `$1"${val}"`);
+    }
+
+    // slots
     if (data.adsenseSlotHeader !== undefined) {
-      raw = raw.replace(/(header\s*:\s*)"[^"]*"/, `$1"${data.adsenseSlotHeader}"`);
+      raw = raw.replace(/(slots[\s\S]*?header\s*:\s*)"[^"]*"/, `$1"${data.adsenseSlotHeader}"`);
     }
     if (data.adsenseSlotInArticle !== undefined) {
       raw = raw.replace(/(inArticle\s*:\s*)"[^"]*"/, `$1"${data.adsenseSlotInArticle}"`);
     }
     if (data.adsenseSlotSidebar !== undefined) {
-      raw = raw.replace(/(sidebar\s*:\s*)"[^"]*"/, `$1"${data.adsenseSlotSidebar}"`);
+      raw = raw.replace(/(slots[\s\S]*?sidebar\s*:\s*)"[^"]*"/, `$1"${data.adsenseSlotSidebar}"`);
     }
 
-    // Adsense enabled (boolean)
+    // enabled (boolean)
     if (data.adsenseEnabled !== undefined) {
       raw = raw.replace(
-        /(enabled\s*:\s*)(true|false)/,
+        /(adsense[\s\S]*?enabled\s*:\s*)(true|false)/,
         `$1${data.adsenseEnabled ? "true" : "false"}`
       );
     }
