@@ -1,0 +1,179 @@
+
+<h2 class="sr-only">Guia de configuração da aceleração de indexação no Google</h2>
+
+<style>
+  .guia { font-family: var(--font-sans); max-width: 680px; padding: 1.5rem 0; }
+  .section-title { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.08em; margin: 2rem 0 0.75rem; }
+  .step-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 10px; }
+  .step-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .step-num { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+  .step-num.blue { background: #E6F1FB; color: #0C447C; }
+  .step-num.teal { background: #E1F5EE; color: #085041; }
+  .step-num.amber { background: #FAEEDA; color: #633806; }
+  .step-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+  .step-desc { font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; }
+  .code-block { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 10px 14px; font-family: var(--font-mono); font-size: 12px; color: var(--color-text-primary); margin: 10px 0 4px; white-space: pre-wrap; word-break: break-all; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: var(--border-radius-md); margin-right: 6px; }
+  .tag.free { background: #EAF3DE; color: #27500A; }
+  .tag.medium { background: #FAEEDA; color: #633806; }
+  .secret-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .secret-row:last-child { border-bottom: none; }
+  .secret-name { font-family: var(--font-mono); font-size: 12px; color: var(--color-text-primary); flex: 1; }
+  .secret-desc { font-size: 12px; color: var(--color-text-secondary); flex: 2; }
+  .link-btn { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #185FA5; text-decoration: none; padding: 4px 10px; border: 0.5px solid #B5D4F4; border-radius: var(--border-radius-md); margin-top: 8px; }
+  .divider { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 1.5rem 0; }
+  .badge-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+  .check { color: #0F6E56; font-size: 14px; }
+</style>
+
+<div class="guia">
+
+  <p style="font-size: 22px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 4px;">Aceleração de indexação</p>
+  <p style="font-size: 14px; color: var(--color-text-secondary); margin: 0 0 1.5rem;">Configure uma vez — funciona automaticamente a cada novo artigo publicado.</p>
+
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.5rem;">
+    <div style="background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px;">
+      <div style="font-size: 20px; font-weight: 500; color: var(--color-text-primary);">IndexNow</div>
+      <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 2px;">Bing · Yandex · DDG</div>
+      <div class="tag free" style="margin-top: 8px;">fácil</div>
+    </div>
+    <div style="background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px;">
+      <div style="font-size: 20px; font-weight: 500; color: var(--color-text-primary);">Google API</div>
+      <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 2px;">Indexing direto</div>
+      <div class="tag medium" style="margin-top: 8px;">médio</div>
+    </div>
+    <div style="background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px;">
+      <div style="font-size: 20px; font-weight: 500; color: var(--color-text-primary);">Sitemap</div>
+      <div style="font-size: 12px; color: var(--color-text-secondary); margin-top: 2px;">Ping automático</div>
+      <div class="tag free" style="margin-top: 8px;">automático</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-title"><i class="ti ti-bolt" aria-hidden="true"></i> Parte 1 — IndexNow (Bing, Yandex, DuckDuckGo)</div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num blue">1</div>
+      <div class="step-title">Gerar a chave IndexNow</div>
+    </div>
+    <div class="step-desc">Acesse o site abaixo, clique em <strong>Generate API Key</strong> e copie a chave gerada (ex: <code style="font-family:var(--font-mono);font-size:12px;">a1b2c3d4e5f6...</code>)</div>
+    <a class="link-btn" href="https://www.bing.com/indexnow/getstarted" target="_blank"><i class="ti ti-external-link" aria-hidden="true"></i> bing.com/indexnow/getstarted</a>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num blue">2</div>
+      <div class="step-title">Publicar o arquivo de verificação</div>
+    </div>
+    <div class="step-desc">No seu projeto, renomeie o arquivo <code style="font-family:var(--font-mono);font-size:12px;">public/indexnow-key.txt</code> para <code style="font-family:var(--font-mono);font-size:12px;">public/SUA-CHAVE.txt</code> e coloque a chave como conteúdo:</div>
+    <div class="code-block">a1b2c3d4e5f6...</div>
+    <div class="step-desc" style="margin-top:6px;">O arquivo deve ficar acessível em: <code style="font-family:var(--font-mono);font-size:12px;">https://seusite.com/a1b2c3d4e5f6.txt</code></div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num blue">3</div>
+      <div class="step-title">Adicionar ao GitHub Secrets</div>
+    </div>
+    <div class="step-desc">No GitHub: <strong>Settings → Secrets and variables → Actions → New repository secret</strong></div>
+    <div class="code-block">Nome:  INDEXNOW_KEY
+Valor: a1b2c3d4e5f6...</div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-title"><i class="ti ti-brand-google" aria-hidden="true"></i> Parte 2 — Google Indexing API</div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num teal">1</div>
+      <div class="step-title">Criar projeto no Google Cloud</div>
+    </div>
+    <div class="step-desc">Acesse o console, crie um projeto novo e ative a API:</div>
+    <a class="link-btn" href="https://console.cloud.google.com" target="_blank"><i class="ti ti-external-link" aria-hidden="true"></i> console.cloud.google.com</a>
+    <div class="step-desc" style="margin-top:10px;">Caminho: <strong>APIs e Serviços → Biblioteca</strong> → busque <em>Web Search Indexing API</em> → <strong>Ativar</strong></div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num teal">2</div>
+      <div class="step-title">Criar Service Account e baixar JSON</div>
+    </div>
+    <div class="step-desc">Caminho: <strong>APIs e Serviços → Credenciais → Criar credenciais → Conta de serviço</strong></div>
+    <div class="step-desc" style="margin-top:8px;">Após criar, clique na conta → aba <strong>Chaves</strong> → <strong>Adicionar chave → JSON</strong> → salve o arquivo no seu computador.</div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num teal">3</div>
+      <div class="step-title">Adicionar ao Google Search Console</div>
+    </div>
+    <div class="step-desc">Acesse o Search Console → <strong>Configurações → Usuários e permissões → Adicionar usuário</strong></div>
+    <a class="link-btn" href="https://search.google.com/search-console" target="_blank"><i class="ti ti-external-link" aria-hidden="true"></i> search.google.com/search-console</a>
+    <div class="step-desc" style="margin-top:10px;">Cole o e-mail da Service Account (ex: <code style="font-family:var(--font-mono);font-size:12px;">indexing-bot@projeto.iam.gserviceaccount.com</code>) e defina permissão como <strong>Proprietário</strong>.</div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num teal">4</div>
+      <div class="step-title">Converter JSON para base64</div>
+    </div>
+    <div class="step-desc">No terminal do Windows (PowerShell), rode:</div>
+    <div class="code-block">[Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\caminho\para\arquivo.json"))</div>
+    <div class="step-desc" style="margin-top:6px;">Copie o resultado (string longa começando com <code style="font-family:var(--font-mono);font-size:12px;">eyJ...</code>)</div>
+  </div>
+
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-num teal">5</div>
+      <div class="step-title">Adicionar ao GitHub Secrets</div>
+    </div>
+    <div class="step-desc"><strong>Settings → Secrets and variables → Actions → New repository secret</strong></div>
+    <div class="code-block">Nome:  GOOGLE_SERVICE_ACCOUNT_B64
+Valor: eyJ0eXBlIjoic2VydmljZV9hY2NvdW50... (o base64 do passo anterior)</div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-title"><i class="ti ti-check" aria-hidden="true"></i> Resumo — secrets necessários no GitHub</div>
+
+  <div class="step-card">
+    <div class="secret-row">
+      <i class="ti ti-key" style="font-size:16px; color:var(--color-text-secondary);" aria-hidden="true"></i>
+      <div class="secret-name">INDEXNOW_KEY</div>
+      <div class="secret-desc">Chave gerada em bing.com/indexnow</div>
+    </div>
+    <div class="secret-row">
+      <i class="ti ti-key" style="font-size:16px; color:var(--color-text-secondary);" aria-hidden="true"></i>
+      <div class="secret-name">GOOGLE_SERVICE_ACCOUNT_B64</div>
+      <div class="secret-desc">JSON da Service Account em base64</div>
+    </div>
+    <div class="secret-row">
+      <i class="ti ti-key" style="font-size:16px; color:var(--color-text-secondary);" aria-hidden="true"></i>
+      <div class="secret-name">VERCEL_DEPLOY_HOOK</div>
+      <div class="secret-desc">Já existia — webhook do deploy na Vercel</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-title"><i class="ti ti-player-play" aria-hidden="true"></i> Usar manualmente (opcional)</div>
+
+  <div class="step-card">
+    <div class="step-desc" style="margin-bottom:8px;">Rode no terminal dentro da pasta do projeto:</div>
+    <div class="code-block">node scripts/ping-indexing.js --new</div>
+    <div class="step-desc" style="margin-top:6px; font-size:12px;">
+      Sem flags → pinga todos os posts<br>
+      <code style="font-family:var(--font-mono);">--new</code> → só posts das últimas 24h<br>
+      <code style="font-family:var(--font-mono);">--url /blog/meu-artigo</code> → URL específica
+    </div>
+  </div>
+
+  <div style="background: #E1F5EE; border-radius: var(--border-radius-md); padding: 12px 16px; margin-top: 1rem;">
+    <div style="font-size: 13px; font-weight: 500; color: #085041; margin-bottom: 4px;"><i class="ti ti-info-circle" aria-hidden="true"></i> Automático via GitHub Actions</div>
+    <div style="font-size: 13px; color: #0F6E56; line-height: 1.6;">A cada novo artigo publicado, o workflow aguarda 60s o deploy da Vercel e pinga automaticamente Google + IndexNow. Nenhuma ação manual necessária.</div>
+  </div>
+
+</div>

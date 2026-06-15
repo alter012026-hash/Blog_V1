@@ -30,7 +30,7 @@ Depois renomeie o arquivo para `public/<sua-chave>.txt`
 Ex: `public/a1b2c3d4e5f6.txt`
 
 > O arquivo precisa estar acessível em:  
-> `https://seusite.com/a1b2c3d4e5f6.txt`
+> `https://seusite.com/42eae02bc7524825bc97e8d8c50654d1.txt`
 
 ### Passo 3 — Adicionar ao .env.local
 
