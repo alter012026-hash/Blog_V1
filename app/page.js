@@ -23,8 +23,8 @@ export default function HomePage() {
           <div className="container">
             <p className="hero-eyebrow">✦ {config.niche}</p>
             <h1>
-              Inteligência financeira<br />
-              para quem quer <em>resultados reais</em>
+              Tudo Sobre Concursos<br />
+              para quem quer <em>ser aprovado</em>
             </h1>
             <p className="hero-desc">{config.description}</p>
             <Link href="/blog" className="hero-cta">

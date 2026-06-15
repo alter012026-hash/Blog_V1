@@ -1,4 +1,4 @@
 git status
 git add .
-git commit -m "update: ajustes no projeto"
+git commit -m "update: ACELERANDO INDEXÇAO NO GOOGLE"
 git push origin main
