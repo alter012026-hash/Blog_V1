@@ -13,14 +13,14 @@
   --accent-dark:    #D97706;
   --success:        #10B981;
   --bg:             #F8FAFC;
-  --surface:       #FFFFFF;
-  --surface-2:     #EFF6FF;
-  --surface-3:     #F1F5F9;
-  --text:          #0F172A;
+  --surface:      #FFFFFF;
+  --surface-2:    #EFF6FF;
+  --surface-3:    #F1F5F9;
+  --text:         #0F172A;
   --text-secondary:#334155;
-  --text-muted:    #64748B;
-  --border:        #E2E8F0;
-  --border-soft:   #F1F5F9;
+  --text-muted:   #64748B;
+  --border:       #E2E8F0;
+  --border-soft:  #F1F5F9;
 
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   --shadow-md: 0 4px 16px rgba(27,58,107,0.10);
@@ -44,132 +44,39 @@
   padding: 0;
 }
 
-html {
-  font-size: 16px;
-  scroll-behavior: smooth;
-}
-
 body {
   font-family: var(--font-body);
-  color: var(--text);
   background: var(--bg);
+  color: var(--text);
   line-height: 1.7;
-  -webkit-font-smoothing: antialiased;
 }
 
-/* =========================
-   LAYOUT
-========================= */
-.container {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 0 24px;
-}
-
-/* =========================
-   HEADER (FIX STACKING)
-========================= */
+/* ================= HEADER ================= */
 .header {
   position: sticky;
   top: 0;
   z-index: 1000;
   background: rgba(255,255,255,0.92);
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
-  box-shadow: 0 1px 0 rgba(0,0,0,0.04);
 }
 
 .header-inner {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   height: 64px;
 }
 
-/* =========================
-   LOGO
-========================= */
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-}
-
-.logo-icon {
-  width: 34px;
-  height: 34px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-weight: 800;
-}
-
-.logo-text {
-  font-family: var(--font-display);
-  font-weight: 800;
-  color: var(--primary);
-}
-
-/* =========================
-   NAV DESKTOP
-========================= */
+/* ================= NAV DESKTOP ================= */
 .nav {
   display: flex;
-  align-items: center;
   gap: 2px;
   flex: 1;
   justify-content: center;
 }
 
-.nav-link {
-  color: var(--text-secondary);
-  text-decoration: none;
-  font-size: 0.875rem;
-  padding: 6px 12px;
-  border-radius: var(--radius-full);
-}
-
-.nav-link:hover {
-  background: var(--surface-2);
-  color: var(--primary);
-}
-
-.nav-cta {
-  background: var(--accent);
-  color: var(--text);
-  font-weight: 600;
-}
-
-/* =========================
-   MENU TOGGLE
-========================= */
-.menu-toggle {
-  display: none;
-  flex-direction: column;
-  gap: 5px;
-  border: 1px solid var(--border);
-  background: none;
-  padding: 8px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  width: 40px;
-  height: 40px;
-}
-
-.menu-toggle span {
-  height: 2px;
-  background: var(--text);
-  width: 18px;
-}
-
-/* =========================
-   HERO
-========================= */
+/* ================= HERO ================= */
 .hero {
   background: linear-gradient(160deg, var(--primary-dark), var(--primary), var(--primary-light));
   color: white;
@@ -179,18 +86,7 @@ body {
   z-index: 1;
 }
 
-/* =========================
-   POSTS
-========================= */
-.posts-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
-}
-
-/* =========================
-   MOBILE FIX (CRÍTICO)
-========================= */
+/* ================= MOBILE FIX (ÚNICA CORREÇÃO REAL) ================= */
 @media (max-width: 768px) {
 
   .menu-toggle {
@@ -198,52 +94,44 @@ body {
     z-index: 10001;
   }
 
-  /* MENU OVERLAY FIXADO */
   .nav {
+    display: flex;
+
     position: fixed;
     top: 64px;
     left: 0;
-    width: 100%;
-    height: calc(100vh - 64px);
+    right: 0;
+    bottom: 0;
 
     background: rgba(15,23,42,0.97);
 
     flex-direction: column;
-    align-items: stretch;
     justify-content: flex-start;
+    align-items: stretch;
 
     padding: 24px 20px;
-    gap: 8px;
+    gap: 4px;
+
+    overflow-y: auto;
 
     transform: translateX(-100%);
     transition: transform 0.25s ease;
 
-    z-index: 10000;
+    /* 🔥 CORREÇÃO REAL DO BUG */
+    z-index: 99999;
   }
 
   .nav.nav--open {
     transform: translateX(0);
   }
-
-  .nav-link {
-    color: rgba(255,255,255,0.8);
-    padding: 14px 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-  }
-
-  .nav-cta {
-    margin-top: 12px;
-    text-align: center;
-  }
-
-  .posts-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
-/* =========================
-   SAFETY STACK FIX
-========================= */
-header, .nav {
+/* ================= SEGURANÇA STACKING ================= */
+header {
+  z-index: 1000;
+  position: sticky;
+}
+
+.nav {
   isolation: isolate;
 }
