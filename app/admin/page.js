@@ -1,43 +1,166 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 
-/* ─── Paleta e estilos inline (sem depender do globals.css do blog) ─── */
+/* ─── Design tokens ─── */
 const C = {
-  bg: "#0F172A",
-  surface: "#1E293B",
-  surfaceHover: "#263044",
-  border: "#334155",
-  borderSoft: "#1E293B",
+  bg: "#080E1A",
+  bgElevated: "#0D1526",
+  surface: "#111827",
+  surfaceHover: "#1A2535",
+  border: "#1F2D45",
+  borderSoft: "#151E2E",
   primary: "#3B82F6",
   primaryHover: "#2563EB",
+  primaryGlow: "rgba(59,130,246,0.15)",
   accent: "#F59E0B",
+  accentGlow: "rgba(245,158,11,0.12)",
   green: "#10B981",
+  greenGlow: "rgba(16,185,129,0.12)",
   red: "#EF4444",
+  redGlow: "rgba(239,68,68,0.12)",
+  purple: "#8B5CF6",
   text: "#F1F5F9",
   textMuted: "#94A3B8",
-  textFaint: "#64748B",
+  textFaint: "#4B607A",
+  gradient: "linear-gradient(135deg, #1a2a4a 0%, #0f1929 100%)",
 };
 
+/* ─── Injeta CSS global para responsividade ─── */
+const globalCSS = `
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: ${C.bg}; }
+
+  input, textarea, select, button {
+    font-family: inherit;
+  }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: ${C.bg}; }
+  ::-webkit-scrollbar-thumb { background: ${C.border}; border-radius: 3px; }
+
+  .admin-layout {
+    display: flex;
+    gap: 0;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 28px 20px;
+  }
+  .admin-sidebar {
+    width: 200px;
+    flex-shrink: 0;
+    margin-right: 24px;
+    position: sticky;
+    top: 72px;
+    height: fit-content;
+  }
+  .admin-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .aff-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .config-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  /* Bottom nav for mobile */
+  .mobile-nav {
+    display: none;
+  }
+
+  /* Mobile header back button */
+  .desktop-sidebar { display: flex; }
+
+  @media (max-width: 768px) {
+    .admin-layout {
+      flex-direction: column;
+      padding: 16px 12px 80px;
+    }
+    .admin-sidebar { display: none; }
+    .admin-content { width: 100%; }
+
+    .stat-grid { grid-template-columns: 1fr 1fr; }
+    .aff-form-grid { grid-template-columns: 1fr; }
+    .config-grid { grid-template-columns: 1fr; }
+
+    .mobile-nav {
+      display: flex;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: ${C.surface};
+      border-top: 1px solid ${C.border};
+      z-index: 200;
+      padding: 8px 4px;
+      padding-bottom: calc(8px + env(safe-area-inset-bottom));
+    }
+    .mobile-nav-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 6px 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+    .mobile-nav-icon { font-size: 18px; }
+    .mobile-nav-label { font-size: 10px; font-weight: 600; }
+  }
+
+  @media (max-width: 480px) {
+    .stat-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .header-title { font-size: 14px !important; }
+    .aff-card-actions { flex-direction: column; gap: 6px; }
+    .aff-card-actions button { width: 100%; }
+    .indexing-btn-row { flex-direction: column; }
+    .indexing-btn-row a,
+    .indexing-btn-row button { width: 100%; text-align: center; justify-content: center; }
+  }
+
+  .row-links td { overflow: hidden; text-overflow: ellipsis; max-width: 0; }
+
+  @media (max-width: 600px) {
+    .metrics-table thead th:nth-child(4),
+    .metrics-table thead th:nth-child(5),
+    .metrics-table tbody td:nth-child(4),
+    .metrics-table tbody td:nth-child(5) { display: none; }
+  }
+`;
+
+/* ─── Injetar estilos no head ─── */
+function StyleInjector() {
+  useEffect(() => {
+    const tag = document.createElement("style");
+    tag.innerHTML = globalCSS;
+    document.head.appendChild(tag);
+    return () => document.head.removeChild(tag);
+  }, []);
+  return null;
+}
+
+/* ─── Estilos JS (para elementos dinâmicos) ─── */
 const s = {
-  page: {
-    minHeight: "100vh",
-    background: C.bg,
-    color: C.text,
-    fontFamily: "'Inter', system-ui, sans-serif",
-    fontSize: 14,
-  },
-  center: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: "100vh",
-  },
   card: {
     background: C.surface,
     border: `1px solid ${C.border}`,
-    borderRadius: 12,
-    padding: "24px",
+    borderRadius: 14,
+    padding: "20px",
   },
   input: {
     width: "100%",
@@ -49,6 +172,7 @@ const s = {
     fontSize: 14,
     outline: "none",
     boxSizing: "border-box",
+    transition: "border-color 0.15s",
   },
   btn: {
     background: C.primary,
@@ -59,15 +183,22 @@ const s = {
     fontSize: 14,
     fontWeight: 600,
     cursor: "pointer",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    transition: "background 0.15s",
+    whiteSpace: "nowrap",
   },
   btnDanger: {
     background: "transparent",
     color: C.red,
-    border: `1px solid ${C.red}`,
+    border: `1px solid ${C.red}33`,
     borderRadius: 8,
-    padding: "6px 14px",
+    padding: "7px 14px",
     fontSize: 13,
     cursor: "pointer",
+    fontWeight: 500,
+    whiteSpace: "nowrap",
   },
   btnGhost: {
     background: "transparent",
@@ -77,71 +208,105 @@ const s = {
     padding: "8px 16px",
     fontSize: 13,
     cursor: "pointer",
+    fontWeight: 500,
+    whiteSpace: "nowrap",
   },
   label: {
     display: "block",
-    fontSize: 12,
-    fontWeight: 600,
-    color: C.textMuted,
+    fontSize: 11,
+    fontWeight: 700,
+    color: C.textFaint,
     textTransform: "uppercase",
-    letterSpacing: "0.08em",
+    letterSpacing: "0.09em",
     marginBottom: 6,
   },
-  fieldGroup: { marginBottom: 16 },
+  fieldGroup: { marginBottom: 0 },
   tag: (color) => ({
     display: "inline-block",
-    background: color + "22",
+    background: color + "18",
     color,
-    border: `1px solid ${color}44`,
+    border: `1px solid ${color}30`,
     borderRadius: 999,
     padding: "2px 10px",
     fontSize: 11,
     fontWeight: 600,
   }),
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: 700,
+    color: C.textFaint,
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
+    marginBottom: 14,
+  },
 };
 
-/* ─── Componentes utilitários ─── */
+/* ─── Toast ─── */
 function Toast({ msg, type }) {
   if (!msg) return null;
   const color = type === "error" ? C.red : C.green;
+  const icon = type === "error" ? "✕" : "✓";
   return (
     <div style={{
-      position: "fixed", bottom: 24, right: 24, zIndex: 9999,
-      background: C.surface, border: `1px solid ${color}`,
-      borderRadius: 10, padding: "12px 20px", color,
-      fontWeight: 600, fontSize: 13, boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+      position: "fixed", bottom: 80, right: 16, zIndex: 9999,
+      background: C.surface, border: `1px solid ${color}44`,
+      borderRadius: 12, padding: "12px 18px", color,
+      fontWeight: 600, fontSize: 13,
+      boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px ${color}22`,
       display: "flex", alignItems: "center", gap: 8,
+      maxWidth: "calc(100vw - 32px)",
+      animation: "fadeInUp 0.2s ease",
     }}>
-      {type === "error" ? "✗" : "✓"} {msg}
+      <span style={{ fontSize: 16 }}>{icon}</span> {msg}
     </div>
   );
 }
 
-function StatCard({ label, value, sub, color }) {
+/* ─── StatCard ─── */
+function StatCard({ label, value, sub, color, icon }) {
   return (
-    <div style={{ ...s.card, flex: 1, minWidth: 140 }}>
-      <div style={{ fontSize: 11, color: C.textMuted, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>{label}</div>
-      <div style={{ fontSize: 36, fontWeight: 700, color: color || C.text, lineHeight: 1 }}>{value}</div>
-      {sub && <div style={{ fontSize: 12, color: C.textFaint, marginTop: 6 }}>{sub}</div>}
+    <div style={{
+      ...s.card,
+      position: "relative",
+      overflow: "hidden",
+      padding: "18px 16px",
+    }}>
+      <div style={{
+        position: "absolute", top: 0, right: 0, width: 80, height: 80,
+        background: (color || C.primary) + "08",
+        borderRadius: "0 14px 0 80px",
+        display: "flex", alignItems: "flex-start", justifyContent: "flex-end",
+        padding: "12px 12px 0 0",
+        fontSize: 18,
+      }}>{icon}</div>
+      <div style={{ fontSize: 10, color: C.textFaint, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>{label}</div>
+      <div style={{ fontSize: 32, fontWeight: 800, color: color || C.text, lineHeight: 1, marginBottom: 4 }}>{value}</div>
+      {sub && <div style={{ fontSize: 11, color: C.textFaint }}>{sub}</div>}
     </div>
   );
 }
 
+/* ─── BarChart ─── */
 function BarChart({ data }) {
-  if (!data || Object.keys(data).length === 0) return <div style={{ color: C.textFaint, fontSize: 13 }}>Sem dados suficientes.</div>;
-  const max = Math.max(...Object.values(data), 1);
+  if (!data || Object.keys(data).length === 0)
+    return <div style={{ color: C.textFaint, fontSize: 13, padding: "20px 0" }}>Sem dados suficientes.</div>;
+  const entries = Object.entries(data);
+  const max = Math.max(...entries.map(([, v]) => v), 1);
   return (
-    <div style={{ display: "flex", alignItems: "flex-end", gap: 8, height: 80 }}>
-      {Object.entries(data).map(([month, count]) => (
-        <div key={month} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-          <div style={{ fontSize: 11, color: C.textFaint }}>{count}</div>
+    <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 90, padding: "0 4px" }}>
+      {entries.map(([month, count]) => (
+        <div key={month} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minWidth: 0 }}>
+          <div style={{ fontSize: 10, color: C.textFaint, fontWeight: 600 }}>{count}</div>
           <div style={{
             width: "100%", borderRadius: "4px 4px 0 0",
-            background: C.primary,
-            height: `${Math.max(4, (count / max) * 56)}px`,
-            transition: "height 0.4s",
+            background: `linear-gradient(180deg, ${C.primary} 0%, ${C.primary}88 100%)`,
+            height: `${Math.max(4, (count / max) * 64)}px`,
+            transition: "height 0.5s cubic-bezier(.4,0,.2,1)",
+            boxShadow: `0 -2px 8px ${C.primaryGlow}`,
           }} />
-          <div style={{ fontSize: 10, color: C.textFaint, whiteSpace: "nowrap" }}>{month.slice(5)}</div>
+          <div style={{ fontSize: 9, color: C.textFaint, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%" }}>
+            {month.slice(5)}
+          </div>
         </div>
       ))}
     </div>
@@ -153,46 +318,88 @@ function LoginScreen({ onLogin }) {
   const [pw, setPw] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showPw, setShowPw] = useState(false);
 
   async function handleLogin(e) {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const res = await fetch("/api/admin/auth", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password: pw }),
-    });
-    const data = await res.json();
+    try {
+      const res = await fetch("/api/admin/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: pw }),
+      });
+      const data = await res.json();
+      if (data.ok) onLogin();
+      else setError(data.error || "Senha incorreta");
+    } catch {
+      setError("Erro de conexão");
+    }
     setLoading(false);
-    if (data.ok) onLogin();
-    else setError(data.error || "Senha incorreta");
   }
 
   return (
-    <div style={s.center}>
-      <div style={{ ...s.card, width: 340, textAlign: "center" }}>
-        <div style={{ fontSize: 32, marginBottom: 8 }}>🔐</div>
-        <h2 style={{ margin: "0 0 4px", fontSize: 20, fontWeight: 700 }}>Painel Admin</h2>
-        <p style={{ color: C.textMuted, fontSize: 13, margin: "0 0 24px" }}>Aprovado Já</p>
-        <form onSubmit={handleLogin}>
-          <div style={s.fieldGroup}>
+    <div style={{
+      minHeight: "100vh", display: "flex", alignItems: "center",
+      justifyContent: "center", background: C.bg, padding: 20,
+    }}>
+      <div style={{
+        width: "100%", maxWidth: 380,
+        background: C.surface, border: `1px solid ${C.border}`,
+        borderRadius: 20, padding: "36px 32px",
+        boxShadow: "0 24px 80px rgba(0,0,0,0.5)",
+      }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <div style={{
+            width: 56, height: 56, borderRadius: 14,
+            background: C.primaryGlow, border: `1px solid ${C.primary}33`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 24, margin: "0 auto 16px",
+          }}>🔐</div>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: C.text, marginBottom: 4 }}>Painel Admin</h1>
+          <p style={{ color: C.textFaint, fontSize: 13 }}>Aprovado Já</p>
+        </div>
+
+        <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ position: "relative" }}>
+            <label style={s.label}>Senha de administrador</label>
             <input
-              type="password"
-              placeholder="Senha de administrador"
+              type={showPw ? "text" : "password"}
+              placeholder="••••••••"
               value={pw}
               onChange={(e) => setPw(e.target.value)}
-              style={s.input}
+              style={{ ...s.input, paddingRight: 44 }}
               autoFocus
             />
+            <button
+              type="button"
+              onClick={() => setShowPw(!showPw)}
+              style={{
+                position: "absolute", right: 12, bottom: 10,
+                background: "none", border: "none", cursor: "pointer",
+                color: C.textFaint, fontSize: 15,
+              }}
+            >{showPw ? "🙈" : "👁"}</button>
           </div>
-          {error && <div style={{ color: C.red, fontSize: 13, marginBottom: 12 }}>{error}</div>}
-          <button type="submit" style={{ ...s.btn, width: "100%" }} disabled={loading}>
+
+          {error && (
+            <div style={{
+              background: C.redGlow, border: `1px solid ${C.red}33`,
+              borderRadius: 8, padding: "10px 14px",
+              color: C.red, fontSize: 13, display: "flex", alignItems: "center", gap: 8,
+            }}>
+              ✕ {error}
+            </div>
+          )}
+
+          <button type="submit" style={{ ...s.btn, width: "100%", justifyContent: "center", padding: "12px 20px", fontSize: 15 }} disabled={loading}>
             {loading ? "Entrando…" : "Entrar"}
           </button>
         </form>
-        <p style={{ color: C.textFaint, fontSize: 11, marginTop: 20 }}>
-          Defina ADMIN_PASSWORD no .env.local
+
+        <p style={{ color: C.textFaint, fontSize: 11, marginTop: 24, textAlign: "center", lineHeight: 1.6 }}>
+          Configure <code style={{ background: C.bgElevated, padding: "1px 5px", borderRadius: 4 }}>ADMIN_PASSWORD</code> no .env.local
         </p>
       </div>
     </div>
@@ -203,15 +410,30 @@ function LoginScreen({ onLogin }) {
 function MetricsTab({ toast }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/admin/metrics")
-      .then((r) => r.json())
-      .then((d) => { setData(d); setLoading(false); })
-      .catch(() => { toast("Erro ao carregar métricas", "error"); setLoading(false); });
-  }, []);
+  async function load(isRefresh = false) {
+    if (isRefresh) setRefreshing(true);
+    try {
+      const r = await fetch("/api/admin/metrics");
+      const d = await r.json();
+      setData(d);
+    } catch {
+      toast("Erro ao carregar métricas", "error");
+    }
+    setLoading(false);
+    setRefreshing(false);
+  }
 
-  if (loading) return <p style={{ color: C.textMuted }}>Carregando métricas…</p>;
+  useEffect(() => { load(); }, []);
+
+  if (loading) return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      {[1, 2, 3].map(i => (
+        <div key={i} style={{ ...s.card, height: 80, background: C.surfaceHover, animation: "pulse 1.5s infinite" }} />
+      ))}
+    </div>
+  );
   if (!data) return null;
 
   const topCats = Object.entries(data.categories || {}).sort((a, b) => b[1] - a[1]);
@@ -219,27 +441,26 @@ function MetricsTab({ toast }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {/* Cards */}
-      <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-        <StatCard label="Total de Posts" value={data.totalPosts} sub="no blog" color={C.primary} />
-        <StatCard label="Últimas 24h" value={data.postsLast24h} sub="posts publicados" color={C.green} />
-        <StatCard label="Últimos 7 dias" value={data.postsLast7d} sub="posts publicados" color={C.accent} />
-        <StatCard label="Últimos 30 dias" value={data.postsLast30d} sub="posts publicados" />
+      <div className="stat-grid">
+        <StatCard label="Total de Posts" value={data.totalPosts} sub="publicados" color={C.primary} icon="📝" />
+        <StatCard label="Últimas 24h" value={data.postsLast24h} sub="novos posts" color={C.green} icon="⚡" />
+        <StatCard label="Últimos 7 dias" value={data.postsLast7d} sub="novos posts" color={C.accent} icon="📅" />
+        <StatCard label="Últimos 30 dias" value={data.postsLast30d} sub="novos posts" color={C.purple} icon="📈" />
       </div>
 
-      <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-        {/* Gráfico por mês */}
-        <div style={{ ...s.card, flex: 2, minWidth: 240 }}>
-          <div style={{ fontWeight: 700, marginBottom: 16 }}>Posts por mês</div>
+      {/* Gráfico + Categorias */}
+      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16 }}>
+        <div style={{ ...s.card, minWidth: 0 }}>
+          <div style={s.sectionTitle}>Posts por mês</div>
           <BarChart data={data.byMonth} />
         </div>
-
-        {/* Categorias */}
-        <div style={{ ...s.card, flex: 1, minWidth: 200 }}>
-          <div style={{ fontWeight: 700, marginBottom: 16 }}>Por categoria</div>
+        <div style={{ ...s.card, minWidth: 0 }}>
+          <div style={s.sectionTitle}>Categorias</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {topCats.length === 0 && <span style={{ color: C.textFaint, fontSize: 13 }}>Sem dados</span>}
             {topCats.map(([cat, count]) => (
-              <div key={cat} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: 13, color: C.textMuted }}>{cat}</span>
+              <div key={cat} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 13, color: C.textMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{cat}</span>
                 <span style={s.tag(C.primary)}>{count}</span>
               </div>
             ))}
@@ -249,34 +470,43 @@ function MetricsTab({ toast }) {
 
       {/* Posts recentes */}
       <div style={s.card}>
-        <div style={{ fontWeight: 700, marginBottom: 16 }}>Posts recentes</div>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-          <thead>
-            <tr style={{ borderBottom: `1px solid ${C.border}` }}>
-              {["Título", "Categoria", "Data", "Palavras", "Leitura"].map((h) => (
-                <th key={h} style={{ textAlign: "left", color: C.textFaint, fontWeight: 600, padding: "0 8px 10px 0", fontSize: 11, textTransform: "uppercase" }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {data.recent.map((p) => (
-              <tr key={p.slug} style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
-                <td style={{ padding: "10px 8px 10px 0", maxWidth: 240 }}>
-                  <a href={`/blog/${p.slug}`} target="_blank" rel="noreferrer"
-                    style={{ color: C.text, textDecoration: "none", fontWeight: 500 }}>
-                    {p.title.length > 50 ? p.title.slice(0, 50) + "…" : p.title}
-                  </a>
-                </td>
-                <td style={{ padding: "10px 8px 10px 0" }}>
-                  <span style={s.tag(C.accent)}>{p.category}</span>
-                </td>
-                <td style={{ padding: "10px 8px 10px 0", color: C.textMuted, whiteSpace: "nowrap" }}>{p.date}</td>
-                <td style={{ padding: "10px 8px 10px 0", color: C.textMuted }}>{p.words.toLocaleString()}</td>
-                <td style={{ padding: "10px 8px 10px 0", color: C.textMuted }}>{p.readingTime} min</td>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <div style={s.sectionTitle}>Posts recentes</div>
+          <button style={s.btnGhost} onClick={() => load(true)} disabled={refreshing} style={{
+            ...s.btnGhost, padding: "6px 12px", fontSize: 12,
+          }}>
+            {refreshing ? "⟳ Atualizando…" : "⟳ Atualizar"}
+          </button>
+        </div>
+        <div style={{ overflowX: "auto" }}>
+          <table className="metrics-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+            <thead>
+              <tr style={{ borderBottom: `1px solid ${C.border}` }}>
+                {["Título", "Categoria", "Data", "Palavras", "Leitura"].map((h) => (
+                  <th key={h} style={{ textAlign: "left", color: C.textFaint, fontWeight: 700, padding: "0 12px 10px 0", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", whiteSpace: "nowrap" }}>{h}</th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {(data.recent || []).map((p) => (
+                <tr key={p.slug} style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+                  <td style={{ padding: "11px 12px 11px 0", maxWidth: 260 }}>
+                    <a href={`/blog/${p.slug}`} target="_blank" rel="noreferrer"
+                      style={{ color: C.text, textDecoration: "none", fontWeight: 500, display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {p.title}
+                    </a>
+                  </td>
+                  <td style={{ padding: "11px 12px 11px 0", whiteSpace: "nowrap" }}>
+                    <span style={s.tag(C.accent)}>{p.category}</span>
+                  </td>
+                  <td style={{ padding: "11px 12px 11px 0", color: C.textMuted, whiteSpace: "nowrap" }}>{p.date}</td>
+                  <td style={{ padding: "11px 12px 11px 0", color: C.textMuted }}>{(p.words || 0).toLocaleString()}</td>
+                  <td style={{ padding: "11px 12px 11px 0", color: C.textMuted, whiteSpace: "nowrap" }}>{p.readingTime} min</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
@@ -289,7 +519,8 @@ function AffiliatesTab({ toast }) {
   const [saving, setSaving] = useState(false);
   const empty = { id: "", name: "", url: "", keywords: "", cta: "" };
   const [form, setForm] = useState(empty);
-  const [editing, setEditing] = useState(null); // index
+  const [editing, setEditing] = useState(null);
+  const formRef = useRef(null);
 
   useEffect(() => {
     fetch("/api/admin/affiliates")
@@ -315,18 +546,13 @@ function AffiliatesTab({ toast }) {
     const a = affiliates[i];
     setForm({ ...a, keywords: (a.keywords || []).join(", ") });
     setEditing(i);
+    setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
   }
 
-  function cancelEdit() {
-    setForm(empty);
-    setEditing(null);
-  }
+  function cancelEdit() { setForm(empty); setEditing(null); }
 
   function applyEdit() {
-    const aff = {
-      ...form,
-      keywords: form.keywords.split(",").map((k) => k.trim()).filter(Boolean),
-    };
+    const aff = { ...form, keywords: form.keywords.split(",").map((k) => k.trim()).filter(Boolean) };
     const list = editing === "new"
       ? [...affiliates, aff]
       : affiliates.map((a, i) => (i === editing ? aff : a));
@@ -336,6 +562,7 @@ function AffiliatesTab({ toast }) {
   }
 
   function remove(i) {
+    if (!confirm("Remover este afiliado?")) return;
     const list = affiliates.filter((_, idx) => idx !== i);
     setAffiliates(list);
     save(list);
@@ -343,60 +570,23 @@ function AffiliatesTab({ toast }) {
 
   if (loading) return <p style={{ color: C.textMuted }}>Carregando afiliados…</p>;
 
+  const fields = [
+    { key: "id", label: "ID (único, sem espaços)", placeholder: "estrategia" },
+    { key: "name", label: "Nome do afiliado", placeholder: "Estratégia Concursos" },
+    { key: "url", label: "URL do link de afiliado", placeholder: "https://..." },
+    { key: "cta", label: "Texto CTA (call to action)", placeholder: "Conheça os cursos..." },
+  ];
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      {/* Lista */}
-      <div style={s.card}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <div style={{ fontWeight: 700 }}>Links de afiliados ({affiliates.length})</div>
-          <button style={s.btn} onClick={() => { setForm(empty); setEditing("new"); }}>+ Novo afiliado</button>
-        </div>
-
-        {affiliates.length === 0 && (
-          <p style={{ color: C.textFaint, fontSize: 13 }}>Nenhum afiliado cadastrado.</p>
-        )}
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {affiliates.map((aff, i) => (
-            <div key={aff.id || i} style={{
-              background: C.bg, border: `1px solid ${C.border}`,
-              borderRadius: 10, padding: 16,
-              display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12,
-            }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700, marginBottom: 4 }}>{aff.name}</div>
-                <div style={{ fontSize: 12, color: C.primary, marginBottom: 6 }}>
-                  <a href={aff.url} target="_blank" rel="noreferrer" style={{ color: C.primary }}>{aff.url}</a>
-                </div>
-                <div style={{ fontSize: 12, color: C.textMuted, marginBottom: 6 }}>CTA: {aff.cta}</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                  {(aff.keywords || []).map((k) => (
-                    <span key={k} style={s.tag(C.textFaint)}>{k}</span>
-                  ))}
-                </div>
-              </div>
-              <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-                <button style={s.btnGhost} onClick={() => startEdit(i)}>Editar</button>
-                <button style={s.btnDanger} onClick={() => remove(i)}>Remover</button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Formulário edição/criação */}
+      {/* Formulário de edição/criação */}
       {editing !== null && (
-        <div style={s.card}>
-          <div style={{ fontWeight: 700, marginBottom: 20 }}>
-            {editing === "new" ? "Novo afiliado" : "Editar afiliado"}
+        <div ref={formRef} style={{ ...s.card, border: `1px solid ${C.primary}33` }}>
+          <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 20, color: C.text }}>
+            {editing === "new" ? "➕ Novo afiliado" : "✏️ Editar afiliado"}
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            {[
-              { key: "id", label: "ID (único, sem espaços)", placeholder: "estrategia" },
-              { key: "name", label: "Nome", placeholder: "Estratégia Concursos" },
-              { key: "url", label: "URL do afiliado", placeholder: "https://..." },
-              { key: "cta", label: "Texto CTA", placeholder: "Conheça os cursos..." },
-            ].map(({ key, label, placeholder }) => (
+          <div className="aff-form-grid">
+            {fields.map(({ key, label, placeholder }) => (
               <div key={key} style={s.fieldGroup}>
                 <label style={s.label}>{label}</label>
                 <input
@@ -407,7 +597,7 @@ function AffiliatesTab({ toast }) {
                 />
               </div>
             ))}
-            <div style={{ ...s.fieldGroup, gridColumn: "1 / -1" }}>
+            <div style={{ gridColumn: "1 / -1" }}>
               <label style={s.label}>Palavras-chave (separadas por vírgula)</label>
               <input
                 style={s.input}
@@ -417,19 +607,70 @@ function AffiliatesTab({ toast }) {
               />
             </div>
           </div>
-          <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+          <div style={{ display: "flex", gap: 10, marginTop: 20, flexWrap: "wrap" }}>
             <button style={s.btn} onClick={applyEdit} disabled={saving}>
-              {saving ? "Salvando…" : "Salvar"}
+              {saving ? "Salvando…" : "💾 Salvar afiliado"}
             </button>
             <button style={s.btnGhost} onClick={cancelEdit}>Cancelar</button>
           </div>
         </div>
       )}
+
+      {/* Lista */}
+      <div style={s.card}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 16, color: C.text }}>Links de afiliados</div>
+            <div style={{ color: C.textFaint, fontSize: 12, marginTop: 2 }}>{affiliates.length} cadastrado{affiliates.length !== 1 ? "s" : ""}</div>
+          </div>
+          <button style={s.btn} onClick={() => { setForm(empty); setEditing("new"); }}>+ Novo afiliado</button>
+        </div>
+
+        {affiliates.length === 0 && (
+          <div style={{
+            textAlign: "center", padding: "40px 20px",
+            color: C.textFaint, fontSize: 14,
+          }}>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>🔗</div>
+            <div>Nenhum afiliado cadastrado ainda.</div>
+            <div style={{ fontSize: 12, marginTop: 4 }}>Clique em "Novo afiliado" para começar.</div>
+          </div>
+        )}
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {affiliates.map((aff, i) => (
+            <div key={aff.id || i} style={{
+              background: C.bg, border: `1px solid ${C.border}`,
+              borderRadius: 12, padding: "16px",
+              display: "flex", justifyContent: "space-between",
+              alignItems: "flex-start", gap: 12,
+            }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4, color: C.text }}>{aff.name}</div>
+                <a href={aff.url} target="_blank" rel="noreferrer"
+                  style={{ fontSize: 12, color: C.primary, textDecoration: "none", display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: 6 }}>
+                  {aff.url} ↗
+                </a>
+                {aff.cta && <div style={{ fontSize: 12, color: C.textMuted, marginBottom: 8 }}>"{aff.cta}"</div>}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+                  {(aff.keywords || []).map((k) => (
+                    <span key={k} style={s.tag(C.textFaint)}>{k}</span>
+                  ))}
+                </div>
+              </div>
+              <div className="aff-card-actions" style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                <button style={s.btnGhost} onClick={() => startEdit(i)}>Editar</button>
+                <button style={s.btnDanger} onClick={() => remove(i)}>Remover</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
 
-/* ─── ABA: CONFIGURAÇÕES GERAIS ─── */
+/* ─── ABA: CONFIGURAÇÕES ─── */
 function ConfigTab({ toast }) {
   const [cfg, setCfg] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -457,96 +698,94 @@ function ConfigTab({ toast }) {
 
   if (loading || !cfg) return <p style={{ color: C.textMuted }}>Carregando configurações…</p>;
 
-  const Field = ({ label, field, placeholder, type = "text" }) => (
-    <div style={s.fieldGroup}>
-      <label style={s.label}>{label}</label>
-      {type === "textarea" ? (
-        <textarea
-          rows={3}
-          style={{ ...s.input, resize: "vertical" }}
-          placeholder={placeholder}
-          value={cfg[field] || ""}
-          onChange={(e) => setCfg({ ...cfg, [field]: e.target.value })}
-        />
-      ) : (
-        <input
-          type={type}
-          style={s.input}
-          placeholder={placeholder}
-          value={cfg[field] || ""}
-          onChange={(e) => setCfg({ ...cfg, [field]: e.target.value })}
-        />
-      )}
-    </div>
-  );
+  function Field({ label, field, placeholder, type = "text", fullWidth = false }) {
+    return (
+      <div style={{ ...s.fieldGroup, ...(fullWidth ? { gridColumn: "1 / -1" } : {}) }}>
+        <label style={s.label}>{label}</label>
+        {type === "textarea" ? (
+          <textarea
+            rows={3}
+            style={{ ...s.input, resize: "vertical" }}
+            placeholder={placeholder}
+            value={cfg[field] || ""}
+            onChange={(e) => setCfg({ ...cfg, [field]: e.target.value })}
+          />
+        ) : (
+          <input
+            type={type}
+            style={s.input}
+            placeholder={placeholder}
+            value={cfg[field] || ""}
+            onChange={(e) => setCfg({ ...cfg, [field]: e.target.value })}
+          />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       {/* Identidade */}
       <div style={s.card}>
-        <div style={{ fontWeight: 700, marginBottom: 20 }}>Identidade do blog</div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        <div style={s.sectionTitle}>🏷️ Identidade do blog</div>
+        <div className="config-grid" style={{ gap: 16 }}>
           <Field label="Nome do blog" field="name" placeholder="Aprovado Já" />
           <Field label="URL do site" field="url" placeholder="https://..." />
-          <div style={{ gridColumn: "1 / -1" }}>
-            <Field label="Tagline" field="tagline" placeholder="Sua tagline aqui" />
-          </div>
-          <div style={{ gridColumn: "1 / -1" }}>
-            <Field label="Descrição" field="description" placeholder="Descrição do site..." type="textarea" />
-          </div>
+          <Field label="Tagline" field="tagline" placeholder="Sua tagline aqui" fullWidth />
+          <Field label="Descrição" field="description" placeholder="Descrição do site..." type="textarea" fullWidth />
           <Field label="Twitter Handle" field="twitterHandle" placeholder="@aprovadoja" />
-          <Field label="Google Site Verification" field="googleSiteVerification" placeholder="código de verificação" />
+          <Field label="Google Site Verification" field="googleSiteVerification" placeholder="código" />
         </div>
       </div>
 
       {/* AdSense */}
       <div style={s.card}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <div style={{ fontWeight: 700 }}>Google AdSense</div>
-          <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-            <div style={{
-              width: 40, height: 22, borderRadius: 999,
-              background: cfg.adsenseEnabled ? C.green : C.border,
-              position: "relative", transition: "background 0.2s", cursor: "pointer",
-            }} onClick={() => setCfg({ ...cfg, adsenseEnabled: !cfg.adsenseEnabled })}>
-              <div style={{
-                position: "absolute", top: 3, left: cfg.adsenseEnabled ? 21 : 3,
-                width: 16, height: 16, borderRadius: "50%", background: "#fff",
-                transition: "left 0.2s",
-              }} />
-            </div>
-            <span style={{ fontSize: 13, color: cfg.adsenseEnabled ? C.green : C.textMuted }}>
-              {cfg.adsenseEnabled ? "Ativado" : "Desativado"}
-            </span>
-          </label>
+          <div style={s.sectionTitle}>💰 Google AdSense</div>
+          <button
+            onClick={() => setCfg({ ...cfg, adsenseEnabled: !cfg.adsenseEnabled })}
+            style={{
+              background: cfg.adsenseEnabled ? C.greenGlow : "transparent",
+              border: `1px solid ${cfg.adsenseEnabled ? C.green + "44" : C.border}`,
+              borderRadius: 999, padding: "4px 14px",
+              color: cfg.adsenseEnabled ? C.green : C.textFaint,
+              fontSize: 12, fontWeight: 700, cursor: "pointer",
+              display: "flex", alignItems: "center", gap: 6,
+            }}
+          >
+            <span style={{
+              width: 8, height: 8, borderRadius: "50%",
+              background: cfg.adsenseEnabled ? C.green : C.textFaint,
+              display: "inline-block",
+            }} />
+            {cfg.adsenseEnabled ? "Ativado" : "Desativado"}
+          </button>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-          <div style={{ gridColumn: "1 / -1" }}>
-            <Field label="Publisher ID (ca-pub-...)" field="adsensePublisherId" placeholder="ca-pub-XXXXXXXXXXXXXXXX" />
-          </div>
+        <div className="config-grid" style={{ gap: 16 }}>
+          <Field label="Publisher ID (ca-pub-...)" field="adsensePublisherId" placeholder="ca-pub-XXXXXXXXXXXXXXXX" fullWidth />
           <Field label="Slot: Header" field="adsenseSlotHeader" placeholder="1234567890" />
           <Field label="Slot: In-Article" field="adsenseSlotInArticle" placeholder="0987654321" />
           <Field label="Slot: Sidebar" field="adsenseSlotSidebar" placeholder="1122334455" />
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: 10 }}>
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
         <button style={s.btn} onClick={handleSave} disabled={saving}>
-          {saving ? "Salvando…" : "Salvar configurações"}
+          {saving ? "Salvando…" : "💾 Salvar configurações"}
         </button>
       </div>
     </div>
   );
 }
 
-/* ─── INDEXAÇÃO ─── */
+/* ─── ABA: INDEXAÇÃO ─── */
 function IndexingTab({ toast }) {
   const [running, setRunning] = useState(false);
   const [output, setOutput] = useState("");
 
   async function runPing(mode) {
     setRunning(true);
-    setOutput("⏳ Executando ping de indexação…\n");
+    setOutput("⏳ Iniciando ping de indexação…\n");
     try {
       const res = await fetch(`/api/admin/indexing?mode=${mode}`, { method: "POST" });
       const d = await res.json();
@@ -557,25 +796,33 @@ function IndexingTab({ toast }) {
     setRunning(false);
   }
 
+  const quickLinks = [
+    { label: "Google Search Console", url: "https://search.google.com/search-console", icon: "🔍" },
+    { label: "Google Analytics", url: "https://analytics.google.com", icon: "📊" },
+    { label: "Bing Webmaster Tools", url: "https://www.bing.com/webmasters", icon: "🌐" },
+    { label: "IndexNow", url: "https://www.indexnow.org", icon: "⚡" },
+    { label: "PageSpeed Insights", url: "https://pagespeed.web.dev", icon: "🚀" },
+  ];
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={s.card}>
-        <div style={{ fontWeight: 700, marginBottom: 8 }}>Indexação Google / Bing</div>
-        <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 20, lineHeight: 1.6 }}>
-          Notifica os buscadores sobre posts novos. Use "Últimas 24h" após publicar conteúdo novo.
+        <div style={s.sectionTitle}>🚀 Indexação Google / Bing</div>
+        <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 20, lineHeight: 1.7 }}>
+          Notifica os buscadores sobre posts novos. Use <strong style={{ color: C.text }}>"Últimas 24h"</strong> após publicar conteúdo novo.
           O Google Search Console é a forma mais confiável — acesse diretamente para resultados garantidos.
         </p>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <div className="indexing-btn-row" style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <button style={s.btn} onClick={() => runPing("new")} disabled={running}>
-            {running ? "Enviando…" : "⚡ Pingar últimas 24h"}
+            ⚡ {running ? "Enviando…" : "Pingar últimas 24h"}
           </button>
-          <button style={s.btnGhost} onClick={() => runPing("all")} disabled={running}>
+          <button style={{ ...s.btnGhost, display: "inline-flex", alignItems: "center", gap: 6 }} onClick={() => runPing("all")} disabled={running}>
             📡 Pingar todos os posts
           </button>
           <a
             href="https://search.google.com/search-console"
             target="_blank" rel="noreferrer"
-            style={{ ...s.btnGhost, textDecoration: "none", display: "inline-flex", alignItems: "center" }}
+            style={{ ...s.btnGhost, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}
           >
             🔍 Abrir Search Console ↗
           </a>
@@ -584,8 +831,9 @@ function IndexingTab({ toast }) {
         {output && (
           <pre style={{
             marginTop: 20, background: C.bg, border: `1px solid ${C.border}`,
-            borderRadius: 8, padding: 16, fontSize: 12, color: C.textMuted,
-            whiteSpace: "pre-wrap", wordBreak: "break-all", maxHeight: 320, overflowY: "auto",
+            borderRadius: 10, padding: 16, fontSize: 12, color: C.textMuted,
+            whiteSpace: "pre-wrap", wordBreak: "break-all",
+            maxHeight: 320, overflowY: "auto", lineHeight: 1.6,
           }}>
             {output}
           </pre>
@@ -593,17 +841,27 @@ function IndexingTab({ toast }) {
       </div>
 
       <div style={s.card}>
-        <div style={{ fontWeight: 700, marginBottom: 12 }}>Links rápidos</div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {[
-            ["Google Search Console", "https://search.google.com/search-console"],
-            ["Google Analytics", "https://analytics.google.com"],
-            ["IndexNow", "https://www.indexnow.org"],
-            ["PageSpeed Insights", "https://pagespeed.web.dev"],
-          ].map(([label, url]) => (
-            <a key={url} href={url} target="_blank" rel="noreferrer"
-              style={{ color: C.primary, fontSize: 13, textDecoration: "none" }}>
-              {label} ↗
+        <div style={s.sectionTitle}>🔗 Links rápidos</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 10 }}>
+          {quickLinks.map(({ label, url, icon }) => (
+            <a
+              key={url}
+              href={url}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                display: "flex", alignItems: "center", gap: 10,
+                background: C.bg, border: `1px solid ${C.border}`,
+                borderRadius: 10, padding: "12px 14px",
+                color: C.textMuted, textDecoration: "none", fontSize: 13, fontWeight: 500,
+                transition: "border-color 0.15s",
+              }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = C.primary + "66"}
+              onMouseLeave={e => e.currentTarget.style.borderColor = C.border}
+            >
+              <span style={{ fontSize: 18 }}>{icon}</span>
+              {label}
+              <span style={{ marginLeft: "auto", color: C.textFaint }}>↗</span>
             </a>
           ))}
         </div>
@@ -612,32 +870,29 @@ function IndexingTab({ toast }) {
   );
 }
 
-/* ─── PÁGINA PRINCIPAL ─── */
+/* ─── TABS config ─── */
 const TABS = [
-  { id: "metrics", label: "📊 Métricas" },
-  { id: "affiliates", label: "🔗 Afiliados" },
-  { id: "config", label: "⚙️ Configurações" },
-  { id: "indexing", label: "🚀 Indexação" },
+  { id: "metrics", label: "Métricas", icon: "📊", shortLabel: "Métricas" },
+  { id: "affiliates", label: "Afiliados", icon: "🔗", shortLabel: "Afiliados" },
+  { id: "config", label: "Configurações", icon: "⚙️", shortLabel: "Config" },
+  { id: "indexing", label: "Indexação", icon: "🚀", shortLabel: "Indexação" },
 ];
 
+/* ─── PÁGINA PRINCIPAL ─── */
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [checking, setChecking] = useState(true);
   const [tab, setTab] = useState("metrics");
-  const [toast, setToast] = useState({ msg: "", type: "ok" });
+  const [toastState, setToastState] = useState({ msg: "", type: "ok" });
 
   function showToast(msg, type = "ok") {
-    setToast({ msg, type });
-    setTimeout(() => setToast({ msg: "", type: "ok" }), 3500);
+    setToastState({ msg, type });
+    setTimeout(() => setToastState({ msg: "", type: "ok" }), 3500);
   }
 
-  // Verifica se já está autenticado (cookie)
   useEffect(() => {
     fetch("/api/admin/metrics")
-      .then((r) => {
-        if (r.ok) setAuthed(true);
-        setChecking(false);
-      })
+      .then((r) => { if (r.ok) setAuthed(true); setChecking(false); })
       .catch(() => setChecking(false));
   }, []);
 
@@ -646,29 +901,37 @@ export default function AdminPage() {
     setAuthed(false);
   }
 
-  if (checking) {
-    return (
-      <div style={{ ...s.page, ...s.center }}>
-        <div style={{ color: C.textMuted }}>Verificando autenticação…</div>
-      </div>
-    );
-  }
+  if (checking) return (
+    <div style={{ minHeight: "100vh", background: C.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ color: C.textFaint, fontSize: 14 }}>Verificando autenticação…</div>
+    </div>
+  );
 
-  if (!authed) {
-    return (
-      <div style={s.page}>
-        <LoginScreen onLogin={() => setAuthed(true)} />
-      </div>
-    );
-  }
+  if (!authed) return (
+    <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Inter', system-ui, sans-serif" }}>
+      <StyleInjector />
+      <LoginScreen onLogin={() => setAuthed(true)} />
+    </div>
+  );
+
+  const activeTab = TABS.find((t) => t.id === tab);
 
   return (
-    <div style={s.page}>
+    <div style={{
+      minHeight: "100vh",
+      background: C.bg,
+      color: C.text,
+      fontFamily: "'Inter', system-ui, sans-serif",
+      fontSize: 14,
+    }}>
+      <StyleInjector />
+
       {/* Header */}
       <div style={{
         borderBottom: `1px solid ${C.border}`,
-        background: C.surface,
-        padding: "0 24px",
+        background: C.surface + "ee",
+        backdropFilter: "blur(12px)",
+        padding: "0 20px",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
@@ -677,32 +940,36 @@ export default function AdminPage() {
         top: 0,
         zIndex: 100,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <span style={{ fontWeight: 800, fontSize: 16 }}>
-            <span style={{ color: C.accent }}>A</span> Admin
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <span style={{ fontWeight: 800, fontSize: 15, letterSpacing: "-0.02em" }} className="header-title">
+            <span style={{ color: C.accent }}>▲</span>{" "}
+            <span style={{ color: C.text }}>Admin</span>
           </span>
-          <span style={{ color: C.border }}>|</span>
+          <span style={{ color: C.border, fontSize: 18 }}>|</span>
           <a href="/" target="_blank" rel="noreferrer"
-            style={{ color: C.textMuted, fontSize: 12, textDecoration: "none" }}>
+            style={{ color: C.textFaint, fontSize: 12, textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
             Ver site ↗
           </a>
         </div>
-        <button style={s.btnGhost} onClick={handleLogout}>Sair</button>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <button style={{ ...s.btnGhost, padding: "6px 14px", fontSize: 12 }} onClick={handleLogout}>Sair</button>
+        </div>
       </div>
 
-      <div style={{ display: "flex", maxWidth: 1100, margin: "0 auto", padding: "24px 24px" }}>
-        {/* Sidebar */}
-        <div style={{ width: 180, flexShrink: 0, marginRight: 24 }}>
-          <nav style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+      {/* Layout principal */}
+      <div className="admin-layout">
+        {/* Sidebar desktop */}
+        <aside className="admin-sidebar">
+          <nav style={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {TABS.map((t) => (
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
                 style={{
-                  background: tab === t.id ? C.primary + "22" : "transparent",
+                  background: tab === t.id ? C.primaryGlow : "transparent",
                   color: tab === t.id ? C.primary : C.textMuted,
                   border: `1px solid ${tab === t.id ? C.primary + "44" : "transparent"}`,
-                  borderRadius: 8,
+                  borderRadius: 9,
                   padding: "10px 14px",
                   fontSize: 13,
                   fontWeight: tab === t.id ? 700 : 500,
@@ -710,27 +977,47 @@ export default function AdminPage() {
                   textAlign: "left",
                   width: "100%",
                   transition: "all 0.15s",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
                 }}
               >
-                {t.label}
+                <span>{t.icon}</span> {t.label}
               </button>
             ))}
           </nav>
-        </div>
+        </aside>
 
         {/* Conteúdo */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 24, marginTop: 0 }}>
-            {TABS.find((t) => t.id === tab)?.label}
+        <main style={{ flex: 1, minWidth: 0 }}>
+          <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 24, marginTop: 0, color: C.text, display: "flex", alignItems: "center", gap: 8 }}>
+            <span>{activeTab?.icon}</span> {activeTab?.label}
           </h1>
           {tab === "metrics" && <MetricsTab toast={showToast} />}
           {tab === "affiliates" && <AffiliatesTab toast={showToast} />}
           {tab === "config" && <ConfigTab toast={showToast} />}
           {tab === "indexing" && <IndexingTab toast={showToast} />}
-        </div>
+        </main>
       </div>
 
-      <Toast msg={toast.msg} type={toast.type} />
+      {/* Nav mobile (bottom) */}
+      <nav className="mobile-nav">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            className="mobile-nav-btn"
+            onClick={() => setTab(t.id)}
+            style={{
+              color: tab === t.id ? C.primary : C.textFaint,
+            }}
+          >
+            <span className="mobile-nav-icon">{t.icon}</span>
+            <span className="mobile-nav-label">{t.shortLabel}</span>
+          </button>
+        ))}
+      </nav>
+
+      <Toast msg={toastState.msg} type={toastState.type} />
     </div>
   );
 }
