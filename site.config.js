@@ -5,11 +5,11 @@
 
 const siteConfig = {
   // --- IDENTIDADE DO BLOG ---
-  name: "Aprovado Já",
+  name: "Passeja Concursos",
   tagline: "Estratégias, editais e preparação para sua aprovação",
   description:
     "Conteúdo completo sobre concursos públicos, editais, técnicas de estudo, materiais gratuitos e dicas para conquistar sua vaga.",
-  url: "https://blog-v1-beta.vercel.app",
+  url: "https://passejaconcursos.com.br",
   locale: "pt_BR",
   language: "pt-BR",
 
@@ -102,7 +102,7 @@ const siteConfig = {
   seo: {
     twitterHandle: "@aprovadoja",
     ogImage: "/og-default.jpg",
-    googleSiteVerification: "nDeb5-psmng92z4Vz42zy1ozm6NZKUR-5_vkJFu1AqM",
+    googleSiteVerification: "EMQ4ibn6YHecVCgCRbTG-HMfXdtS7hnhXZj1clWB5HE",
     
   },
 
