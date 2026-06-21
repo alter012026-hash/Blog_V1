@@ -66,7 +66,7 @@ const siteConfig = {
   // --- ADSENSE ---
   adsense: {
     enabled: true,
-    publisherId: "ca-pub-XXXXXXXXXXXXXXXX",
+    publisherId: "ca-pub-5977321239837606",
     slots: {
       header: "1234567890",
       inArticle: "0987654321",
