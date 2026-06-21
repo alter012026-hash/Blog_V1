@@ -61,6 +61,14 @@ const siteConfig = {
       keywords: ["questões", "simulados", "banco de questões"],
       cta: "Pratique com milhares de questões no QConcursos",
     },
+    {
+      id: "empreendedormais",
+      name: "Empreendedor MAIS",
+      url: "https://empreendedor.mais.com.br/catalogo-de-lojas?tab=share",
+      keywords: ["renda extra", "trabalhar em casa", "ganhar dinheiro online", "negócio online", "trabalho remoto"],
+      cta: "Enquanto estuda, monte uma renda extra online gratuita com o Empreendedor MAIS",
+      pinned: true, // aparece em todo post, independente do conteúdo (não depende de match de keyword)
+    },
   ],
 
   // --- ADSENSE ---

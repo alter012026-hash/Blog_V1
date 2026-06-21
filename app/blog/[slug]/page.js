@@ -4,7 +4,7 @@ import Footer from "../../../components/Footer";
 import PostCard from "../../../components/PostCard";
 import AffiliateBox from "../../../components/AffiliateBox";
 import { getAllSlugs, getPostBySlug, getPostContentHtml, getRelatedPosts } from "../../../lib/posts";
-import { matchAffiliate } from "../../../lib/affiliate-matcher";
+import { matchAffiliate, getPinnedAffiliates } from "../../../lib/affiliate-matcher";
 import config from "../../../site.config";
 
 export const revalidate = 3600;
@@ -53,6 +53,7 @@ export default async function PostPage({ params }) {
   const contentHtml = await getPostContentHtml(post.content);
   const relatedPosts = getRelatedPosts(params.slug, post.category);
   const matchedAffiliate = matchAffiliate(post.content, config.affiliates);
+  const pinnedAffiliates = getPinnedAffiliates(config.affiliates);
 
   const formattedDate = new Date(post.date + "T12:00:00").toLocaleDateString("pt-BR", {
     day: "numeric",
@@ -118,6 +119,11 @@ export default async function PostPage({ params }) {
 
             {/* Indicação de afiliado relevante ao tema do post */}
             {matchedAffiliate && <AffiliateBox affiliate={matchedAffiliate} />}
+
+            {/* Afiliados fixos (sem relação temática com o conteúdo, exibidos sempre) */}
+            {pinnedAffiliates.map((aff) => (
+              <AffiliateBox key={aff.id} affiliate={aff} />
+            ))}
 
             {/* Posts relacionados */}
             {relatedPosts.length > 0 && (
