@@ -94,14 +94,15 @@ Na aba **Actions** do GitHub → **Gerar e Publicar Artigos** → **Run workflow
 
 ---
 
-## Painel Admin: Regenerar e remover posts em produção
+## Painel Admin: Regenerar, remover posts e editar afiliados em produção
 
 O `/admin` tem botões para **regenerar** o conteúdo de um post (mantendo a mesma
-URL) e para **remover duplicatas**. Esses botões rodam dentro de uma function
-serverless da Vercel — que tem filesystem **somente leitura** em produção — então
-eles não escrevem em disco. Em vez disso, comitam direto no GitHub via API
-(mesma lógica que o GitHub Action de geração automática já usa), e a Vercel
-rebuilda a partir do novo commit.
+URL), **remover duplicatas**, e a aba **Afiliados** permite cadastrar/editar os
+links de afiliado direto pelo navegador. Todos esses botões rodam dentro de uma
+function serverless da Vercel — que tem filesystem **somente leitura** em
+produção — então eles não escrevem em disco. Em vez disso, comitam direto no
+GitHub via API (mesma lógica que o GitHub Action de geração automática já
+usa), e a Vercel rebuilda a partir do novo commit.
 
 ### Variáveis de ambiente necessárias na Vercel
 

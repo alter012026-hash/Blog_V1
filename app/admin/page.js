@@ -529,7 +529,7 @@ function AffiliatesTab({ toast }) {
       .catch(() => { toast("Erro ao carregar afiliados", "error"); setLoading(false); });
   }, []);
 
-  async function save(list) {
+  async function save(list, previousList) {
     setSaving(true);
     const res = await fetch("/api/admin/affiliates", {
       method: "POST",
@@ -538,8 +538,14 @@ function AffiliatesTab({ toast }) {
     });
     const d = await res.json();
     setSaving(false);
-    if (d.ok) toast("Afiliados salvos!");
-    else toast(d.error || "Erro ao salvar", "error");
+    if (d.ok) {
+      toast(d.note || "Afiliados salvos! O site vai atualizar após o próximo deploy.");
+    } else {
+      toast(d.error || "Erro ao salvar", "error");
+      // commit falhou (ex: GITHUB_TOKEN ausente) — desfaz a atualização otimista
+      // pra tela não mostrar algo que não foi de fato persistido no repositório.
+      if (previousList) setAffiliates(previousList);
+    }
   }
 
   function startEdit(i) {
@@ -553,19 +559,21 @@ function AffiliatesTab({ toast }) {
 
   function applyEdit() {
     const aff = { ...form, keywords: form.keywords.split(",").map((k) => k.trim()).filter(Boolean) };
+    const previousList = affiliates;
     const list = editing === "new"
       ? [...affiliates, aff]
       : affiliates.map((a, i) => (i === editing ? aff : a));
     setAffiliates(list);
-    save(list);
+    save(list, previousList);
     cancelEdit();
   }
 
   function remove(i) {
     if (!confirm("Remover este afiliado?")) return;
+    const previousList = affiliates;
     const list = affiliates.filter((_, idx) => idx !== i);
     setAffiliates(list);
-    save(list);
+    save(list, previousList);
   }
 
   if (loading) return <p style={{ color: C.textMuted }}>Carregando afiliados…</p>;
