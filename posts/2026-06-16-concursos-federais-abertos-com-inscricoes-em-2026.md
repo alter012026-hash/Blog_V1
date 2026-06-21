@@ -1,8 +1,8 @@
 ---
-title: "concursos federais abertos com inscrições em 2026"
+title: "Concursos Federais Abertos com Inscrições em 2026"
 date: "2026-06-16"
 category: "Concursos Abertos"
-excerpt: "Os concursos federais no Brasil representam uma oportunidade de carreira estável e desafiadora para muitos brasileiros. Com a abertura de inscrições para v..."
+excerpt: "Os concursos federais no Brasil representam uma oportunidade de carreira estável e desafiadora para muitos brasileiros. Com a abertura de inscrições para..."
 ---
 
 ## Introdução

@@ -23,24 +23,6 @@ const signaturesLogPath = path.resolve(__dirname, "../.content-signatures.json")
 
 const MIN_WORDS_THRESHOLD = 900; // ~80% do minWords padrão (1200) do site.config.js
 
-function getFrontmatterField(raw, field) {
-  const m = raw.match(new RegExp(`^${field}:\\s*"((?:[^"\\\\]|\\\\.)*)"\\s*$`, "m"));
-  return m ? m[1].replace(/\\"/g, '"') : null;
-}
-
-function setFrontmatterField(raw, field, value) {
-  const safe = String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-  const re = new RegExp(`^(${field}:\\s*")(?:[^"\\\\]|\\\\.)*("\\s*)$`, "m");
-  if (re.test(raw)) return raw.replace(re, `$1${safe}$2`);
-  return raw;
-}
-
-function splitFrontmatterAndBody(raw) {
-  const match = raw.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
-  if (!match) return null;
-  return { fm: match[1], body: match[2] };
-}
-
 function main() {
   if (!fs.existsSync(postsDir)) {
     console.error("❌ Pasta /posts não encontrada.");
@@ -61,7 +43,7 @@ function main() {
   for (const file of files) {
     const filePath = path.join(postsDir, file);
     const raw = fs.readFileSync(filePath, "utf8");
-    const parsed = splitFrontmatterAndBody(raw);
+    const parsed = qe.splitFrontmatterAndBody(raw);
 
     if (!parsed) {
       console.warn(`⚠️  ${file}: frontmatter não reconhecido, pulei.`);
@@ -71,23 +53,23 @@ function main() {
     let { fm, body } = parsed;
     const slug = qe.slugFromFileName(file);
     const dateMatch = file.match(/^(\d{4}-\d{2}-\d{2})/);
-    const date = dateMatch ? dateMatch[1] : (getFrontmatterField(fm, "date") || "");
+    const date = dateMatch ? dateMatch[1] : (qe.getFrontmatterField(fm, "date") || "");
 
     // 1. título
-    const currentTitle = getFrontmatterField(fm, "title") || slug;
+    const currentTitle = qe.getFrontmatterField(fm, "title") || slug;
     const fixedTitle = qe.toTitleCase(currentTitle);
     if (fixedTitle !== currentTitle) {
-      fm = setFrontmatterField(fm, "title", fixedTitle);
+      fm = qe.setFrontmatterField(fm, "title", fixedTitle);
       titlesFixed++;
       console.log(`✏️  ${file}\n    título: "${currentTitle}" → "${fixedTitle}"`);
     }
 
     // 2. excerpt — sempre regenera com o cortador seguro (sem mudar o conteúdo)
     const newExcerpt = qe.buildSafeExcerpt(body);
-    const currentExcerpt = getFrontmatterField(fm, "excerpt");
+    const currentExcerpt = qe.getFrontmatterField(fm, "excerpt");
     if (newExcerpt !== currentExcerpt) {
       fm = /^excerpt:/m.test(fm)
-        ? setFrontmatterField(fm, "excerpt", newExcerpt)
+        ? qe.setFrontmatterField(fm, "excerpt", newExcerpt)
         : fm + `\nexcerpt: "${newExcerpt.replace(/"/g, '\\"')}"`;
       excerptsFixed++;
     }
@@ -101,7 +83,7 @@ function main() {
     // 4. qualidade
     const wordCount = qe.countWords(body);
     const fillerCount = qe.countFillerPhrases(body);
-    const category = getFrontmatterField(fm, "category") || "Geral";
+    const category = qe.getFrontmatterField(fm, "category") || "Geral";
 
     qualityEntries.push({
       timestamp: new Date().toISOString(),

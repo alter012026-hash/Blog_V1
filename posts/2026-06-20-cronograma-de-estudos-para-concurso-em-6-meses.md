@@ -1,8 +1,8 @@
 ---
-title: "cronograma de estudos para concurso em 6 meses"
+title: "Cronograma de Estudos para Concurso em 6 Meses"
 date: "2026-06-20"
 category: "Cronograma de Estudos"
-excerpt: "Se você está se preparando para um concurso público no Brasil, sabe que a competição é acirrada e que a estratégia certa pode fazer toda a diferença. Com a..."
+excerpt: "Se você está se preparando para um concurso público no Brasil, sabe que a competição é acirrada e que a estratégia certa pode fazer toda a diferença. Com..."
 ---
 
 Se você está se preparando para um concurso público no Brasil, sabe que a competição é acirrada e que a estratégia certa pode fazer toda a diferença. Com apenas 6 meses à frente, é crucial criar um cronograma de estudos eficaz para maximizar seu potencial e aumentar suas chances de sucesso. Neste artigo, vamos explorar como criar um plano de estudos personalizado, abordando os principais tópicos e estratégias para ajudá-lo a se preparar de forma eficiente.

@@ -1,8 +1,8 @@
 ---
-title: "como manter o foco nos estudos para concurso"
+title: "Como Manter o Foco nos Estudos para Concurso"
 date: "2026-06-19"
 category: "Técnicas de Estudo"
-excerpt: "Manter o foco nos estudos para concurso é um desafio comum enfrentado por muitos candidatos. Com a grande quantidade de material a ser estudado e a pressão..."
+excerpt: "Manter o foco nos estudos para concurso é um desafio comum enfrentado por muitos candidatos. Com a grande quantidade de material a ser estudado e a..."
 ---
 
 ## Introdução
