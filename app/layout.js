@@ -1,4 +1,5 @@
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/react";
 import config from "../site.config";
 
 export const metadata = {
@@ -41,7 +42,10 @@ export default function RootLayout({ children }) {
           <meta name="google-site-verification" content={config.seo.googleSiteVerification} />
         )}
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
