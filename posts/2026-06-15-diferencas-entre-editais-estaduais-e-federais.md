@@ -1,8 +1,8 @@
 ---
-title: "diferenças entre editais estaduais e federais"
+title: "Diferenças Entre Editais Estaduais e Federais"
 date: "2026-06-15"
 category: "Editais"
-excerpt: "Os concursos públicos no Brasil são um dos principais meios de ingresso nos quadros da administração pública, seja em âmbito federal, estadual ou municipal..."
+excerpt: "Os concursos públicos no Brasil são um dos principais meios de ingresso nos quadros da administração pública, seja em âmbito federal, estadual ou..."
 ---
 
 ## Introdução

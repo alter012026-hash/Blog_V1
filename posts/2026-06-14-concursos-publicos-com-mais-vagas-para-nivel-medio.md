@@ -1,8 +1,8 @@
 ---
-title: "Concursos públicos com mais vagas para nível médio"
+title: "Concursos Públicos com Mais Vagas para Nível Médio"
 date: "2026-06-14"
 category: "Concursos Abertos"
-excerpt: "Você está procurando por uma carreira estável e segura? Então, os concursos públicos são uma excelente opção. Com mais de 15 anos de experiência como profe..."
+excerpt: "Você está procurando por uma carreira estável e segura? Então, os concursos públicos são uma excelente opção. Com mais de 15 anos de experiência como..."
 targetKeyword: "concursos públicos com mais vagas para nível médio"
 secondaryKeywords: ["concursos", "públicos", "vagas"]
 readingTime: ""

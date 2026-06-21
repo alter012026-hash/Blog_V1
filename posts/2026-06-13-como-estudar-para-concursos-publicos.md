@@ -1,8 +1,8 @@
 ---
-title: "Como Estudar para Concursos Públicos: Um Guia Prático"
+title: "Como Estudar para Concursos Públicos: um Guia Prático"
 date: "2026-06-13"
 category: "Técnicas de Estudo"
-excerpt: "Guia completo com estratégias, técnicas e dicas práticas para estudar de forma eficaz e passar em concursos públicos."
+excerpt: "Os concursos públicos são uma excelente oportunidade para quem busca uma carreira estável e segura no setor público. No entanto, a concorrência é intensa..."
 targetKeyword: "como estudar para concursos públicos"
 secondaryKeywords: ["técnicas de estudo concurso", "aprovação concurso público", "plano de estudos"]
 readingTime: ""

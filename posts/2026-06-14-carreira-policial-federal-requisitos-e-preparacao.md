@@ -1,8 +1,8 @@
 ---
-title: "carreira policial federal: requisitos e preparação"
+title: "Carreira Policial Federal: Requisitos e Preparação"
 date: "2026-06-14"
 category: "Carreiras Públicas"
-excerpt: "A carreira policial federal é uma das mais respeitadas e desejadas no Brasil, oferecendo uma oportunidade de servir à nação, garantir a segurança pública e..."
+excerpt: "A carreira policial federal é uma das mais respeitadas e desejadas no Brasil, oferecendo uma oportunidade de servir à nação, garantir a segurança pública..."
 ---
 
 ## Introdução

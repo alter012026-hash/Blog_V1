@@ -2,7 +2,7 @@
 title: "Guia Completo para Entender e Cumprir os Prazos de Inscrição nos Editais de Concursos Públicos"
 date: "2026-06-13"
 category: "Editais"
-excerpt: "Entenda os prazos de inscrição nos editais"
+excerpt: "Os editais de concursos públicos são documentos oficiais que estabelecem as regras e os procedimentos para a realização de um concurso público. Eles..."
 targetKeyword: "editais de concursos públicos"
 secondaryKeywords: ["prazos de inscrição", "concursos públicos no Brasil", "como se inscrever em concursos"]
 readingTime: "8 min"

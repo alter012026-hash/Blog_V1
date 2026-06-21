@@ -1,8 +1,8 @@
 ---
-title: "como montar cronograma de estudos para concurso público"
+title: "Como Montar Cronograma de Estudos para Concurso Público"
 date: "2026-06-15"
 category: "Cronograma de Estudos"
-excerpt: "Se você está aqui, é porque está se preparando para um concurso público no Brasil. Parabéns pelo primeiro passo! Montar um cronograma de estudos eficaz é f..."
+excerpt: "Se você está aqui, é porque está se preparando para um concurso público no Brasil. Parabéns pelo primeiro passo! Montar um cronograma de estudos eficaz é..."
 ---
 
 Se você está aqui, é porque está se preparando para um concurso público no Brasil. Parabéns pelo primeiro passo! Montar um cronograma de estudos eficaz é fundamental para alcançar o sucesso nessa jornada. Neste artigo, vamos explorar como criar um plano de estudos personalizado e estratégico que se adapte às suas necessidades e objetivos.

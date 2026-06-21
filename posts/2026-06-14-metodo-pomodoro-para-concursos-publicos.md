@@ -1,8 +1,8 @@
 ---
-title: "Método pomodoro para concursos públicos"
+title: "Método Pomodoro para Concursos Públicos"
 date: "2026-06-14"
 category: "Técnicas de Estudo"
-excerpt: "Você está se preparando para concursos públicos e busca uma estratégia eficaz para gerenciar seu tempo de estudo? Então você está no lugar certo! Com 15 an..."
+excerpt: "Você está se preparando para concursos públicos e busca uma estratégia eficaz para gerenciar seu tempo de estudo? Então você está no lugar certo! Com 15..."
 targetKeyword: "método pomodoro para concursos públicos"
 secondaryKeywords: ["método", "pomodoro", "concursos"]
 readingTime: ""

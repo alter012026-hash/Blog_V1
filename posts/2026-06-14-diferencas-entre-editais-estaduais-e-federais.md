@@ -1,8 +1,8 @@
 ---
-title: "Diferenças entre editais estaduais e federais"
+title: "Diferenças Entre Editais Estaduais e Federais"
 date: "2026-06-14"
 category: "Editais"
-excerpt: "Se você está se preparando para concursos públicos no Brasil, é fundamental entender as diferenças entre editais estaduais e federais. Essas diferenças pod..."
+excerpt: "Se você está se preparando para concursos públicos no Brasil, é fundamental entender as diferenças entre editais estaduais e federais. Essas diferenças..."
 targetKeyword: "diferenças entre editais estaduais e federais"
 secondaryKeywords: ["diferenças", "entre", "editais"]
 readingTime: ""

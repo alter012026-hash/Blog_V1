@@ -1,5 +1,5 @@
 ---
-title: "melhores concursos para iniciantes em 2026"
+title: "Melhores Concursos para Iniciantes em 2026"
 date: "2026-06-15"
 category: "Concursos Abertos"
 excerpt: "Se você está começando a se preparar para concursos públicos no Brasil, é fundamental escolher os certames mais adequados para o seu nível de conhecimento..."

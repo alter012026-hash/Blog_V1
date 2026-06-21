@@ -870,9 +870,158 @@ function IndexingTab({ toast }) {
   );
 }
 
+/* ─── ABA: QUALIDADE ─── */
+function QualityTab({ toast }) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [busyFile, setBusyFile] = useState(null);
+
+  async function load() {
+    try {
+      const r = await fetch("/api/admin/quality");
+      const d = await r.json();
+      setData(d);
+    } catch {
+      toast("Erro ao carregar dados de qualidade", "error");
+    }
+    setLoading(false);
+  }
+
+  useEffect(() => { load(); }, []);
+
+  async function regenerate(entry) {
+    if (!confirm(`Regenerar o conteúdo de "${entry.title}"? O arquivo e a URL continuam os mesmos.`)) return;
+    setBusyFile(entry.file);
+    try {
+      const res = await fetch("/api/admin/quality", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "regenerate", file: entry.file, topic: entry.title }),
+      });
+      const d = await res.json();
+      if (d.ok) {
+        toast("Conteúdo regenerado!");
+        load();
+      } else {
+        toast(d.error || "Erro ao regenerar", "error");
+      }
+    } catch (e) {
+      toast("Erro: " + e.message, "error");
+    }
+    setBusyFile(null);
+  }
+
+  async function removeDuplicate(entry) {
+    if (!confirm(`Remover "${entry.file}"? Essa cópia duplicada será apagada permanentemente.`)) return;
+    setBusyFile(entry.file);
+    try {
+      const res = await fetch("/api/admin/quality", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ file: entry.file }),
+      });
+      const d = await res.json();
+      if (d.ok) {
+        toast("Duplicata removida!");
+        load();
+      } else {
+        toast(d.error || "Erro ao remover", "error");
+      }
+    } catch (e) {
+      toast("Erro: " + e.message, "error");
+    }
+    setBusyFile(null);
+  }
+
+  if (loading) return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      {[1, 2, 3].map(i => (
+        <div key={i} style={{ ...s.card, height: 80, background: C.surfaceHover, animation: "pulse 1.5s infinite" }} />
+      ))}
+    </div>
+  );
+  if (!data) return null;
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      <div className="stat-grid">
+        <StatCard label="Posts OK" value={data.okCount} sub="qualidade aprovada" color={C.green} icon="✅" />
+        <StatCard label="Conteúdo Raso" value={data.shallowCount} sub="precisam revisão" color={C.accent} icon="⚠️" />
+        <StatCard label="Duplicados" value={data.duplicateCount} sub="mesmo tema repetido" color={C.red} icon="🔁" />
+        <StatCard label="Erros de Geração" value={data.errorCount} sub="falharam ao gerar" color={C.purple} icon="❌" />
+      </div>
+
+      {/* Duplicados */}
+      <div style={s.card}>
+        <div style={s.sectionTitle}>🔁 Posts Duplicados</div>
+        <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 16, lineHeight: 1.6 }}>
+          Mesmo tema publicado mais de uma vez. A cópia mais antiga é mantida — remova as extras pra evitar conteúdo duplicado no Google.
+        </p>
+        {data.duplicates.length === 0 && <span style={{ color: C.textFaint, fontSize: 13 }}>Nenhum duplicado encontrado. 🎉</span>}
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {data.duplicates.map((d) => (
+            <div key={d.file} style={{
+              display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12,
+              background: C.bg, border: `1px solid ${C.border}`, borderRadius: 10, padding: "12px 14px", flexWrap: "wrap",
+            }}>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ color: C.text, fontWeight: 600, fontSize: 13, overflow: "hidden", textOverflow: "ellipsis" }}>{d.title}</div>
+                <div style={{ color: C.textFaint, fontSize: 11, marginTop: 2 }}>
+                  {d.file} · duplica {d.duplicateOf}
+                </div>
+              </div>
+              <button
+                style={s.btnDanger}
+                onClick={() => removeDuplicate(d)}
+                disabled={busyFile === d.file}
+              >
+                {busyFile === d.file ? "Removendo…" : "🗑️ Remover"}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Conteúdo raso */}
+      <div style={s.card}>
+        <div style={s.sectionTitle}>⚠️ Conteúdo Raso ou Genérico</div>
+        <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 16, lineHeight: 1.6 }}>
+          Poucas palavras, muitos clichês, ou muito parecido com outro post. Regenerar mantém a mesma URL.
+        </p>
+        {data.shallow.length === 0 && <span style={{ color: C.textFaint, fontSize: 13 }}>Nenhum post raso encontrado. 🎉</span>}
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {data.shallow.map((p) => (
+            <div key={p.file} style={{
+              display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12,
+              background: C.bg, border: `1px solid ${C.border}`, borderRadius: 10, padding: "12px 14px", flexWrap: "wrap",
+            }}>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ color: C.text, fontWeight: 600, fontSize: 13, overflow: "hidden", textOverflow: "ellipsis" }}>{p.title}</div>
+                <div style={{ color: C.textFaint, fontSize: 11, marginTop: 2, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <span>{(p.wordCount || 0).toLocaleString()} palavras</span>
+                  {p.fillerCount > 0 && <span>· {p.fillerCount} clichês</span>}
+                  {p.similarity > 0 && <span>· {p.similarity}% similar a {p.similarTo}</span>}
+                </div>
+              </div>
+              <button
+                style={s.btn}
+                onClick={() => regenerate(p)}
+                disabled={busyFile === p.file}
+              >
+                {busyFile === p.file ? "Gerando…" : "🔁 Regenerar"}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── TABS config ─── */
 const TABS = [
   { id: "metrics", label: "Métricas", icon: "📊", shortLabel: "Métricas" },
+  { id: "quality", label: "Qualidade", icon: "🎯", shortLabel: "Qualidade" },
   { id: "affiliates", label: "Afiliados", icon: "🔗", shortLabel: "Afiliados" },
   { id: "config", label: "Configurações", icon: "⚙️", shortLabel: "Config" },
   { id: "indexing", label: "Indexação", icon: "🚀", shortLabel: "Indexação" },
@@ -994,6 +1143,7 @@ export default function AdminPage() {
             <span>{activeTab?.icon}</span> {activeTab?.label}
           </h1>
           {tab === "metrics" && <MetricsTab toast={showToast} />}
+          {tab === "quality" && <QualityTab toast={showToast} />}
           {tab === "affiliates" && <AffiliatesTab toast={showToast} />}
           {tab === "config" && <ConfigTab toast={showToast} />}
           {tab === "indexing" && <IndexingTab toast={showToast} />}

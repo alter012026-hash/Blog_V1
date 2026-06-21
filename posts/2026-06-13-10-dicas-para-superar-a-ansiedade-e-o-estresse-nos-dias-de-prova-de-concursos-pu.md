@@ -2,7 +2,7 @@
 title: "10 Dicas para Superar a Ansiedade e o Estresse nos Dias de Prova de Concursos Públicos"
 date: "2026-06-13"
 category: "Concursos Abertos"
-excerpt: "Dicas para superar ansiedade em concursos"
+excerpt: "A ansiedade e o estresse são sentimentos comuns entre os candidatos que se preparam para concursos públicos. Esses sentimentos podem afetar negativamente..."
 targetKeyword: "ansiedade em concursos públicos"
 secondaryKeywords: ["estresse nos concursos", "dicas para provas", "preparação mental para concursos"]
 readingTime: "8 min"
