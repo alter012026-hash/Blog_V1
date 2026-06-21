@@ -94,6 +94,35 @@ Na aba **Actions** do GitHub → **Gerar e Publicar Artigos** → **Run workflow
 
 ---
 
+## Painel Admin: Regenerar e remover posts em produção
+
+O `/admin` tem botões para **regenerar** o conteúdo de um post (mantendo a mesma
+URL) e para **remover duplicatas**. Esses botões rodam dentro de uma function
+serverless da Vercel — que tem filesystem **somente leitura** em produção — então
+eles não escrevem em disco. Em vez disso, comitam direto no GitHub via API
+(mesma lógica que o GitHub Action de geração automática já usa), e a Vercel
+rebuilda a partir do novo commit.
+
+### Variáveis de ambiente necessárias na Vercel
+
+Configure em **Settings → Environment Variables** no seu projeto na Vercel:
+
+| Variável | Valor |
+|----------|-------|
+| `GITHUB_TOKEN` | Personal Access Token com permissão de escrita no repo ([criar aqui](https://github.com/settings/tokens)) |
+| `GITHUB_REPO` | `usuario/repositorio` |
+| `GITHUB_BRANCH` | `main` (ou a branch que a Vercel builda) |
+| `VERCEL_DEPLOY_HOOK` | Mesma URL de Deploy Hook usada no GitHub Action (opcional, acelera o rebuild) |
+
+> Sem `GITHUB_TOKEN`/`GITHUB_REPO`, os botões de Regenerar/Remover retornam erro
+> explicando o que falta — eles nunca tentam escrever no disco da Vercel.
+
+Depois de clicar em Regenerar ou Remover, o painel mostra que o commit foi
+enviado, mas o site só reflete a mudança depois que a Vercel terminar o
+próximo deploy (1–3 minutos).
+
+---
+
 ## Estrutura do Projeto
 
 ```

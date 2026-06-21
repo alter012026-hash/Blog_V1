@@ -4,7 +4,14 @@
  * Gera artigos com frontmatter completo + fallback:
  *   Groq (gpt-oss-120b → llama-3.3-70b-versatile) → OpenRouter → Gemini
  *
- * Novidades desta versão:
+ * A lógica de geração (prompt, providers, validação de qualidade) vive em
+ * lib/article-generator.js e é compartilhada com app/api/admin/quality/route.js
+ * (que usa o mesmo núcleo, mas persiste via GitHub API em vez de fs, porque
+ * roda dentro de uma function serverless da Vercel).
+ *
+ * Este script é o "modo CLI": roda em VPS/local/GitHub Actions, escreve
+ * direto em posts/*.md e faz commit/push pelo próprio workflow do GitHub Actions.
+ *
  *  - Título sempre em Title Case (siglas tipo INSS preservadas)
  *  - Excerpt nunca corta no meio da palavra/frase
  *  - Não repete tópicos recentes nem gera conteúdo quase-idêntico a posts existentes
@@ -18,6 +25,7 @@ require("dotenv").config({ path: ".env.local", override: false });
 const fs = require("fs");
 const path = require("path");
 const qe = require("../lib/quality-engine.js");
+const ag = require("../lib/article-generator.js");
 
 // ─────────────────────────────────────────────
 // SAFE CONFIG LOADER (mantido do original)
@@ -61,30 +69,6 @@ const signaturesLogPath = path.resolve(__dirname, "../.content-signatures.json")
 const qualityLogPath = path.resolve(__dirname, "../.quality-log.json");
 
 // ─── Helpers ──────────────────────────────────────────────────────────
-function slugify(text) {
-  return text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .substring(0, 80);
-}
-
-function randomItem(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-function todayISO() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-function escapeForYaml(str) {
-  return String(str).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-}
-
 function loadJson(filePath, fallback) {
   if (!fs.existsSync(filePath)) return fallback;
   try {
@@ -120,22 +104,8 @@ function saveSignature(slug, words) {
   saveJson(signaturesLogPath, signatures);
 }
 
-function checkSimilarity(bodyText) {
-  const signatures = loadJson(signaturesLogPath, []);
-  const newSig = qe.getSignature(bodyText);
-
-  let maxSim = 0;
-  let mostSimilarSlug = null;
-
-  for (const entry of signatures) {
-    const sim = qe.jaccardSimilarity(newSig, entry.words);
-    if (sim > maxSim) {
-      maxSim = sim;
-      mostSimilarSlug = entry.slug;
-    }
-  }
-
-  return { maxSim, mostSimilarSlug, newSig };
+function getExistingSignatures() {
+  return loadJson(signaturesLogPath, []);
 }
 
 // ─── Tópicos ──────────────────────────────────────────────────────────
@@ -188,7 +158,7 @@ const SEEDS = {
 
 function buildTopic() {
   if (topicArg) {
-    return { topic: topicArg, category: randomItem(CATEGORIES) };
+    return { topic: topicArg, category: ag.randomItem(CATEGORIES) };
   }
 
   const usedTopics = loadJson(usedTopicsLogPath, []);
@@ -196,13 +166,13 @@ function buildTopic() {
   const MAX_ATTEMPTS = 15;
 
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-    const category = randomItem(CATEGORIES);
+    const category = ag.randomItem(CATEGORIES);
     const pool = SEEDS[category] || [`dicas sobre ${category}`];
 
     const available = pool.filter((t) => !usedTopics.includes(t));
     const finalPool = available.length > 0 ? available : pool;
-    const topic = randomItem(finalPool);
-    const slug = slugify(topic);
+    const topic = ag.randomItem(finalPool);
+    const slug = ag.slugify(topic);
 
     if (!existingSlugs.has(slug) && !usedTopics.includes(topic)) {
       return { topic, category };
@@ -210,261 +180,53 @@ function buildTopic() {
   }
 
   // esgotou tentativas: gera variação pra não travar o pipeline
-  const category = randomItem(CATEGORIES);
+  const category = ag.randomItem(CATEGORIES);
   const pool = SEEDS[category] || [`dicas sobre ${category}`];
-  const base = randomItem(pool);
-  const variation = randomItem(["guia atualizado", "passo a passo", "dicas práticas", "o que mudou em 2026"]);
+  const base = ag.randomItem(pool);
+  const variation = ag.randomItem(["guia atualizado", "passo a passo", "dicas práticas", "o que mudou em 2026"]);
   return { topic: `${base} (${variation})`, category };
 }
 
-// ─── Prompt ───────────────────────────────────────────────────────────
-function buildPrompt({ topic }, retryHint) {
-  const { tone, audienceLevel, minWords } = generation;
-
-  return `
-Você é um especialista em concursos públicos no Brasil.
-
-Escreva um artigo completo e ESPECÍFICO sobre: "${topic}"
-
-REGRAS DE PROFUNDIDADE (obrigatório, evite conteúdo raso/genérico):
-- Mínimo de ${minWords || 1200} palavras
-- Cite pelo menos 3 exemplos concretos (nomes de órgãos, bancas, provas, números reais)
-- Inclua dados específicos sempre que possível (prazos, percentuais, valores, quantidade de vagas)
-- Cada seção precisa ensinar algo aplicável, não só afirmar o óbvio
-- PROIBIDO frases de preenchimento como "é importante destacar que", "vale ressaltar que",
-  "nos dias atuais", "podemos concluir que"
-
-REGRAS DE FORMATO:
-- Tom: ${tone || "didático e direto"}
-- Público: ${audienceLevel || "iniciantes"}
-- Markdown válido
-- Estrutura com introdução, desenvolvimento (use ## para subtítulos) e conclusão
-- Título do artigo na primeira linha, começando com "#", em Capitalização de Título
-  (primeira letra de cada palavra principal maiúscula; siglas como INSS, STF, CNH sempre maiúsculas)
-
-${retryHint ? `\nATENÇÃO: a versão anterior foi rejeitada por: ${retryHint}. Corrija isso agora.\n` : ""}
-
-RETORNE APENAS O CONTEÚDO EM MARKDOWN.
-`;
-}
-
-// ─── Providers ────────────────────────────────────────────────────────
-async function callGroqModel(prompt, model) {
-  const key = process.env.GROQ_API_KEY?.trim();
-  if (!key) throw new Error("GROQ_API_KEY ausente");
-
-  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${key}`,
-    },
-    body: JSON.stringify({
-      model,
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.7,
-      max_tokens: 4096,
-    }),
-  });
-
-  if (!res.ok) throw new Error(`Groq(${model}) HTTP ${res.status}`);
-  const data = await res.json();
-  const content = data.choices?.[0]?.message?.content;
-  if (!content) throw new Error(`Groq(${model}) retornou vazio`);
-  return content;
-}
-
-// 🔥 Modelo principal trocado: openai/gpt-oss-120b
-// É mais barato, mais rápido e maior que o llama-3.3-70b-versatile usado antes
-// (ver tabela de modelos do Groq: console.groq.com/docs/models).
-// Mantemos llama-3.3-70b-versatile como segunda tentativa dentro do próprio Groq
-// antes de cair pros provedores externos.
-async function callGroq(prompt) {
-  const models = ["openai/gpt-oss-120b", "llama-3.3-70b-versatile"];
-  let lastErr;
-  for (const model of models) {
-    try {
-      return await callGroqModel(prompt, model);
-    } catch (err) {
-      lastErr = err;
-      console.log(`   ⚠️  ${err.message}`);
-    }
-  }
-  throw lastErr;
-}
-
-async function callOpenRouter(prompt) {
-  const key = process.env.OPENROUTER_API_KEY?.trim();
-  if (!key) throw new Error("OPENROUTER_API_KEY ausente");
-
-  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${key}`,
-      "HTTP-Referer": siteConfig.url || "http://localhost",
-      "X-Title": siteConfig.name || "generator",
-    },
-    body: JSON.stringify({
-      model: "meta-llama/llama-3.3-70b-instruct:free",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.7,
-      max_tokens: 4096,
-    }),
-  });
-
-  if (!res.ok) throw new Error(`OpenRouter HTTP ${res.status}`);
-  const data = await res.json();
-  return data.choices?.[0]?.message?.content;
-}
-
-async function callGemini(prompt) {
-  const key = process.env.GEMINI_API_KEY?.trim();
-  if (!key) throw new Error("GEMINI_API_KEY ausente");
-
-  const models = ["gemini-2.0-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro-latest"];
-
-  for (const model of models) {
-    try {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.7, maxOutputTokens: 4096 },
-          }),
-        }
-      );
-      if (!res.ok) continue;
-      const data = await res.json();
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (text) return text;
-    } catch {}
-  }
-  throw new Error("Gemini falhou em todos os modelos");
-}
-
-async function generateWithFallback(prompt) {
-  const providers = [
-    { name: "Groq", fn: callGroq },
-    { name: "OpenRouter", fn: callOpenRouter },
-    { name: "Gemini", fn: callGemini },
-  ];
-
-  for (const p of providers) {
-    try {
-      console.log(`🔄 ${p.name}...`);
-      const text = await p.fn(prompt);
-      console.log(`✅ ${p.name} OK`);
-      return { text, provider: p.name };
-    } catch (err) {
-      console.log(`❌ ${p.name}: ${err.message}`);
-      await sleep(1000);
-    }
-  }
-  throw new Error("Todos os provedores falharam");
-}
-
-// ─── Markdown ─────────────────────────────────────────────────────────
-function extractTitle(markdown) {
-  const match = markdown.match(/^#\s+(.+)$/m);
-  return match ? match[1].trim() : null;
-}
-
-function cleanMarkdown(text = "") {
-  const noReasoning = qe.stripReasoningLeakage(text);
-  return noReasoning
-    .replace(/^[=\-]{3,}$/gm, "")
-    .replace(/^#\s+.+\n?/gm, "")
-    .trim();
-}
-
-// ─── Qualidade + retry ────────────────────────────────────────────────
-const MAX_QUALITY_RETRIES = 2;
-
-async function generateValidated(promptArgs) {
-  let retryHint = null;
-  let lastAttempt = null;
-
-  for (let attempt = 0; attempt <= MAX_QUALITY_RETRIES; attempt++) {
-    const prompt = buildPrompt(promptArgs, retryHint);
-    const { text, provider } = await generateWithFallback(prompt);
-
-    const title = extractTitle(text) || promptArgs.topic;
-    const body = cleanMarkdown(text);
-
-    const minWords = generation.minWords || 1200;
-    const wordCount = qe.countWords(body);
-    const fillerCount = qe.countFillerPhrases(body);
-    const { maxSim, mostSimilarSlug } = checkSimilarity(body);
-
-    const issues = [];
-    if (wordCount < minWords * 0.8) issues.push(`abaixo do mínimo de palavras (${wordCount}/${minWords})`);
-    if (fillerCount >= 3) issues.push(`muitas frases genéricas (${fillerCount})`);
-    if (maxSim > 0.55) issues.push(`muito parecido com "${mostSimilarSlug}" (${(maxSim * 100).toFixed(0)}%)`);
-
-    lastAttempt = { title, body, provider, wordCount, fillerCount, maxSim, mostSimilarSlug, issues };
-
-    if (issues.length === 0) return lastAttempt;
-
-    retryHint = issues.join("; ");
-    console.log(`   ⚠️  Tentativa ${attempt + 1} reprovada: ${retryHint}`);
-  }
-
-  console.log(`   ⚠️  Salvando mesmo com ressalvas após ${MAX_QUALITY_RETRIES + 1} tentativas.`);
-  return lastAttempt;
-}
-
 // ─── Save ─────────────────────────────────────────────────────────────
-function saveArticle({ title, body, topic, category, provider, wordCount, fillerCount, maxSim, mostSimilarSlug, issues }, forceFile) {
+function saveArticle(result, topic, category, forceFile) {
   if (!fs.existsSync(postsDir)) fs.mkdirSync(postsDir, { recursive: true });
 
-  const normalizedTitle = qe.toTitleCase(title || topic);
-  const excerpt = qe.buildSafeExcerpt(body);
-
-  let file, date, slug;
-
+  let existingFrontmatter;
   if (forceFile) {
-    file = forceFile;
     const oldRaw = fs.readFileSync(path.join(postsDir, forceFile), "utf8");
-    date = oldRaw.match(/^date:\s*"([^"]*)"/m)?.[1] || todayISO();
-    category = oldRaw.match(/^category:\s*"([^"]*)"/m)?.[1] || category;
-    slug = qe.slugFromFileName(forceFile);
-  } else {
-    date = todayISO();
-    slug = slugify(normalizedTitle);
-    file = `${date}-${slug}.md`;
+    existingFrontmatter = {
+      date: oldRaw.match(/^date:\s*"([^"]*)"/m)?.[1],
+      category: oldRaw.match(/^category:\s*"([^"]*)"/m)?.[1],
+    };
   }
 
-  const frontmatter = `---
-title: "${escapeForYaml(normalizedTitle)}"
-date: "${date}"
-category: "${escapeForYaml(category)}"
-excerpt: "${escapeForYaml(excerpt)}"
----
-
-`;
-
-  fs.writeFileSync(path.join(postsDir, file), frontmatter + body);
-  saveSignature(slug, qe.getSignature(body));
-
-  appendQualityLog({
-    file,
-    slug,
-    title: normalizedTitle,
+  const article = ag.buildArticleFile({
+    title: result.title,
+    body: result.body,
+    topic,
     category,
-    provider,
-    wordCount,
-    fillerCount,
-    similarity: Math.round(maxSim * 100),
-    similarTo: mostSimilarSlug,
-    status: issues && issues.length > 0 ? "ressalvas" : "ok",
-    issues: issues || [],
+    forceFile,
+    existingFrontmatter,
   });
 
-  return file;
+  fs.writeFileSync(path.join(postsDir, article.file), article.content);
+  saveSignature(article.slug, result.signature);
+
+  appendQualityLog({
+    file: article.file,
+    slug: article.slug,
+    title: article.normalizedTitle,
+    category: article.category,
+    provider: result.provider,
+    wordCount: result.wordCount,
+    fillerCount: result.fillerCount,
+    similarity: Math.round(result.maxSim * 100),
+    similarTo: result.mostSimilarSlug,
+    status: result.issues.length > 0 ? "ressalvas" : "ok",
+    issues: result.issues,
+  });
+
+  return article.file;
 }
 
 // ─── MAIN ─────────────────────────────────────────────────────────────
@@ -485,11 +247,16 @@ async function main() {
     }
 
     console.log(`\n🔁 Regenerando conteúdo de: ${forceFileArg}\n`);
-    const category = randomItem(CATEGORIES);
+    const category = ag.randomItem(CATEGORIES);
 
     try {
-      const result = await generateValidated({ topic: topicArg, category });
-      const file = saveArticle({ ...result, topic: topicArg, category }, forceFileArg);
+      const result = await ag.generateValidatedArticle({
+        topic: topicArg,
+        category,
+        generation,
+        existingSignatures: getExistingSignatures(),
+      });
+      const file = saveArticle(result, topicArg, category, forceFileArg);
       console.log(`💾 Atualizado: ${file} (${result.wordCount} palavras, via ${result.provider})`);
     } catch (err) {
       console.error(`❌ Erro ao regenerar: ${err.message}`);
@@ -505,8 +272,13 @@ async function main() {
     console.log(`\n📝 ${i + 1}/${count}: ${topic}`);
 
     try {
-      const result = await generateValidated({ topic, category });
-      const file = saveArticle({ ...result, topic, category });
+      const result = await ag.generateValidatedArticle({
+        topic,
+        category,
+        generation,
+        existingSignatures: getExistingSignatures(),
+      });
+      const file = saveArticle(result, topic, category, null);
 
       const used = loadJson(usedTopicsLogPath, []);
       used.push(topic);

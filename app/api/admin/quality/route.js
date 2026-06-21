@@ -1,24 +1,26 @@
 import { NextResponse } from "next/server";
 import { checkAdminAuth } from "../../../../lib/admin-auth";
-import { exec } from "child_process";
 import fs from "fs";
 import path from "path";
+import { generateValidatedArticle, buildArticleFile } from "../../../../lib/article-generator";
+import { commitFile, deleteFile, getFile, triggerVercelDeploy } from "../../../../lib/github-commit";
+import config from "../../../../site.config.js";
 
 const qualityLogPath = path.join(process.cwd(), ".quality-log.json");
-const signaturesLogPath = path.join(process.cwd(), ".content-signatures.json");
-const postsDir = path.join(process.cwd(), "posts");
 
-function readLog() {
-  if (!fs.existsSync(qualityLogPath)) return [];
+const QUALITY_LOG_REPO_PATH = ".quality-log.json";
+const SIGNATURES_REPO_PATH = ".content-signatures.json";
+
+// ── Leitura: usa o filesystem local (somente leitura) ──────────────────
+// Isso funciona bem mesmo na Vercel, porque o build inclui esses arquivos
+// como vieram do último commit no Git — GET nunca precisa escrever nada.
+function readLocalJson(filePath, fallback) {
+  if (!fs.existsSync(filePath)) return fallback;
   try {
-    return JSON.parse(fs.readFileSync(qualityLogPath, "utf8"));
+    return JSON.parse(fs.readFileSync(filePath, "utf8"));
   } catch {
-    return [];
+    return fallback;
   }
-}
-
-function writeLog(entries) {
-  fs.writeFileSync(qualityLogPath, JSON.stringify(entries, null, 2));
 }
 
 // mantém só a entrada mais recente de cada arquivo (regenerações criam entradas novas)
@@ -37,7 +39,7 @@ export async function GET() {
   }
 
   try {
-    const entries = dedupeByFile(readLog());
+    const entries = dedupeByFile(readLocalJson(qualityLogPath, []));
 
     const shallow = entries
       .filter((e) => e.status === "raso")
@@ -65,6 +67,13 @@ export async function GET() {
   }
 }
 
+// ── Escrita: tudo via GitHub Contents API ───────────────────────────────
+// Nunca usa fs.writeFileSync em produção: o filesystem da Vercel é read-only
+// (ou, no máximo, /tmp efêmero), então qualquer escrita local se perderia no
+// próximo cold start / deploy e nunca apareceria no Git. Em vez disso, este
+// endpoint comita o resultado direto no repositório — exatamente como o
+// .github/workflows/generate-articles.yml já faz com `git commit && git push`
+// — e o push aciona o build normal da Vercel (mais o deploy hook, se configurado).
 export async function POST(request) {
   if (!checkAdminAuth()) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
@@ -81,24 +90,92 @@ export async function POST(request) {
     }
 
     const safeFile = file.replace(/[^a-zA-Z0-9\-_.]/g, "");
-    if (!safeFile.endsWith(".md") || !fs.existsSync(path.join(postsDir, safeFile))) {
+    if (!safeFile.endsWith(".md")) {
       return NextResponse.json({ error: "Arquivo inválido" }, { status: 400 });
     }
 
-    const safeTopic = topic.replace(/"/g, '\\"');
+    // Busca o post atual direto do GitHub (fonte da verdade), não do disco local,
+    // pra garantir que estamos lendo o conteúdo realmente publicado.
+    const existing = await getFile(`posts/${safeFile}`);
+    if (!existing) {
+      return NextResponse.json({ error: "Arquivo não encontrado no repositório" }, { status: 404 });
+    }
 
-    const output = await new Promise((resolve, reject) => {
-      exec(
-        `node scripts/generate-article.js --topic "${safeTopic}" --force-file "${safeFile}"`,
-        { cwd: process.cwd(), timeout: 120000 },
-        (error, stdout, stderr) => {
-          if (error) reject(new Error(stderr || error.message));
-          else resolve(stdout);
-        }
-      );
+    const existingFrontmatter = {
+      date: existing.content.match(/^date:\s*"([^"]*)"/m)?.[1],
+      category: existing.content.match(/^category:\s*"([^"]*)"/m)?.[1],
+    };
+
+    // Assinaturas de conteúdo existentes, para checar similaridade (igual ao script CLI).
+    const signaturesFile = await getFile(SIGNATURES_REPO_PATH);
+    const signatures = signaturesFile ? JSON.parse(signaturesFile.content || "[]") : [];
+
+    const result = await generateValidatedArticle({
+      topic,
+      category: existingFrontmatter.category,
+      generation: config.generation,
+      existingSignatures: signatures.map((s) => ({ slug: s.slug, words: s.words })),
     });
 
-    return NextResponse.json({ ok: true, output });
+    const article = buildArticleFile({
+      title: result.title,
+      body: result.body,
+      topic,
+      category: existingFrontmatter.category,
+      forceFile: safeFile,
+      existingFrontmatter,
+    });
+
+    // 1) Commita o post regenerado
+    await commitFile(
+      `posts/${article.file}`,
+      article.content,
+      `✍️ Regenerar artigo: ${article.file}`
+    );
+
+    // 2) Atualiza o log de qualidade (mesmo formato que o script CLI grava)
+    const qualityLogFile = await getFile(QUALITY_LOG_REPO_PATH);
+    const qualityLog = qualityLogFile ? JSON.parse(qualityLogFile.content || "[]") : [];
+    qualityLog.push({
+      timestamp: new Date().toISOString(),
+      file: article.file,
+      slug: article.slug,
+      title: article.normalizedTitle,
+      category: article.category,
+      provider: result.provider,
+      wordCount: result.wordCount,
+      fillerCount: result.fillerCount,
+      similarity: Math.round(result.maxSim * 100),
+      similarTo: result.mostSimilarSlug,
+      status: result.issues.length > 0 ? "ressalvas" : "ok",
+      issues: result.issues,
+    });
+    await commitFile(
+      QUALITY_LOG_REPO_PATH,
+      JSON.stringify(qualityLog.slice(-400), null, 2),
+      `chore: atualizar log de qualidade (${article.file})`
+    );
+
+    // 3) Atualiza as assinaturas de conteúdo (pra futuras checagens de similaridade)
+    signatures.push({ slug: article.slug, words: result.signature });
+    await commitFile(
+      SIGNATURES_REPO_PATH,
+      JSON.stringify(signatures.slice(-400), null, 2),
+      `chore: atualizar assinaturas de conteúdo (${article.file})`
+    );
+
+    // 4) Dispara o rebuild na Vercel (se VERCEL_DEPLOY_HOOK estiver configurado)
+    const deploy = await triggerVercelDeploy();
+
+    return NextResponse.json({
+      ok: true,
+      file: article.file,
+      provider: result.provider,
+      wordCount: result.wordCount,
+      issues: result.issues,
+      deployTriggered: deploy.triggered,
+      note: "Commit enviado ao GitHub. O site será atualizado no próximo deploy da Vercel (alguns minutos).",
+    });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
@@ -112,28 +189,43 @@ export async function DELETE(request) {
   try {
     const { file } = await request.json();
     const safeFile = (file || "").replace(/[^a-zA-Z0-9\-_.]/g, "");
-    const filePath = path.join(postsDir, safeFile);
 
-    if (!safeFile.endsWith(".md") || !fs.existsSync(filePath)) {
+    if (!safeFile.endsWith(".md")) {
       return NextResponse.json({ error: "Arquivo inválido" }, { status: 400 });
     }
 
-    fs.unlinkSync(filePath);
+    const deleted = await deleteFile(`posts/${safeFile}`, `🗑️ Remover post: ${safeFile}`);
+    if (!deleted) {
+      return NextResponse.json({ error: "Arquivo não encontrado no repositório" }, { status: 404 });
+    }
 
     // remove a entrada do log de qualidade
-    const entries = readLog().filter((e) => e.file !== safeFile);
-    writeLog(entries);
+    const qualityLogFile = await getFile(QUALITY_LOG_REPO_PATH);
+    if (qualityLogFile) {
+      const entries = JSON.parse(qualityLogFile.content || "[]").filter((e) => e.file !== safeFile);
+      await commitFile(
+        QUALITY_LOG_REPO_PATH,
+        JSON.stringify(entries, null, 2),
+        `chore: remover log de qualidade (${safeFile})`
+      );
+    }
 
     // remove a assinatura de conteúdo correspondente
-    if (fs.existsSync(signaturesLogPath)) {
+    const signaturesFile = await getFile(SIGNATURES_REPO_PATH);
+    if (signaturesFile) {
       try {
-        const sigs = JSON.parse(fs.readFileSync(signaturesLogPath, "utf8"));
-        const filtered = sigs.filter((s) => s.file !== safeFile);
-        fs.writeFileSync(signaturesLogPath, JSON.stringify(filtered, null, 2));
+        const sigs = JSON.parse(signaturesFile.content || "[]").filter((s) => s.file !== safeFile);
+        await commitFile(
+          SIGNATURES_REPO_PATH,
+          JSON.stringify(sigs, null, 2),
+          `chore: remover assinatura de conteúdo (${safeFile})`
+        );
       } catch {}
     }
 
-    return NextResponse.json({ ok: true });
+    const deploy = await triggerVercelDeploy();
+
+    return NextResponse.json({ ok: true, deployTriggered: deploy.triggered });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

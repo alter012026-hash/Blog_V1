@@ -900,7 +900,7 @@ function QualityTab({ toast }) {
       });
       const d = await res.json();
       if (d.ok) {
-        toast("Conteúdo regenerado!");
+        toast(d.note || "Conteúdo regenerado! O site vai atualizar após o próximo deploy.");
         load();
       } else {
         toast(d.error || "Erro ao regenerar", "error");
@@ -922,7 +922,7 @@ function QualityTab({ toast }) {
       });
       const d = await res.json();
       if (d.ok) {
-        toast("Duplicata removida!");
+        toast("Remoção comitada! O site vai atualizar após o próximo deploy.");
         load();
       } else {
         toast(d.error || "Erro ao remover", "error");
