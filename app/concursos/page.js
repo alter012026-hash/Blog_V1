@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 
 const estados = [
   { uf: "sp", nome: "São Paulo" },
@@ -47,14 +49,16 @@ export default function ConcursosPage() {
   }, []);
 
   return (
-    <main className="section section--light">
+    <>
+      <Header posts={[]} />
+      <main className="section section--light">
       <div className="container">
 
         <h1 className="section-title">
           Concursos por Estado no Brasil
         </h1>
 
-        <p style={{ marginBottom: "32px", color: "#4a5162" }}>
+        <p style={{ marginBottom: "32px", color: "var(--text-secondary)" }}>
           Dados atualizados com concursos abertos e previstos por estado.
         </p>
 
@@ -86,6 +90,8 @@ export default function ConcursosPage() {
         )}
 
       </div>
-    </main>
+      </main>
+      <Footer />
+    </>
   );
 }

@@ -31,6 +31,15 @@ export default function RootLayout({ children }) {
   return (
     <html lang={config.language.toLowerCase()}>
       <head>
+        {/* Aplica o tema salvo ANTES do primeiro paint, evitando flash de
+            light→dark. Roda de forma síncrona e bloqueante (é o objetivo:
+            é mais rápido decidir a cor agora do que renderizar errado e
+            corrigir depois). Sem acesso a dados sensíveis, só localStorage. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`,
+          }}
+        />
         {config.adsense.enabled && config.adsense.publisherId !== "ca-pub-XXXXXXXXXXXXXXXX" && (
           <script
             async

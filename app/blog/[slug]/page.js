@@ -3,7 +3,10 @@ import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import PostCard from "../../../components/PostCard";
 import AffiliateBox from "../../../components/AffiliateBox";
-import { getAllSlugs, getPostBySlug, getPostContentHtml, getRelatedPosts } from "../../../lib/posts";
+import ReadProgress from "../../../components/ReadProgress";
+import ScrollReveal from "../../../components/ScrollReveal";
+import { getAllSlugs, getPostBySlug, getPostContentHtml, getRelatedPosts, getAllPosts } from "../../../lib/posts";
+import { getSearchIndex } from "../../../lib/search-index";
 import { matchAffiliate, getPinnedAffiliates } from "../../../lib/affiliate-matcher";
 import config from "../../../site.config";
 
@@ -54,6 +57,7 @@ export default async function PostPage({ params }) {
   const relatedPosts = getRelatedPosts(params.slug, post.category);
   const matchedAffiliate = matchAffiliate(post.content, config.affiliates);
   const pinnedAffiliates = getPinnedAffiliates(config.affiliates);
+  const searchIndex = getSearchIndex();
 
   const formattedDate = new Date(post.date + "T12:00:00").toLocaleDateString("pt-BR", {
     day: "numeric",
@@ -89,7 +93,9 @@ export default async function PostPage({ params }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
       />
 
-      <Header />
+      <ReadProgress />
+      <ScrollReveal />
+      <Header posts={searchIndex} />
 
       <main>
         <article>
@@ -127,9 +133,9 @@ export default async function PostPage({ params }) {
 
             {/* Posts relacionados */}
             {relatedPosts.length > 0 && (
-              <aside className="related-posts">
+              <aside className="related-posts reveal">
                 <h3>Artigos relacionados</h3>
-                <div className="posts-grid">
+                <div className="posts-grid reveal-stagger">
                   {relatedPosts.map(p => (
                     <PostCard key={p.slug} post={p} />
                   ))}

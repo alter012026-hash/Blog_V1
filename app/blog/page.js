@@ -2,7 +2,9 @@ import Link from "next/link";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import PostCard from "../../components/PostCard";
+import ScrollReveal from "../../components/ScrollReveal";
 import { getAllPosts, getAllCategories } from "../../lib/posts";
+import { getSearchIndex } from "../../lib/search-index";
 import config from "../../site.config";
 
 export const revalidate = 3600;
@@ -16,6 +18,7 @@ export default function BlogPage({ searchParams }) {
   const categoria = searchParams?.categoria || null;
   const allPosts = getAllPosts();
   const categories = getAllCategories();
+  const searchIndex = getSearchIndex();
 
   const filteredPosts = categoria
     ? allPosts.filter(p => p.category === categoria)
@@ -23,7 +26,8 @@ export default function BlogPage({ searchParams }) {
 
   return (
     <>
-      <Header />
+      <Header posts={searchIndex} />
+      <ScrollReveal />
 
       <main>
         <section className="hero" style={{ padding: "56px 0 40px" }}>
@@ -60,7 +64,7 @@ export default function BlogPage({ searchParams }) {
             </div>
 
             {filteredPosts.length > 0 ? (
-              <div className="posts-grid">
+              <div className="posts-grid reveal-stagger">
                 {filteredPosts.map(post => (
                   <PostCard key={post.slug} post={post} />
                 ))}

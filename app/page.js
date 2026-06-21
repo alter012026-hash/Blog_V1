@@ -2,7 +2,9 @@ import Link from "next/link";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import PostCard from "../components/PostCard";
+import ScrollReveal from "../components/ScrollReveal";
 import { getAllPosts, getAllCategories } from "../lib/posts";
+import { getSearchIndex } from "../lib/search-index";
 import config from "../site.config";
 
 export const revalidate = 3600; // revalida a cada hora
@@ -12,10 +14,12 @@ export default function HomePage() {
   const featuredPost = allPosts[0];
   const latestPosts = allPosts.slice(1, 7);
   const categories = getAllCategories();
+  const searchIndex = getSearchIndex();
 
   return (
     <>
-      <Header />
+      <Header posts={searchIndex} />
+      <ScrollReveal />
 
       <main>
         {/* Hero */}
@@ -35,7 +39,7 @@ export default function HomePage() {
 
         {/* Destaque */}
         {featuredPost && (
-          <section className="section section--light">
+          <section className="section section--light reveal">
             <div className="container">
               <div className="section-header">
                 <p className="section-label">Artigo em destaque</p>
@@ -48,7 +52,7 @@ export default function HomePage() {
 
         {/* Categorias */}
         {categories.length > 0 && (
-          <section className="section section--alt">
+          <section className="section section--alt reveal">
             <div className="container">
               <div className="section-header">
                 <p className="section-label">Navegue por tema</p>
@@ -68,13 +72,13 @@ export default function HomePage() {
         {/* Posts recentes */}
         <section className="section section--light">
           <div className="container">
-            <div className="section-header">
+            <div className="section-header reveal">
               <p className="section-label">Conteúdo recente</p>
               <h2 className="section-title">Artigos publicados</h2>
             </div>
 
             {latestPosts.length > 0 ? (
-              <div className="posts-grid">
+              <div className="posts-grid reveal-stagger">
                 {latestPosts.map(post => (
                   <PostCard key={post.slug} post={post} />
                 ))}

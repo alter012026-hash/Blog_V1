@@ -1,14 +1,17 @@
 import Link from "next/link";
 
+// Cores em hsla com baixa opacidade no fundo: funcionam tanto sobre o
+// branco do tema claro quanto sobre o quase-preto do tema escuro, sem
+// precisar de um segundo mapa de cores por tema.
 const categoryStyles = {
-  "Editais":               { bg: "#EFF6FF", color: "#1B3A6B", border: "rgba(27,58,107,0.15)" },
-  "Técnicas de Estudo":    { bg: "#F0FDF4", color: "#166534", border: "rgba(22,101,52,0.15)" },
-  "Concursos Abertos":     { bg: "#FFFBEB", color: "#92400E", border: "rgba(245,158,11,0.25)" },
-  "Materiais Gratuitos":   { bg: "#F5F3FF", color: "#5B21B6", border: "rgba(91,33,182,0.15)" },
-  "Cronograma de Estudos": { bg: "#FFF1F2", color: "#9F1239", border: "rgba(244,63,94,0.2)"  },
-  "Carreiras Públicas":    { bg: "#ECFEFF", color: "#155E75", border: "rgba(6,182,212,0.2)"  },
-  "Questões Comentadas":   { bg: "#FFF7ED", color: "#9A3412", border: "rgba(234,88,12,0.2)"  },
-  "Geral":                 { bg: "#F8FAFC", color: "#475569", border: "rgba(71,85,105,0.15)" },
+  "Editais":               { bg: "hsla(215, 60%, 50%, 0.12)", color: "hsl(215, 60%, 55%)", border: "hsla(215, 60%, 50%, 0.25)" },
+  "Técnicas de Estudo":    { bg: "hsla(142, 60%, 40%, 0.12)", color: "hsl(142, 55%, 45%)", border: "hsla(142, 60%, 40%, 0.25)" },
+  "Concursos Abertos":     { bg: "hsla(38, 90%, 50%, 0.14)",  color: "hsl(32, 85%, 50%)",  border: "hsla(38, 90%, 50%, 0.28)" },
+  "Materiais Gratuitos":   { bg: "hsla(262, 55%, 50%, 0.12)", color: "hsl(262, 55%, 60%)", border: "hsla(262, 55%, 50%, 0.25)" },
+  "Cronograma de Estudos": { bg: "hsla(346, 75%, 50%, 0.12)", color: "hsl(346, 65%, 55%)", border: "hsla(346, 75%, 50%, 0.25)" },
+  "Carreiras Públicas":    { bg: "hsla(190, 75%, 40%, 0.13)", color: "hsl(190, 65%, 48%)", border: "hsla(190, 75%, 40%, 0.26)" },
+  "Questões Comentadas":   { bg: "hsla(24, 80%, 48%, 0.13)",  color: "hsl(24, 75%, 50%)",  border: "hsla(24, 80%, 48%, 0.26)" },
+  "Geral":                 { bg: "hsla(220, 14%, 50%, 0.12)", color: "hsl(220, 14%, 50%)", border: "hsla(220, 14%, 50%, 0.25)" },
 };
 
 function formatDate(dateStr) {
