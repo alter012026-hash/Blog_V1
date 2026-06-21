@@ -62,6 +62,20 @@ const siteConfig = {
       cta: "Pratique com milhares de questões no QConcursos",
     },
     {
+      id: "amazon-vademecum",
+      name: "Amazon — Vade Mecum e livros para concurso",
+      url: "https://www.amazon.com.br/s?k=vade+mecum&tag=passejaconcur-20",
+      keywords: ["vade mecum", "legislação", "lei seca", "código civil", "constituição federal", "livro de direito"],
+      cta: "Veja Vade Mecum e livros de direito atualizados na Amazon",
+    },
+    {
+      id: "amazon-apostilas",
+      name: "Amazon — Apostilas e cadernos de questões",
+      url: "https://www.amazon.com.br/s?k=apostila+concurso+publico&tag=passejaconcur-20",
+      keywords: ["apostila impressa", "caderno de questões", "livro de exercícios", "material impresso"],
+      cta: "Encontre apostilas e cadernos de questões na Amazon",
+    },
+    {
       id: "empreendedormais",
       name: "Empreendedor MAIS",
       url: "https://empreendedor.mais.com.br/catalogo-de-lojas?tab=share",
