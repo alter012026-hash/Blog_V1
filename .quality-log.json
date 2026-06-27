@@ -434,5 +434,19 @@
     "similarTo": "2026-06-15-como-interpretar-um-edital-de-concurso-publico.md",
     "status": "ok",
     "issues": []
+  },
+  {
+    "timestamp": "2026-06-27T16:57:46.446Z",
+    "file": "2026-06-13-como-estudar-para-concursos-publicos.md",
+    "slug": "como-estudar-para-concursos-publicos",
+    "title": "Como Estudar para Concursos Públicos: Um Guia Prático Focado em Análise de Banca e Estratégias de Resolução",
+    "category": "Técnicas de Estudo",
+    "provider": "Groq",
+    "wordCount": 1878,
+    "fillerCount": 0,
+    "similarity": 9,
+    "similarTo": "diferencas-entre-editais-estaduais-e-federais",
+    "status": "ok",
+    "issues": []
   }
 ]
