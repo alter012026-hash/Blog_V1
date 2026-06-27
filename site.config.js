@@ -62,13 +62,6 @@ const siteConfig = {
       cta: "Pratique com milhares de questões no QConcursos",
     },
     {
-      id: "amazon-apostilas",
-      name: "Amazon — Apostilas e cadernos de questões",
-      url: "https://www.amazon.com.br/s?k=apostila+concurso+publico&tag=passejaconcur-20",
-      keywords: ["apostila impressa", "caderno de questões", "livro de exercícios", "material impresso"],
-      cta: "Encontre apostilas e cadernos de questões na Amazon",
-    },
-    {
       id: "empreendedormais",
       name: "Empreendedor MAIS",
       url: "https://empreendedor.mais.com.br/catalogo-de-lojas?tab=share",
