@@ -62,13 +62,6 @@ const siteConfig = {
       cta: "Pratique com milhares de questões no QConcursos",
     },
     {
-      id: "amazon-vademecum",
-      name: "Amazon — Vade Mecum e livros para concurso",
-      url: "https://www.amazon.com.br/s?k=vade+mecum&tag=passejaconcur-20",
-      keywords: ["vade mecum", "legislação", "lei seca", "código civil", "constituição federal", "livro de direito"],
-      cta: "Veja Vade Mecum e livros de direito atualizados na Amazon",
-    },
-    {
       id: "amazon-apostilas",
       name: "Amazon — Apostilas e cadernos de questões",
       url: "https://www.amazon.com.br/s?k=apostila+concurso+publico&tag=passejaconcur-20",
@@ -81,7 +74,6 @@ const siteConfig = {
       url: "https://empreendedor.mais.com.br/catalogo-de-lojas?tab=share",
       keywords: ["renda extra", "trabalhar em casa", "ganhar dinheiro online", "negócio online", "trabalho remoto"],
       cta: "Enquanto estuda, monte uma renda extra online gratuita com o Empreendedor MAIS",
-      pinned: true, // aparece em todo post, independente do conteúdo (não depende de match de keyword)
     },
   ],
 
