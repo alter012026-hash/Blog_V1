@@ -6,6 +6,7 @@ excerpt: "A preparação para concursos públicos é um desafio que exige dedica
 targetKeyword: "preparação para concursos públicos"
 secondaryKeywords: ["dicas de estudo para concurso", "como estudar para concurso público", "plano de estudos para concurso"]
 readingTime: "AUTO"
+curiosity: "A técnica de Pomodoro pode aumentar a produtividade de estudo, trabalhando em intervalos de 25 minutos com descansos de 5 minutos, ajudando a reduzir a fadiga e melhorar a retenção de informações."
 ---
 
 ## Introdução

@@ -3,6 +3,7 @@ title: "Mudança nos Conteúdos das Provas Ao Longo dos Anos"
 date: "2026-06-21"
 category: "Concursos Abertos"
 excerpt: "A evolução dos concursos públicos no Brasil não se resume apenas à quantidade de vagas ou ao valor das remunerações. O que realmente determina a..."
+curiosity: "A curiosidade pouco conhecida é que o termo banca, usado para designar as instituições que organizam concursos públicos no Brasil, tem origem nos tempos coloniais, quando os jurados que avaliavam candidatos se reuniam em uma banca de madeira, semelhante ao painel onde os juízes de exames universitários sentavam. Essa tradição foi mantida e acabou se tornando sinônimo de organizadora de provas."
 ---
 
 ## Introdução  

@@ -6,6 +6,7 @@ excerpt: "Você está se preparando para um concurso público e sabe que as ques
 targetKeyword: "estratégia para questões de português em concursos públicos"
 secondaryKeywords: ["estratégia", "questões", "português"]
 readingTime: ""
+curiosity: "Uma curiosidade pouco conhecida é que muitas bancas de concursos federais adotam como referência oficial o Vocabulário Ortográfico da Língua Portuguesa da Academia Brasileira de Letras; assim, palavras que foram excluídas nas últimas revisões do VOLP costumam aparecer em provas justamente para verificar se o candidato acompanha as mudanças ortográficas recentes."
 ---
 
 ## Introdução

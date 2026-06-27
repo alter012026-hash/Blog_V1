@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { checkAdminAuth } from "../../../../lib/admin-auth";
 import fs from "fs";
 import path from "path";
-import { generateValidatedArticle, buildArticleFile } from "../../../../lib/article-generator";
+import { generateValidatedArticle, generateCuriosity, buildArticleFile } from "../../../../lib/article-generator";
 import { commitFile, deleteFile, getFile, triggerVercelDeploy } from "../../../../lib/github-commit";
 import config from "../../../../site.config.js";
 
@@ -104,6 +104,7 @@ export async function POST(request) {
     const existingFrontmatter = {
       date: existing.content.match(/^date:\s*"([^"]*)"/m)?.[1],
       category: existing.content.match(/^category:\s*"([^"]*)"/m)?.[1],
+      curiosity: existing.content.match(/^curiosity:\s*"([^"]*)"/m)?.[1],
     };
 
     // Assinaturas de conteúdo existentes, para checar similaridade (igual ao script CLI).
@@ -118,6 +119,11 @@ export async function POST(request) {
       previousContent: existing.content,
     });
 
+    // Curiosidade do card "💡 Curiosidade" — gerada 1x aqui, junto com a
+    // regeneração do artigo. Se falhar, buildArticleFile preserva a
+    // curiosidade anterior (em existingFrontmatter.curiosity).
+    const curiosity = await generateCuriosity(result.body);
+
     const article = buildArticleFile({
       title: result.title,
       body: result.body,
@@ -125,6 +131,7 @@ export async function POST(request) {
       category: existingFrontmatter.category,
       forceFile: safeFile,
       existingFrontmatter,
+      curiosity,
     });
 
     // 1) Commita o post regenerado

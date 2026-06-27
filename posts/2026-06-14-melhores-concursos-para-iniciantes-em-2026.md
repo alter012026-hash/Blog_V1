@@ -3,6 +3,7 @@ title: "Melhores Concursos para Iniciantes em 2026"
 date: "2026-06-14"
 category: "Concursos Abertos"
 excerpt: "Se você está começando sua jornada em concursos públicos no Brasil, é fundamental entender que a escolha do concurso certo pode ser um fator decisivo para..."
+curiosity: "Uma curiosidade pouco conhecida é que, desde 2012, os concursos federais reservam até 20% das vagas para candidatos negros, indígenas e pessoas com deficiência, mas a lei também garante cotas para estudantes de escolas públicas que comprovem renda familiar per capita inferior a um salário‑mínimo, ampliando a inclusão social no serviço público."
 ---
 
 ## Introdução

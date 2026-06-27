@@ -6,6 +6,7 @@ excerpt: "Se você está se preparando para concursos públicos no Brasil, é fu
 targetKeyword: "diferenças entre editais estaduais e federais"
 secondaryKeywords: ["diferenças", "entre", "editais"]
 readingTime: ""
+curiosity: "Embora hoje os concursos pareçam uma tradição, o primeiro deles no Brasil só aconteceu depois da Proclamação da República, em 1889, quando o novo Ministério da Fazenda realizou um processo seletivo para preencher cargos administrativos; esse edital marcou o início da contratação baseada em mérito no serviço público, substituindo o antigo sistema de indicação."
 ---
 
 ## Introdução

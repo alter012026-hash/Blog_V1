@@ -6,6 +6,7 @@ excerpt: "Os editais de concursos públicos são documentos oficiais que estabel
 targetKeyword: "editais de concursos públicos"
 secondaryKeywords: ["prazos de inscrição", "concursos públicos no Brasil", "como se inscrever em concursos"]
 readingTime: "8 min"
+curiosity: "Os editais de concursos públicos devem ser publicados em jornais oficiais e sites governamentais para garantir transparência e equidade no processo de seleção, informando os interessados sobre as oportunidades disponíveis."
 ---
 
 ## Introdução

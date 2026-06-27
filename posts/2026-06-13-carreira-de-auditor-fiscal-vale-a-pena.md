@@ -6,6 +6,7 @@ excerpt: "A carreira de auditor fiscal é uma escolha profissional que pode ser 
 targetKeyword: "carreira de auditor fiscal"
 secondaryKeywords: ["auditor fiscal salário", "concurso auditor fiscal", "carreira pública"]
 readingTime: ""
+curiosity: "A carreira de auditor fiscal exige conhecimento em contabilidade, direito e gestão, tornando-a uma opção atraente para quem busca um desafio profissional multifacetado."
 ---
 
 

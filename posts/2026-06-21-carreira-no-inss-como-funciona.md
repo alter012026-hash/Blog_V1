@@ -3,6 +3,7 @@ title: "Carreira no INSS: Como Funciona"
 date: "2026-06-21"
 category: "Carreiras Públicas"
 excerpt: "O Instituto Nacional do Seguro Social (INSS) administra a maior parte dos benefícios previdenciários do país. Trabalhar na autarquia significa participar..."
+curiosity: "Uma curiosidade pouco divulgada é que, em todos os concursos do INSS, 5 % das vagas são reservadas para candidatos com deficiência, conforme a Constituição e a Lei nº 8.112/90, e essas vagas são distribuídas proporcionalmente entre os quadros técnico, analista e jurídico, garantindo inclusão sem necessidade de nota de corte diferenciada."
 ---
 
 ## Introdução  

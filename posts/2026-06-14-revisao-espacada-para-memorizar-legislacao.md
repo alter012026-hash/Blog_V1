@@ -3,6 +3,7 @@ title: "Revisão Espaçada para Memorizar Legislação"
 date: "2026-06-14"
 category: "Técnicas de Estudo"
 excerpt: "A preparação para concursos públicos no Brasil envolve uma vasta gama de conhecimentos, incluindo a legislação específica de cada área. A legislação é um..."
+curiosity: "A revisão espaçada ajuda a consolidar informações na memória de longo prazo, facilitando a retenção de legislação para concursos públicos."
 ---
 
 A preparação para concursos públicos no Brasil envolve uma vasta gama de conhecimentos, incluindo a legislação específica de cada área. A legislação é um dos pilares fundamentais para qualquer carreira na esfera pública, pois fornece as bases legais para as ações e decisões tomadas pelos servidores. No entanto, o volume de informações a ser memorizado pode ser esmagador, especialmente para aqueles que estão iniciando sua jornada. É aqui que entra a técnica de revisão espaçada, uma estratégia comprovada para aprimorar a retenção de informações e facilitar o processo de memorização.

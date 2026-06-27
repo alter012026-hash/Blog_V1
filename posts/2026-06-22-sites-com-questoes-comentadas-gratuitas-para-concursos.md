@@ -3,6 +3,7 @@ title: "Sites com Questões Comentadas Gratuitas para Concursos"
 date: "2026-06-22"
 category: "Materiais Gratuitos"
 excerpt: "A preparação para concursos públicos exige mais do que leitura de editais e revisão de teoria. A prática constante, acompanhada de análise crítica, é o..."
+curiosity: "Uma curiosidade pouco conhecida é que a tradição de publicar a lâmina de resolução – o detalhamento passo a passo das respostas – começou nos concursos da Cebraspe nos anos de 1990, quando a banca decidiu disponibilizar o raciocínio usado nas correções para evitar recursos excessivos; esse recurso acabou inspirando os primeiros sites gratuitos a oferecerem questões comentadas, tornando‑se padrão no estudo de concursos."
 ---
 
 ## Introdução

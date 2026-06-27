@@ -3,6 +3,7 @@ title: "Melhores Apostilas Gratuitas para Concursos Públicos"
 date: "2026-06-16"
 category: "Materiais Gratuitos"
 excerpt: "Se você está se preparando para concursos públicos no Brasil, sabe que ter acesso a materiais de qualidade é fundamental para o sucesso. No entanto..."
+curiosity: "O uso de apostilas gratuitas pode ser uma ferramenta valiosa na preparação para concursos públicos, pois oferece acesso a conhecimento de qualidade sem custos adicionais, ajudando a equalizar as oportunidades de estudo para todos os candidatos."
 ---
 
 ## Introdução

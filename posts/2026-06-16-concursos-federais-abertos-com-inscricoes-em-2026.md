@@ -3,6 +3,7 @@ title: "Concursos Federais Abertos com Inscrições em 2026"
 date: "2026-06-16"
 category: "Concursos Abertos"
 excerpt: "Os concursos federais no Brasil representam uma oportunidade de carreira estável e desafiadora para muitos brasileiros. Com a abertura de inscrições para..."
+curiosity: "A preparação para concursos federais exige um equilíbrio entre estudo teórico e prática, além de cuidado com a saúde mental e física, para que os candidatos possam enfrentar os desafios com eficácia e resiliência."
 ---
 
 ## Introdução

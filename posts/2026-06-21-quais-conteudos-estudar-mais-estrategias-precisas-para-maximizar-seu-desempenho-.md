@@ -3,6 +3,7 @@ title: "Quais Conteúdos Estudar Mais? Estratégias Precisas para Maximizar Seu 
 date: "2026-06-21"
 category: "Técnicas de Estudo"
 excerpt: "A escolha dos conteúdos a ser aprofundado determina a velocidade com que o candidato avança rumo à aprovação. Em concursos de grande concorrência, como os..."
+curiosity: "A taxa de aprovação em concursos de grande concorrência no Brasil costuma ser abaixo de 2%, o que torna fundamental um plano de estudo direcionado para maximizar as chances de aprovação."
 ---
 
 ## Introdução  

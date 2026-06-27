@@ -868,6 +868,73 @@ time {
   background: rgba(61,220,151,0.06);
 }
 
+/* ---- Card "💡 Curiosidade" (substitui a antiga imagem hero) ----
+   Ocupa o mesmo espaço/posição que a imagem ocupava, mas sem depender
+   de nenhuma API externa: o texto é gerado 1x no momento da geração do
+   artigo (lib/article-generator.js) e persistido no frontmatter. */
+.curiosity-card {
+  margin: 0 0 8px;
+  padding: 22px 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--glass-border);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+}
+
+.curiosity-card-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: rgba(245,158,11,0.14);
+  color: var(--accent-dark);
+}
+
+[data-theme="dark"] .curiosity-card-icon {
+  background: rgba(61,220,151,0.14);
+  color: var(--accent);
+}
+
+.curiosity-card-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.curiosity-card-body { flex: 1; min-width: 0; }
+
+.curiosity-card-tag {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-dark);
+  margin-bottom: 6px;
+}
+
+[data-theme="dark"] .curiosity-card-tag { color: var(--accent); }
+
+.curiosity-card-title {
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.curiosity-card-text {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+
 .article-divider {
   border: none;
   border-top: 1px solid var(--border);
@@ -1375,6 +1442,12 @@ a { transition: color 0.15s; }
     height: 44px;
   }
 
+  /* Card de curiosidade — mobile */
+  .curiosity-card {
+    padding: 16px 18px;
+    gap: 12px;
+  }
+
   .hero {
     position: relative;
     z-index: 1;
@@ -1467,6 +1540,7 @@ a { transition: color 0.15s; }
   .logo-text { font-size: 0.95rem; }
   .header-actions { gap: 4px; }
   .hero-cta { padding: 12px 22px; font-size: 0.875rem; }
+  .article-title { font-size: 1.45rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

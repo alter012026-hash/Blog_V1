@@ -3,6 +3,7 @@ title: "Concursos da Área de Saúde com Inscrições Abertas"
 date: "2026-06-22"
 category: "Concursos Abertos"
 excerpt: "O mercado de concursos públicos na saúde tem se expandido de forma consistente nos últimos anos. A combinação de salários atrativos, estabilidade e a..."
+curiosity: "A taxa de aprovação em concursos públicos de saúde pode ser estimada dividindo-se o número de vagas pelo total de inscritos em edições anteriores, ajudando candidatos a avaliar a competitividade."
 ---
 
 ---  

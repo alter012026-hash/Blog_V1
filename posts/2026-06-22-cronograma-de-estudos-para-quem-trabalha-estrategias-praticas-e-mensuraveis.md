@@ -3,6 +3,7 @@ title: "Cronograma de Estudos para Quem Trabalha: Estratégias Práticas e Mensu
 date: "2026-06-22"
 category: "Cronograma de Estudos"
 excerpt: "Conciliar jornada profissional de 8 h ou mais com a preparação para concursos exige planejamento rigoroso e foco nos resultados. Este artigo apresenta um..."
+curiosity: "A técnica Pomodoro pode ser ajustada para 45 minutos de estudo ativo e 10 minutos de pausa, melhorando a concentração e reduzindo a fadiga."
 ---
 
 ## Introdução

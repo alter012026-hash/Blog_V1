@@ -3,6 +3,7 @@ title: "Diferenças Entre Cargos de Nível Médio e Superior no Setor Público"
 date: "2026-06-15"
 category: "Carreiras Públicas"
 excerpt: "No setor público brasileiro, os cargos são classificados de acordo com o nível de escolaridade exigida para o seu exercício. Essa classificação é..."
+curiosity: "A preparação para concursos públicos no Brasil exige estudo e dedicação, pois as provas avaliam conhecimentos gerais e específicos da área do cargo, além de habilidades e competências."
 ---
 
 No setor público brasileiro, os cargos são classificados de acordo com o nível de escolaridade exigida para o seu exercício. Essa classificação é fundamental para os concursos públicos, pois determina as habilidades e conhecimentos necessários para cada função. Neste artigo, vamos explorar as diferenças entre cargos de nível médio e superior no setor público, destacando as exigências, responsabilidades e oportunidades associadas a cada categoria.

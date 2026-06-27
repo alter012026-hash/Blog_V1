@@ -3,6 +3,7 @@ title: "Carreira Policial Federal: Requisitos e Preparação"
 date: "2026-06-14"
 category: "Carreiras Públicas"
 excerpt: "A carreira policial federal é uma das mais respeitadas e desejadas no Brasil, oferecendo uma oportunidade de servir à nação, garantir a segurança pública..."
+curiosity: "A preparação para o concurso da polícia federal exige um estudo rigoroso e uma revisão de matérias como Direito Penal e Constitucional, além de treinamento físico regular para atingir os padrões exigidos nos testes físicos."
 ---
 
 ## Introdução

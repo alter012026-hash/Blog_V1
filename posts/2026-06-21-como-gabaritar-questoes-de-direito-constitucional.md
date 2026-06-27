@@ -3,6 +3,7 @@ title: "Como Gabaritar Questões de Direito Constitucional"
 date: "2026-06-21"
 category: "Questões Comentadas"
 excerpt: "O candidato que deseja transformar o estudo de Direito Constitucional em aprovação precisa de um método que vá além da leitura passiva. Este artigo reúne..."
+curiosity: "A técnica de \"elimina-e-confirma\" é essencial para resolver questões de Direito Constitucional, pois ajuda a eliminar opções incorretas e a confirmar a resposta certa com base nos blocos temáticos estudados."
 ---
 
 ## Introdução  

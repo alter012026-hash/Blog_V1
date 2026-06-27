@@ -3,6 +3,7 @@ title: "Como Manter o Foco nos Estudos para Concurso"
 date: "2026-06-19"
 category: "Técnicas de Estudo"
 excerpt: "Manter o foco nos estudos para concurso é um desafio comum enfrentado por muitos candidatos. Com a grande quantidade de material a ser estudado e a..."
+curiosity: "A aprovação em concursos públicos no Brasil é um marco importante para muitos, exigindo dedicação e estratégias eficazes de estudo."
 ---
 
 ## Introdução

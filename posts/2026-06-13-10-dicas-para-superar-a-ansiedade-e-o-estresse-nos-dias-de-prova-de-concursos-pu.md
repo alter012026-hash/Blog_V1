@@ -6,6 +6,7 @@ excerpt: "A ansiedade e o estresse são sentimentos comuns entre os candidatos q
 targetKeyword: "ansiedade em concursos públicos"
 secondaryKeywords: ["estresse nos concursos", "dicas para provas", "preparação mental para concursos"]
 readingTime: "8 min"
+curiosity: "Um estudo da USP, publicado em 2018, mostrou que candidatos que fizeram uma caminhada leve antes da prova tiveram desempenho melhor em questões que exigem memória de trabalho, sugerindo que a atividade física moderada pode reduzir a ansiedade e melhorar a concentração nos concursos."
 ---
 
 ## Introdução

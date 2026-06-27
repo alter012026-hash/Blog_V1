@@ -7,7 +7,9 @@ import { getAllPosts, getAllCategories } from "../../lib/posts";
 import { getSearchIndex } from "../../lib/search-index";
 import config from "../../site.config";
 
-export const revalidate = 3600;
+// ✅ OBRIGATÓRIO: força modo dinâmico para que searchParams funcione
+// Com revalidate estático, o Next.js 14 ignora searchParams completamente
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Blog",
@@ -16,8 +18,8 @@ export const metadata = {
 
 export default function BlogPage({ searchParams }) {
   const categoria = searchParams?.categoria || null;
-  const allPosts = getAllPosts();
-  const categories = getAllCategories();
+  const allPosts    = getAllPosts();
+  const categories  = getAllCategories();
   const searchIndex = getSearchIndex();
 
   const filteredPosts = categoria
@@ -44,6 +46,7 @@ export default function BlogPage({ searchParams }) {
 
         <section className="section section--light">
           <div className="container">
+
             {/* Filtro de categorias */}
             <div className="categories-filter">
               <Link
@@ -74,6 +77,7 @@ export default function BlogPage({ searchParams }) {
                 Nenhum artigo encontrado nesta categoria.
               </p>
             )}
+
           </div>
         </section>
       </main>

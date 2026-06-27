@@ -188,7 +188,7 @@ function buildTopic() {
 }
 
 // ─── Save ─────────────────────────────────────────────────────────────
-function saveArticle(result, topic, category, forceFile) {
+async function saveArticle(result, topic, category, forceFile) {
   if (!fs.existsSync(postsDir)) fs.mkdirSync(postsDir, { recursive: true });
 
   let existingFrontmatter;
@@ -197,8 +197,14 @@ function saveArticle(result, topic, category, forceFile) {
     existingFrontmatter = {
       date: oldRaw.match(/^date:\s*"([^"]*)"/m)?.[1],
       category: oldRaw.match(/^category:\s*"([^"]*)"/m)?.[1],
+      curiosity: oldRaw.match(/^curiosity:\s*"([^"]*)"/m)?.[1],
     };
   }
+
+  // Curiosidade pro card "💡 Curiosidade" — gerada 1x aqui, junto com o
+  // artigo, e nunca em runtime. Se falhar, buildArticleFile cai de volta
+  // pra curiosidade anterior (regeneração) ou simplesmente omite o campo.
+  const curiosity = await ag.generateCuriosity(result.body);
 
   const article = ag.buildArticleFile({
     title: result.title,
@@ -207,6 +213,7 @@ function saveArticle(result, topic, category, forceFile) {
     category,
     forceFile,
     existingFrontmatter,
+    curiosity,
   });
 
   fs.writeFileSync(path.join(postsDir, article.file), article.content);
@@ -256,7 +263,7 @@ async function main() {
         generation,
         existingSignatures: getExistingSignatures(),
       });
-      const file = saveArticle(result, topicArg, category, forceFileArg);
+      const file = await saveArticle(result, topicArg, category, forceFileArg);
       console.log(`💾 Atualizado: ${file} (${result.wordCount} palavras, via ${result.provider})`);
     } catch (err) {
       console.error(`❌ Erro ao regenerar: ${err.message}`);
@@ -278,7 +285,7 @@ async function main() {
         generation,
         existingSignatures: getExistingSignatures(),
       });
-      const file = saveArticle(result, topic, category, null);
+      const file = await saveArticle(result, topic, category, null);
 
       const used = loadJson(usedTopicsLogPath, []);
       used.push(topic);

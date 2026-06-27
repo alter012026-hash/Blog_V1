@@ -1,11 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Static export for Vercel/Netlify compatibility
-  // Remove this if using dynamic API routes in production
-  
   images: {
     formats: ['image/avif', 'image/webp'],
-    remotePatterns: [],
+    remotePatterns: [
+      // Caso queira usar imagens próprias por URL futuramente
+      {
+        protocol: 'https',
+        hostname: '**.githubusercontent.com',
+      },
+    ],
   },
 
   // Security headers

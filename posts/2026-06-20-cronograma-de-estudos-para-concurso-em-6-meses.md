@@ -3,6 +3,7 @@ title: "Cronograma de Estudos para Concurso em 6 Meses"
 date: "2026-06-20"
 category: "Cronograma de Estudos"
 excerpt: "Se você está se preparando para um concurso público no Brasil, sabe que a competição é acirrada e que a estratégia certa pode fazer toda a diferença. Com..."
+curiosity: "A criação de um cronograma de estudos personalizado é crucial para o sucesso em concursos públicos, pois permite que o candidato se organize e se prepare de forma eficiente, aumentando suas chances de aprovação."
 ---
 
 Se você está se preparando para um concurso público no Brasil, sabe que a competição é acirrada e que a estratégia certa pode fazer toda a diferença. Com apenas 6 meses à frente, é crucial criar um cronograma de estudos eficaz para maximizar seu potencial e aumentar suas chances de sucesso. Neste artigo, vamos explorar como criar um plano de estudos personalizado, abordando os principais tópicos e estratégias para ajudá-lo a se preparar de forma eficiente.

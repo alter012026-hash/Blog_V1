@@ -6,6 +6,7 @@ excerpt: "Você está se preparando para concursos públicos e busca uma estrat�
 targetKeyword: "método pomodoro para concursos públicos"
 secondaryKeywords: ["método", "pomodoro", "concursos"]
 readingTime: ""
+curiosity: "O nome Pomodoro vem de um simples timer de cozinha em forma de tomate que Francesco Cirillo usava nos anos 80; curiosamente, a primeira edição brasileira do livro The Pomodoro Technique apareceu em 2002 e, desde então, grupos de estudo para concursos começaram a trocar fichas de papel por aplicativos que contam exatamente 25 minutos, ajudando candidatos a manter o foco sem perceber que estavam seguindo uma prática originalmente criada para programadores."
 ---
 
 ## Introdução

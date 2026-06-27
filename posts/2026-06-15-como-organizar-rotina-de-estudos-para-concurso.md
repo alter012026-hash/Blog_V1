@@ -3,6 +3,7 @@ title: "Como Organizar Rotina de Estudos para Concurso"
 date: "2026-06-15"
 category: "Cronograma de Estudos"
 excerpt: "Organizar uma rotina de estudos eficaz é fundamental para quem deseja conquistar uma vaga em concursos públicos no Brasil. Com tantos candidatos..."
+curiosity: "A criação de uma rotina de estudos personalizada é fundamental para o sucesso nos concursos públicos, pois permite que o candidato se adapte às suas necessidades individuais e ao conteúdo do concurso."
 ---
 
 Organizar uma rotina de estudos eficaz é fundamental para quem deseja conquistar uma vaga em concursos públicos no Brasil. Com tantos candidatos disputando poucas vagas, é necessário ter uma estratégia de estudos bem definida para se destacar. Neste artigo, vamos explorar como criar uma rotina de estudos personalizada e eficiente para alcançar seus objetivos.

@@ -6,6 +6,7 @@ excerpt: "Você está procurando por uma carreira estável e segura? Então, os 
 targetKeyword: "concursos públicos com mais vagas para nível médio"
 secondaryKeywords: ["concursos", "públicos", "vagas"]
 readingTime: ""
+curiosity: "Os concursos públicos oferecem uma grande oportunidade de carreira estável e segura, com muitas vagas de nível médio disponíveis em diversas áreas, como saúde, educação e segurança."
 ---
 
 ## Introdução

@@ -3,6 +3,7 @@ title: "Videoaulas Gratuitas para Concursos Públicos"
 date: "2026-06-15"
 category: "Materiais Gratuitos"
 excerpt: "Se você está procurando por uma forma eficaz e gratuita de se preparar para concursos públicos no Brasil, as videoaulas gratuitas podem ser uma excelente..."
+curiosity: "Um detalhe pouco divulgado é que o próprio site do Tribunal de Contas da União (TCU) disponibiliza, desde 2015, um acervo de videoaulas gravadas por seus especialistas, abordando auditoria, direito administrativo e contabilidade pública, que pode ser usado livremente por quem estuda para concursos, sem necessidade de cadastro."
 ---
 
 Se você está procurando por uma forma eficaz e gratuita de se preparar para concursos públicos no Brasil, as videoaulas gratuitas podem ser uma excelente opção. Com o avanço da tecnologia e a popularização das plataformas de ensino online, é possível acessar uma vasta gama de recursos educacionais de alta qualidade sem gastar um centavo. Neste artigo, vamos explorar as melhores opções de videoaulas gratuitas para concursos públicos, mostrando como elas podem ser uma ferramenta valiosa na sua jornada para conquistar um cargo público.

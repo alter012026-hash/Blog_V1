@@ -3,6 +3,7 @@ title: "Canais no Youtube para Estudar para Concursos"
 date: "2026-06-21"
 category: "Materiais Gratuitos"
 excerpt: "O acesso gratuito a videoaulas tornou‑se um dos pilares da preparação para concursos públicos. No Brasil, mais de 70 % dos candidatos utilizam, em algum..."
+curiosity: "A taxa de retenção de informações aumenta em até 30% quando se integram videoaulas a cronogramas semanais e técnicas de anotação ativa."
 ---
 
 ## Introdução  

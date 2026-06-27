@@ -6,6 +6,7 @@ excerpt: "Se você está procurando por uma oportunidade de carreira estável e 
 targetKeyword: "cursos gratuitos para concursos públicos"
 secondaryKeywords: ["materiais de estudo gratuitos", "preparação para concursos públicos", "recursos educacionais gratuitos"]
 readingTime: "AUTO"
+curiosity: "A criação de um plano de estudo personalizado é fundamental para aproveitar ao máximo os cursos gratuitos para concursos públicos, permitindo que os candidatos se organizem e se preparem de forma eficaz."
 ---
 
 ## Introdução
