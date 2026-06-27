@@ -108,15 +108,60 @@ async function pingIndexNow(urls) {
 
 // ── Google Indexing API ───────────────────────────────────────────────────────
 // Usa JWT manual (sem dependência extra do googleapis)
+
+// JSON.parse é estrito: não aceita quebra de linha real (\n), tab, ou outros
+// control characters dentro de uma string entre aspas — exige que venham
+// escapados como \\n. É muito comum colar a "private_key" de um service
+// account do Google com quebras de linha literais (em vez de \\n escapado),
+// o que produz exatamente o erro "Bad control character in string literal".
+// Esta função escapa esses caracteres de controle apenas quando estão DENTRO
+// de uma string JSON (entre aspas não escapadas), preservando a formatação
+// do JSON fora das strings.
+function parseJsonTolerante(raw) {
+  let result = "";
+  let dentroDeString = false;
+  let escapando = false;
+
+  for (const char of raw) {
+    if (dentroDeString) {
+      if (escapando) {
+        result += char;
+        escapando = false;
+        continue;
+      }
+      if (char === "\\") {
+        result += char;
+        escapando = true;
+        continue;
+      }
+      if (char === '"') {
+        dentroDeString = false;
+        result += char;
+        continue;
+      }
+      if (char === "\n") { result += "\\n"; continue; }
+      if (char === "\r") { result += "\\r"; continue; }
+      if (char === "\t") { result += "\\t"; continue; }
+      result += char;
+      continue;
+    }
+
+    if (char === '"') dentroDeString = true;
+    result += char;
+  }
+
+  return JSON.parse(result);
+}
+
 async function getGoogleAccessToken() {
   let serviceAccountJson;
 
   // Aceita JSON em base64 (variável de ambiente) ou path para arquivo
   if (process.env.GOOGLE_SERVICE_ACCOUNT_B64) {
     const raw = Buffer.from(process.env.GOOGLE_SERVICE_ACCOUNT_B64, "base64").toString("utf8");
-    serviceAccountJson = JSON.parse(raw);
+    serviceAccountJson = parseJsonTolerante(raw);
   } else if (process.env.GOOGLE_SERVICE_ACCOUNT_PATH) {
-    serviceAccountJson = JSON.parse(
+    serviceAccountJson = parseJsonTolerante(
       fs.readFileSync(process.env.GOOGLE_SERVICE_ACCOUNT_PATH, "utf8")
     );
   } else {

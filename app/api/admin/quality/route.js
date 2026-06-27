@@ -115,6 +115,7 @@ export async function POST(request) {
       category: existingFrontmatter.category,
       generation: config.generation,
       existingSignatures: signatures.map((s) => ({ slug: s.slug, words: s.words })),
+      previousContent: existing.content,
     });
 
     const article = buildArticleFile({

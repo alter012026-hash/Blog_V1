@@ -6,6 +6,48 @@ import matter from "gray-matter";
 
 const postsDir = path.join(process.cwd(), "posts");
 
+// JSON.parse é estrito: não aceita quebra de linha real, tab, ou outros
+// control characters dentro de uma string entre aspas — exige \\n escapado.
+// É comum colar a "private_key" do service account do Google com quebras
+// de linha literais em vez de \\n, o que produz "Bad control character in
+// string literal". Esta função escapa esses caracteres apenas quando estão
+// dentro de uma string JSON, sem alterar a formatação fora delas.
+function parseJsonTolerante(raw) {
+  let result = "";
+  let dentroDeString = false;
+  let escapando = false;
+
+  for (const char of raw) {
+    if (dentroDeString) {
+      if (escapando) {
+        result += char;
+        escapando = false;
+        continue;
+      }
+      if (char === "\\") {
+        result += char;
+        escapando = true;
+        continue;
+      }
+      if (char === '"') {
+        dentroDeString = false;
+        result += char;
+        continue;
+      }
+      if (char === "\n") { result += "\\n"; continue; }
+      if (char === "\r") { result += "\\r"; continue; }
+      if (char === "\t") { result += "\\t"; continue; }
+      result += char;
+      continue;
+    }
+
+    if (char === '"') dentroDeString = true;
+    result += char;
+  }
+
+  return JSON.parse(result);
+}
+
 function getUrls(mode, siteUrl) {
   if (!fs.existsSync(postsDir)) return [];
   const now = Date.now();
@@ -62,9 +104,9 @@ async function pingGoogleIndexing(urls) {
   try {
     let sa;
     if (b64) {
-      sa = JSON.parse(Buffer.from(b64, "base64").toString("utf8"));
+      sa = parseJsonTolerante(Buffer.from(b64, "base64").toString("utf8"));
     } else {
-      sa = JSON.parse(fs.readFileSync(filePath, "utf8"));
+      sa = parseJsonTolerante(fs.readFileSync(filePath, "utf8"));
     }
 
     const { client_email, private_key: rawKey } = sa;
