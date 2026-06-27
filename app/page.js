@@ -3,6 +3,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import PostCard from "../components/PostCard";
 import ScrollReveal from "../components/ScrollReveal";
+import NextPostCountdown from "../components/NextPostCountdown";
 import { getAllPosts, getAllCategories } from "../lib/posts";
 import { getSearchIndex } from "../lib/search-index";
 import config from "../site.config";
@@ -35,6 +36,11 @@ export default function HomePage() {
               Explorar artigos →
             </Link>
           </div>
+        </section>
+
+        {/* Countdown — próximo post */}
+        <section className="cd-section">
+          <NextPostCountdown />
         </section>
 
         {/* Destaque */}

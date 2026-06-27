@@ -3,7 +3,7 @@ import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import PostCard from "../../../components/PostCard";
 import AffiliateBox from "../../../components/AffiliateBox";
-import ReadProgress from "../../../components/ReadProgress";
+import ReadProgressEnhanced from "../../../components/ReadProgressEnhanced";
 import ScrollReveal from "../../../components/ScrollReveal";
 import { getAllSlugs, getPostBySlug, getPostContentHtml, getRelatedPosts, getAllPosts } from "../../../lib/posts";
 import { getSearchIndex } from "../../../lib/search-index";
@@ -93,7 +93,7 @@ export default async function PostPage({ params }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
       />
 
-      <ReadProgress />
+      <ReadProgressEnhanced />
       <ScrollReveal />
       <Header posts={searchIndex} />
 
