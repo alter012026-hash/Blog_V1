@@ -24,7 +24,6 @@ export default function Footer() {
                 {item.label}
               </Link>
             ))}
-            <Link href="/sitemap.xml" className="footer-link">Sitemap</Link>
           </nav>
         </div>
 

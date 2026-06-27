@@ -2,6 +2,11 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import config from "../site.config";
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export const metadata = {
   title: { default: config.name, template: `%s | ${config.name}` },
   description: config.description,

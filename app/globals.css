@@ -82,6 +82,10 @@ html {
   font-size: 16px;
   scroll-behavior: smooth;
   color-scheme: light;
+  /* Trava qualquer overflow horizontal acidental (tabelas, palavras
+     longas, etc.) sem criar um novo scroll container — por isso
+     "clip" e não "hidden", que poderia interferir no header sticky. */
+  overflow-x: clip;
 }
 html[data-theme="dark"] { color-scheme: dark; }
 
@@ -92,6 +96,12 @@ body {
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
   transition: background 0.3s var(--ease-out), color 0.3s var(--ease-out);
+  overflow-x: clip;
+  /* Evita o "bounce"/rubber-band horizontal em iOS e o tap-highlight
+     cinza padrão do Android — feedback de toque fica a cargo dos
+     estados :active definidos em cada componente interativo. */
+  overscroll-behavior-x: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Dados tabulares (datas, contadores, tempo de leitura) usam mono —
@@ -235,7 +245,8 @@ time {
   white-space: nowrap;
 }
 
-.nav-link:hover {
+.nav-link:hover,
+.nav-link:active {
   color: var(--primary);
   background: var(--surface-2);
 }
@@ -425,6 +436,8 @@ time {
 .search-results {
   max-height: 50vh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   padding: 8px;
 }
 
@@ -441,6 +454,7 @@ time {
 }
 
 .search-result:hover,
+.search-result:active,
 .search-result.is-active {
   background: var(--surface-2);
 }
@@ -662,13 +676,15 @@ time {
   transition: opacity 0.2s;
 }
 
-.post-card:hover {
+.post-card:hover,
+.post-card:active {
   transform: translateY(-5px);
   box-shadow: var(--shadow-lg);
   border-color: transparent;
 }
 
-.post-card:hover::after { opacity: 1; }
+.post-card:hover::after,
+.post-card:active::after { opacity: 1; }
 
 .post-card-meta {
   display: flex;
@@ -709,7 +725,8 @@ time {
   transition: color 0.15s;
 }
 
-.post-card-title a:hover { color: var(--primary); }
+.post-card-title a:hover,
+.post-card-title a:active { color: var(--primary); }
 
 .post-card-excerpt {
   font-size: 0.875rem;
@@ -749,7 +766,8 @@ time {
   font-family: var(--font-display);
 }
 
-.post-card-link:hover {
+.post-card-link:hover,
+.post-card-link:active {
   gap: 8px;
   color: var(--accent-dark);
 }
@@ -854,6 +872,9 @@ time {
   font-size: 1rem;
   line-height: 1.8;
   color: var(--text-secondary);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .prose h2 {
@@ -866,6 +887,7 @@ time {
   letter-spacing: -0.02em;
   padding-bottom: 10px;
   border-bottom: 2px solid var(--surface-2);
+  scroll-margin-top: 80px;
 }
 
 .prose h3 {
@@ -875,6 +897,7 @@ time {
   color: var(--text);
   margin: 2em 0 0.6em;
   letter-spacing: -0.01em;
+  scroll-margin-top: 80px;
 }
 
 .prose p { margin-bottom: 1.4em; }
@@ -922,9 +945,38 @@ time {
 }
 
 .prose a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; transition: color 0.15s; }
-.prose a:hover { color: var(--accent-dark); }
+.prose a:hover, .prose a:active { color: var(--accent-dark); }
 
 .prose strong { font-weight: 700; color: var(--text); }
+
+/* Imagens, vídeos e embeds dentro do conteúdo nunca devem exceder a
+   largura do artigo — proteção para qualquer mídia que venha a ser
+   inserida nos posts (capa, GIFs, embeds de vídeo, etc). */
+.prose img,
+.prose video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.75em auto;
+  border-radius: var(--radius);
+}
+
+.prose iframe {
+  max-width: 100%;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: none;
+  border-radius: var(--radius);
+  margin: 1.75em 0;
+}
+
+.prose figure { margin: 1.75em 0; }
+.prose figcaption {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 8px;
+}
 
 .prose blockquote {
   border-left: 4px solid var(--accent);
@@ -957,6 +1009,7 @@ time {
   padding: 20px 24px;
   border-radius: var(--radius);
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   margin: 1.75em 0;
 }
 
@@ -966,8 +1019,30 @@ time {
 
 .prose pre code { background: none; border: none; color: inherit; font-size: 0.88em; }
 
-.prose table { width: 100%; border-collapse: collapse; margin: 1.75em 0; font-size: 0.9em; }
-.prose th { background: var(--primary); color: #fff; padding: 10px 16px; text-align: left; font-family: var(--font-display); font-weight: 700; font-size: 0.8rem; letter-spacing: 0.04em; text-transform: uppercase; }
+/* Tabelas de comparativo/cronograma podem ter muitas colunas. Em vez
+   de espremer o texto até ficar ilegível, o container rola na
+   horizontal — a tabela em si mantém uma largura mínima legível. */
+.table-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1.75em 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-light) var(--surface-2);
+}
+
+.table-scroll::-webkit-scrollbar { height: 6px; }
+.table-scroll::-webkit-scrollbar-track { background: var(--surface-2); }
+.table-scroll::-webkit-scrollbar-thumb {
+  background: var(--primary-light);
+  border-radius: var(--radius-full);
+}
+
+.prose table { width: 100%; min-width: 480px; border-collapse: collapse; font-size: 0.9rem; margin: 0; }
+.prose th { background: var(--primary); color: #fff; padding: 10px 16px; text-align: left; font-family: var(--font-display); font-weight: 700; font-size: 0.8rem; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; }
 .prose td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
 .prose tr:hover td { background: var(--surface-2); }
 
@@ -1030,7 +1105,8 @@ time {
   transition: background 0.15s ease, transform 0.15s var(--ease-spring);
 }
 
-.affiliate-box-link:hover {
+.affiliate-box-link:hover,
+.affiliate-box-link:active {
   background: var(--primary-light);
   transform: translateY(-1px);
 }
@@ -1085,7 +1161,8 @@ time {
   white-space: nowrap;
 }
 
-.cat-btn:hover {
+.cat-btn:hover,
+.cat-btn:active {
   border-color: var(--primary);
   color: var(--primary);
   background: var(--surface-2);
@@ -1222,7 +1299,7 @@ a { transition: color 0.15s; }
     position: fixed;
     top: 60px;
     left: 0;
-    width: 100vw;
+    width: 100%;
     height: calc(100vh - 60px);
 
     display: flex;
@@ -1238,6 +1315,8 @@ a { transition: color 0.15s; }
     -webkit-backdrop-filter: blur(16px);
 
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
 
     z-index: 99998;
 
@@ -1268,7 +1347,8 @@ a { transition: color 0.15s; }
     border-bottom: 1px solid var(--border-soft);
   }
 
-  .nav-link:hover {
+  .nav-link:hover,
+  .nav-link:active {
     color: var(--primary);
     background: var(--surface-2);
   }
@@ -1283,6 +1363,8 @@ a { transition: color 0.15s; }
     display: flex;
     position: relative;
     z-index: 100000;
+    width: 44px;
+    height: 44px;
   }
 
   .hero {
@@ -1378,6 +1460,7 @@ a { transition: color 0.15s; }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
   .reveal, .reveal-stagger > * { opacity: 1 !important; transform: none !important; }
 }
