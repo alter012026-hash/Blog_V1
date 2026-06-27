@@ -95,6 +95,10 @@ const siteConfig = {
       "Cronograma de Estudos",
       "Carreiras Públicas",
       "Questões Comentadas",
+      "Informática para Concursos",
+      "Redação e Discursiva",
+      "Direito Administrativo",
+      "Concursos de Tribunais",
     ],
   },
 

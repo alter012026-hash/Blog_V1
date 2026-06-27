@@ -7,6 +7,7 @@ import { commitFile, deleteFile, getFile, triggerVercelDeploy } from "../../../.
 import config from "../../../../site.config.js";
 
 const qualityLogPath = path.join(process.cwd(), ".quality-log.json");
+const topicOverlapPath = path.join(process.cwd(), ".topic-overlap.json");
 
 const QUALITY_LOG_REPO_PATH = ".quality-log.json";
 const SIGNATURES_REPO_PATH = ".content-signatures.json";
@@ -52,6 +53,12 @@ export async function GET() {
     const ok = entries.filter((e) => e.status === "ok" || e.status === "ressalvas");
     const errors = entries.filter((e) => e.status === "erro");
 
+    // Sobreposição temática (canibalização de SEO): grupos de posts sobre o
+    // MESMO TEMA mesmo com texto diferente entre si — gerado por
+    // scripts/detect-topic-overlap.js. Lido aqui do disco (committed no repo,
+    // igual ao .quality-log.json), nunca recalculado em runtime.
+    const topicOverlap = readLocalJson(topicOverlapPath, null);
+
     return NextResponse.json({
       total: entries.length,
       okCount: ok.length,
@@ -61,6 +68,7 @@ export async function GET() {
       shallow,
       duplicates,
       errors,
+      topicOverlap,
     });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });

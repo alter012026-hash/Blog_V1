@@ -109,6 +109,12 @@ function getExistingSignatures() {
 }
 
 // ─── Tópicos ──────────────────────────────────────────────────────────
+// Pool grande de propósito: com poucos seeds por categoria, o pipeline
+// esgota o pool rapidamente e cai no fallback de "variação" (que só anexa
+// um sufixo genérico tipo "guia atualizado" a um tópico já publicado —
+// isso gera títulos quase idênticos e foi a causa dos posts duplicados
+// detectados em 2026-06). Cada categoria deve ter MUITO mais seeds do que
+// o número de posts que você pretende publicar nela.
 const SEEDS = {
   "Editais": [
     "como interpretar um edital de concurso público",
@@ -116,6 +122,13 @@ const SEEDS = {
     "diferenças entre editais estaduais e federais",
     "principais erros ao ler um edital de concurso",
     "glossário de termos comuns em editais públicos",
+    "como funciona o cronograma de um edital, do lançamento à posse",
+    "o que é cargo, função e atribuição dentro de um edital",
+    "como identificar pegadinhas e cláusulas de barreira em editais",
+    "o que fazer quando o edital é suspenso ou tem o prazo prorrogado",
+    "como entender a tabela de cargos, vagas e remuneração de um edital",
+    "diferença entre edital de abertura e edital de convocação",
+    "o que verificar nas regras de isenção da taxa de inscrição",
   ],
   "Técnicas de Estudo": [
     "método pomodoro para concursos públicos",
@@ -123,36 +136,91 @@ const SEEDS = {
     "revisão espaçada para memorizar legislação",
     "como manter o foco nos estudos para concurso",
     "técnicas de leitura ativa para concurseiros",
+    "como usar mapas mentais para fixar matérias de concurso",
+    "técnica de recordação ativa aplicada a questões de concurso",
+    "como estudar legislação seca sem decorar artigo por artigo",
+    "como criar flashcards eficientes para concursos",
+    "como estudar com pouco tempo livre por dia",
+    "técnica Feynman aplicada ao estudo para concursos",
   ],
   "Concursos Abertos": [
     "concursos públicos com mais vagas para nível médio",
     "concursos federais abertos com inscrições em 2026",
     "melhores concursos para iniciantes em 2026",
     "concursos da área de saúde com inscrições abertas",
+    "concursos municipais com inscrições abertas em 2026",
+    "concursos com menor concorrência para começar a carreira pública",
+    "concursos com salário inicial acima de R$ 5 mil em 2026",
+    "concursos para quem não tem ensino superior completo",
   ],
   "Materiais Gratuitos": [
     "melhores apostilas gratuitas para concursos públicos",
     "sites com questões comentadas gratuitas para concursos",
     "videoaulas gratuitas para concursos públicos",
     "canais no youtube para estudar para concursos",
+    "aplicativos gratuitos para estudar para concursos",
+    "como usar a Lei Seca e a Vade Mecum de graça no celular",
+    "grupos e comunidades gratuitas de concurseiros",
+    "editais e provas anteriores gratuitas para baixar",
   ],
   "Cronograma de Estudos": [
     "como montar cronograma de estudos para concurso público",
     "cronograma de estudos para concurso em 6 meses",
     "como organizar rotina de estudos para concurso",
     "cronograma de estudos para quem trabalha",
+    "cronograma de estudos para concurso em 3 meses",
+    "como dividir as horas de estudo entre várias matérias",
+    "cronograma de estudos para quem tem filhos pequenos",
+    "como ajustar o cronograma na reta final antes da prova",
   ],
   "Carreiras Públicas": [
     "carreira de auditor fiscal: salário e perspectivas",
     "carreira policial federal: requisitos e preparação",
     "diferenças entre cargos de nível médio e superior no setor público",
     "carreira no INSS: como funciona",
+    "carreira de analista judiciário: como funciona e quanto ganha",
+    "carreira de defensor público: requisitos e etapas",
+    "carreira de auditor da receita estadual: o que muda em relação à federal",
+    "carreira de agente penitenciário: rotina e requisitos",
+    "carreira de diplomata: como funciona o concurso do Itamaraty",
   ],
   "Questões Comentadas": [
     "como resolver questões de raciocínio lógico em concursos",
     "estratégia para questões de português em concursos públicos",
     "como gabaritar questões de direito constitucional",
     "técnicas para questões de matemática financeira em concursos",
+    "como resolver questões de interpretação de texto em concursos",
+    "estratégia para questões de informática em concursos",
+    "como resolver questões de direito administrativo em concursos",
+    "estratégia para questões de atualidades em concursos",
+  ],
+  "Informática para Concursos": [
+    "noções de informática mais cobradas em concursos públicos",
+    "Word para concursos: o que realmente cai na prova",
+    "Excel para concursos: fórmulas e funções mais cobradas",
+    "segurança da informação para concursos: o que estudar",
+    "redes de computadores para concursos: conceitos essenciais",
+    "sistemas operacionais para concursos: Windows e Linux básico",
+  ],
+  "Redação e Discursiva": [
+    "como estruturar uma redação dissertativa para concursos",
+    "erros que zeram a redação em concursos públicos",
+    "como fazer uma prova discursiva de direito",
+    "como usar conectivos para melhorar a coesão na redação de concurso",
+    "como interpretar o comando da prova discursiva sem perder pontos",
+  ],
+  "Direito Administrativo": [
+    "princípios da administração pública para concursos",
+    "atos administrativos: o que cai em concursos",
+    "licitações e contratos administrativos para concursos",
+    "poderes da administração pública: como estudar para a prova",
+    "responsabilidade civil do Estado: o que os concursos cobram",
+  ],
+  "Concursos de Tribunais": [
+    "concurso para tribunal de justiça: como se preparar",
+    "concurso para tribunal regional federal: o que estudar",
+    "concurso para tribunal regional do trabalho: requisitos e etapas",
+    "diferenças entre concursos de tribunais estaduais e federais",
   ],
 };
 
@@ -163,32 +231,55 @@ function buildTopic() {
 
   const usedTopics = loadJson(usedTopicsLogPath, []);
   const existingSlugs = getExistingSlugs();
-  const MAX_ATTEMPTS = 15;
 
+  // 1ª passada: tenta achar um tópico inédito, sorteando a categoria.
+  // 15 tentativas é suficiente quando ALGUMA categoria ainda tem seed livre.
+  const MAX_ATTEMPTS = 15;
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const category = ag.randomItem(CATEGORIES);
-    const pool = SEEDS[category] || [`dicas sobre ${category}`];
+    const pool = SEEDS[category] || [];
+    if (pool.length === 0) continue;
 
-    const available = pool.filter((t) => !usedTopics.includes(t));
-    const finalPool = available.length > 0 ? available : pool;
-    const topic = ag.randomItem(finalPool);
-    const slug = ag.slugify(topic);
+    const available = pool.filter((t) => !usedTopics.includes(t) && !existingSlugs.has(ag.slugify(t)));
+    if (available.length === 0) continue;
 
-    if (!existingSlugs.has(slug) && !usedTopics.includes(topic)) {
-      return { topic, category };
+    const topic = ag.randomItem(available);
+    return { topic, category };
+  }
+
+  // 2ª passada (defensiva): a 1ª pode falhar por mau sorteio mesmo com seeds
+  // livres em outra categoria. Varre TODAS as categorias de forma determinística
+  // antes de aceitar que o pool real esgotou.
+  for (const category of CATEGORIES) {
+    const pool = SEEDS[category] || [];
+    const available = pool.filter((t) => !usedTopics.includes(t) && !existingSlugs.has(ag.slugify(t)));
+    if (available.length > 0) {
+      return { topic: ag.randomItem(available), category };
     }
   }
 
-  // esgotou tentativas: gera variação pra não travar o pipeline
+  // Pool de seeds genuinamente esgotado em TODAS as categorias.
+  // Isso não deve gerar um clone disfarçado de tópico antigo (era o bug que
+  // produzia títulos como "...guia atualizado", "...dicas práticas" repetidos).
+  // Em vez disso, sinaliza claramente que o pool precisa de novos seeds —
+  // a pessoa responsável vê isso no console/log e adiciona temas novos em SEEDS.
+  console.warn(
+    "\n⚠️  POOL DE SEEDS ESGOTADO em todas as categorias — todos os tópicos cadastrados já foram usados.\n" +
+    "   Isso é esperado de tempos em tempos; a ação correta é adicionar novos tópicos\n" +
+    "   em scripts/generate-article.js (objeto SEEDS), não gerar variações automáticas\n" +
+    "   do mesmo tópico (isso foi removido por causar posts quase-duplicados).\n"
+  );
+
   const category = ag.randomItem(CATEGORIES);
   const pool = SEEDS[category] || [`dicas sobre ${category}`];
-  const base = ag.randomItem(pool);
-  const variation = ag.randomItem(["guia atualizado", "passo a passo", "dicas práticas", "o que mudou em 2026"]);
-  return { topic: `${base} (${variation})`, category };
+  const topic = ag.randomItem(pool);
+  // marcado explicitamente para aparecer no painel de qualidade como "pool esgotado",
+  // já que o tópico abaixo é necessariamente uma repetição de algo já publicado
+  return { topic, category, seedPoolExhausted: true };
 }
 
 // ─── Save ─────────────────────────────────────────────────────────────
-async function saveArticle(result, topic, category, forceFile) {
+async function saveArticle(result, topic, category, forceFile, seedPoolExhausted = false) {
   if (!fs.existsSync(postsDir)) fs.mkdirSync(postsDir, { recursive: true });
 
   let existingFrontmatter;
@@ -229,8 +320,10 @@ async function saveArticle(result, topic, category, forceFile) {
     fillerCount: result.fillerCount,
     similarity: Math.round(result.maxSim * 100),
     similarTo: result.mostSimilarSlug,
-    status: result.issues.length > 0 ? "ressalvas" : "ok",
-    issues: result.issues,
+    status: seedPoolExhausted ? "pool-esgotado" : (result.issues.length > 0 ? "ressalvas" : "ok"),
+    issues: seedPoolExhausted
+      ? [...result.issues, "pool de seeds esgotado — tópico reaproveitado; adicione novos seeds em SEEDS"]
+      : result.issues,
   });
 
   return article.file;
@@ -275,7 +368,7 @@ async function main() {
   const count = countArg || 1;
 
   for (let i = 0; i < count; i++) {
-    const { topic, category } = buildTopic();
+    const { topic, category, seedPoolExhausted } = buildTopic();
     console.log(`\n📝 ${i + 1}/${count}: ${topic}`);
 
     try {
@@ -285,7 +378,7 @@ async function main() {
         generation,
         existingSignatures: getExistingSignatures(),
       });
-      const file = await saveArticle(result, topic, category, null);
+      const file = await saveArticle(result, topic, category, null, seedPoolExhausted);
 
       const used = loadJson(usedTopicsLogPath, []);
       used.push(topic);

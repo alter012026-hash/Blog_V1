@@ -205,6 +205,43 @@ O Instituto Nacional do Seguro Social (INSS) reúne milhares de servidores que g
 
 
 
+## 8. Carreira Após a Aprovação
+
+### 8.1. Primeiro cargo e adaptação
+
+Ao ser nomeado, o servidor passa por um curso de integração de 40 horas, dividido entre módulos de legislação, ética e rotinas de atendimento ao público. Nos primeiros 90 dias, cada novo servidor recebe acompanhamento de um colega com 5 anos de casa para orientação no dia a dia.
+
+### 8.2. Oportunidades de especialização
+
+- **Curso de Aperfeiçoamento em Benefícios por Incapacidade**: oferecido pelo próprio INSS, carga horária de 120 horas, custo subsidiado (R$ 500 para servidores nível I).
+- **Programa de Pós-Graduação em Seguridade Social**: parceria com a Universidade Federal de Minas Gerais (UFMG); bolsas de estudo de até 70 % para servidores com desempenho acima de 85 % nas avaliações internas.
+
+### 8.3. Mobilidade interna
+
+A Lei nº 8.112/90 permite a troca de lotação dentro da autarquia. Dados de 2023 mostram que 12 % dos servidores técnicos solicitaram transferência para unidades da região Nordeste, motivados por melhor qualidade de vida e oportunidades de liderança. O processo exige tempo mínimo de 2 anos no cargo atual e avaliação de desempenho com nota mínima de 7,0 (escala 0-10).
+
+> **Aplicação prática** – Se a mobilidade geográfica for um objetivo de médio prazo, mantenha as avaliações de desempenho consistentemente acima da nota mínima exigida desde o primeiro ano de exercício.
+
+## 9. Aspectos Previdenciários do Próprio Servidor
+
+### 9.1. Contribuição ao regime próprio
+
+O servidor do INSS contribui com 11 % do salário bruto para o Regime Próprio de Previdência Social (RPPS). A alíquota é descontada diretamente na folha e não pode ser reduzida por acordos coletivos.
+
+### 9.2. Aposentadoria
+
+- **Tempo de contribuição**: 30 anos (homens) ou 25 anos (mulheres), com idade mínima de 60 (homens) ou 55 (mulheres).
+- **Cálculo do benefício**: média dos 80 % maiores salários de contribuição, multiplicada por fator previdenciário (máximo 100 %).
+- **Valor médio**: em 2024, servidores que se aposentaram pelo RPPS do INSS receberam, em média, 78 % do último salário bruto.
+
+### 9.3. Auxílios e licenças
+
+- **Licença maternidade**: 180 dias, pagamento integral.
+- **Licença paternidade**: 20 dias, pagamento integral.
+- **Auxílio-doença**: 100 % do salário de contribuição, após 15 dias de afastamento.
+
+
+
 ## Conclusão  
 
 A carreira no INSS combina estabilidade, remuneração competitiva e um conjunto de benefícios que tornam o serviço público atraente. O caminho até a aprovação passa por três pilares: conhecimento profundo do edital, preparação metodológica alinhada ao estilo da banca e gestão rigorosa de tempo e documentos. Seguindo as estratégias apresentadas — mapeamento de conteúdo, cronograma semanal, uso de bancos de questões, simulações regulares e monitoramento de editais — o candidato transforma a jornada de estudo em um plano de ação mensurável.  

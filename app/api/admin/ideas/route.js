@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { checkAdminAuth } from "../../../../lib/admin-auth";
 import { generateValidatedArticle, buildArticleFile } from "../../../../lib/article-generator";
-import { commitFile, triggerVercelDeploy } from "../../../../lib/github-commit";
+import { commitFile, getFile, triggerVercelDeploy } from "../../../../lib/github-commit";
 import config from "../../../../site.config.js";
+
+const SIGNATURES_REPO_PATH = ".content-signatures.json";
+const QUALITY_LOG_REPO_PATH = ".quality-log.json";
 
 /**
  * POST /api/admin/ideas
@@ -30,6 +33,16 @@ export async function POST(request) {
     const generated = [];
     const errors = [];
 
+    // Carrega as assinaturas de conteúdo já publicado (mesmo arquivo que o
+    // fluxo de regeneração usa) — sem isso, posts gerados a partir de
+    // "dúvidas" nunca eram comparados contra o que já existe no blog, o que
+    // foi uma das causas dos posts quase-duplicados.
+    const signaturesFile = await getFile(SIGNATURES_REPO_PATH);
+    let signatures = signaturesFile ? JSON.parse(signaturesFile.content || "[]") : [];
+
+    const qualityLogFile = await getFile(QUALITY_LOG_REPO_PATH);
+    const qualityLog = qualityLogFile ? JSON.parse(qualityLogFile.content || "[]") : [];
+
     for (const rawDoubt of doubts.slice(0, 5)) { // máx 5 por vez
       const topic = rawDoubt.trim();
       if (!topic) continue;
@@ -39,7 +52,7 @@ export async function POST(request) {
           topic,
           category: chosenCategory,
           generation: config.generation,
-          existingSignatures: [],
+          existingSignatures: signatures.map((s) => ({ slug: s.slug, words: s.words })),
         });
 
         const article = buildArticleFile({
@@ -55,19 +68,51 @@ export async function POST(request) {
           `💡 Artigo de dúvida: ${article.file}`
         );
 
+        // Atualiza assinaturas e log de qualidade em memória nesta requisição,
+        // pra que a 2ª/3ª dúvida do mesmo lote já seja comparada contra a 1ª
+        // (evita gerar dois artigos quase iguais dentro do mesmo lote de 5).
+        signatures.push({ slug: article.slug, words: result.signature });
+        qualityLog.push({
+          timestamp: new Date().toISOString(),
+          file: article.file,
+          slug: article.slug,
+          title: article.normalizedTitle,
+          category: article.category,
+          provider: result.provider,
+          wordCount: result.wordCount,
+          fillerCount: result.fillerCount,
+          similarity: Math.round(result.maxSim * 100),
+          similarTo: result.mostSimilarSlug,
+          status: result.issues.length > 0 ? "ressalvas" : "ok",
+          issues: result.issues,
+        });
+
         generated.push({
           topic,
           file: article.file,
           words: result.wordCount,
           provider: result.provider,
+          similarity: Math.round(result.maxSim * 100),
+          similarTo: result.mostSimilarSlug,
+          issues: result.issues,
         });
       } catch (err) {
         errors.push({ topic, error: err.message });
       }
     }
 
-    // Aciona deploy na Vercel se gerou algo
+    // Persiste assinaturas e log atualizados (1x ao final, não por item)
     if (generated.length > 0) {
+      await commitFile(
+        SIGNATURES_REPO_PATH,
+        JSON.stringify(signatures.slice(-400), null, 2),
+        "chore: atualizar assinaturas de conteúdo (dúvidas)"
+      );
+      await commitFile(
+        QUALITY_LOG_REPO_PATH,
+        JSON.stringify(qualityLog.slice(-400), null, 2),
+        "chore: atualizar log de qualidade (dúvidas)"
+      );
       await triggerVercelDeploy().catch(() => {});
     }
 

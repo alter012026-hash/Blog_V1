@@ -957,7 +957,67 @@ function QualityTab({ toast }) {
         <StatCard label="Conteúdo Raso" value={data.shallowCount} sub="precisam revisão" color={C.accent} icon="⚠️" />
         <StatCard label="Duplicados" value={data.duplicateCount} sub="mesmo tema repetido" color={C.red} icon="🔁" />
         <StatCard label="Erros de Geração" value={data.errorCount} sub="falharam ao gerar" color={C.purple} icon="❌" />
+        {data.topicOverlap && (
+          <StatCard
+            label="Mesmo Tema"
+            value={data.topicOverlap.affectedFileCount}
+            sub={`em ${data.topicOverlap.overlapGroupCount} grupos`}
+            color={C.red}
+            icon="🪞"
+          />
+        )}
       </div>
+
+      {/* Sobreposição temática (URLs concorrendo pelo mesmo tema) */}
+      {data.topicOverlap && data.topicOverlap.groups.length > 0 && (
+        <div style={s.card}>
+          <div style={s.sectionTitle}>🪞 Mesmo Tema, URLs Diferentes</div>
+          <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 16, lineHeight: 1.6 }}>
+            Esses posts têm texto suficientemente diferente entre si (não aparecem como "duplicado" acima),
+            mas respondem à mesma busca — o Google divide o ranking entre eles em vez de concentrar força numa
+            única página. Sugestão: mantenha o marcado com ✅, copie manualmente qualquer ponto único dos outros
+            pra dentro dele, depois remova os marcados com ⚠️ e crie um redirect 301 da URL antiga pra mantida.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            {data.topicOverlap.groups.map((g) => (
+              <div key={g.topicKey} style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 10, padding: "12px 14px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ color: C.text, fontWeight: 600, fontSize: 13 }}>
+                      ✅ {g.suggestedKeep.title}
+                    </div>
+                    <div style={{ color: C.textFaint, fontSize: 11, marginTop: 2 }}>
+                      {g.suggestedKeep.file} · {(g.suggestedKeep.wordCount || 0).toLocaleString()} palavras
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 10 }}>
+                  {g.suggestedMergeOrRedirect.map((m) => (
+                    <div key={m.file} style={{
+                      display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12,
+                      paddingLeft: 14, borderLeft: `2px solid ${C.border}`, flexWrap: "wrap",
+                    }}>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ color: C.textMuted, fontSize: 13 }}>⚠️ {m.title}</div>
+                        <div style={{ color: C.textFaint, fontSize: 11, marginTop: 2 }}>
+                          {m.file} · {(m.wordCount || 0).toLocaleString()} palavras
+                        </div>
+                      </div>
+                      <button
+                        style={s.btnDanger}
+                        onClick={() => removeDuplicate({ file: m.file })}
+                        disabled={busyFile === m.file}
+                      >
+                        {busyFile === m.file ? "Removendo…" : "🗑️ Remover"}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Duplicados */}
       <div style={s.card}>

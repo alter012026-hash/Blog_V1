@@ -3,6 +3,7 @@ title: "Como Estudar para Concursos Públicos: Um Guia Prático Focado em Análi
 date: "2026-06-13"
 category: "Técnicas de Estudo"
 
+excerpt: "A aprovação em concursos públicos depende de mais do que horas de leitura. Cada banca tem um DNA próprio: estilo de questão, peso das disciplinas..."
 ---
 
 ## Introdução
