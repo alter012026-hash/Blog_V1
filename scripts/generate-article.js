@@ -28,24 +28,51 @@ const https = require("https");
 const qe = require("../lib/quality-engine.js");
 const ag = require("../lib/article-generator.js");
 
-// ─── Geração de Imagem via Pollinations.ai (gratuito, sem chave) ──────────
-// Pollinations.ai oferece API pública gratuita de geração de imagem (FLUX).
-// Não requer API key para uso básico — ideal para 1 imagem/dia.
+// ─── Geração de Imagem via Pollinations.ai ───────────────────────────────
+// Melhorias implementadas conforme documentação oficial:
+//   1. Bearer Token via Authorization header (mais seguro que ?key= na URL)
+//   2. private=true — imagens não aparecem no feed público do Pollinations
+//   3. Suporte a model=kontext para image-to-image (regeneração de capas existentes)
 // Documentação: https://github.com/pollinations/pollinations
-async function generateCoverImage(title, topic, category, slug) {
+async function generateCoverImage(title, topic, category, slug, referenceImageUrl = null) {
   const prompt = buildImagePrompt(title, topic, category);
   const encodedPrompt = encodeURIComponent(prompt);
   const seed = Math.floor(Math.random() * 99999);
 
+  // MELHORIA 3: usa model=kontext (image-to-image) quando uma imagem de
+  // referência é fornecida; caso contrário, usa flux (text-to-image padrão).
+  const model = referenceImageUrl ? "kontext" : "flux";
+
   // 1200x630 = proporção ideal para OG image / capa de blog
+  // MELHORIA 2: private=true — imagem não aparece no feed público
+  const params = new URLSearchParams({
+    width: "1200",
+    height: "630",
+    model,
+    nologo: "true",
+    enhance: "true",
+    private: "true",
+    seed: String(seed),
+  });
+
+  if (referenceImageUrl) {
+    // MELHORIA 3: passa a URL da imagem de referência para o kontext
+    params.set("image", referenceImageUrl);
+  }
+
   const imageUrl =
-    `https://image.pollinations.ai/prompt/${encodedPrompt}` +
-    `?width=1200&height=630&model=flux&nologo=true&enhance=true&seed=${seed}`;
+    `https://image.pollinations.ai/prompt/${encodedPrompt}?${params.toString()}`;
 
   const outputDir = path.resolve(__dirname, "../public/images");
   if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
   const outputPath = path.join(outputDir, `${slug}.jpg`);
+
+  // MELHORIA 1: Bearer Token via Authorization header (não mais ?key= na URL)
+  const apiToken = process.env.POLLINATIONS_API_KEY || null;
+  const requestHeaders = apiToken
+    ? { Authorization: `Bearer ${apiToken}` }
+    : {};
 
   return new Promise((resolve) => {
     const download = (url, redirectCount = 0) => {
@@ -53,7 +80,16 @@ async function generateCoverImage(title, topic, category, slug) {
         console.warn("⚠️  Imagem: muitos redirecionamentos, pulando.");
         return resolve(null);
       }
-      https.get(url, (res) => {
+
+      const parsedUrl = new URL(url);
+      const options = {
+        hostname: parsedUrl.hostname,
+        path: parsedUrl.pathname + parsedUrl.search,
+        method: "GET",
+        headers: requestHeaders,
+      };
+
+      https.request(options, (res) => {
         if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
           return download(res.headers.location, redirectCount + 1);
         }
@@ -67,12 +103,12 @@ async function generateCoverImage(title, topic, category, slug) {
         res.on("end", () => {
           const buf = Buffer.concat(chunks);
           if (buf.length < 5000) {
-            // resposta muito pequena = erro silencioso da API
             console.warn("⚠️  Imagem: resposta muito pequena da API, pulando.");
             return resolve(null);
           }
           fs.writeFileSync(outputPath, buf);
-          console.log(`🖼️  Imagem gerada: public/images/${slug}.jpg`);
+          const modelLabel = referenceImageUrl ? "kontext (img2img)" : "flux";
+          console.log(`🖼️  Imagem gerada [${modelLabel}]: public/images/${slug}.jpg`);
           resolve(`/images/${slug}.jpg`);
         });
         res.on("error", (err) => {
@@ -82,9 +118,11 @@ async function generateCoverImage(title, topic, category, slug) {
       }).on("error", (err) => {
         console.warn(`⚠️  Imagem: falha no request (${err.message}), pulando.`);
         resolve(null);
-      });
+      }).end();
     };
-    console.log(`🎨 Gerando imagem para: "${title}"`);
+
+    const modelLabel = referenceImageUrl ? "kontext (img2img)" : "flux";
+    console.log(`🎨 Gerando imagem [${modelLabel}] para: "${title}"`);
     download(imageUrl);
   });
 }
@@ -152,6 +190,13 @@ const countArg = args.includes("--count")
 // regenera o conteúdo de um post já publicado, mantendo filename/data/categoria
 const forceFileArg = args.includes("--force-file")
   ? args[args.indexOf("--force-file") + 1]
+  : null;
+
+// MELHORIA 3: --reference-image <url> ativa o modelo kontext (image-to-image)
+// Exemplo: node scripts/generate-article.js --topic "..." --reference-image "https://..."
+// Útil para regenerar capas de posts antigos mantendo consistência visual.
+const referenceImageArg = args.includes("--reference-image")
+  ? args[args.indexOf("--reference-image") + 1]
   : null;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -373,7 +418,7 @@ function buildTopic() {
 }
 
 // ─── Save ─────────────────────────────────────────────────────────────
-async function saveArticle(result, topic, category, forceFile, seedPoolExhausted = false) {
+async function saveArticle(result, topic, category, forceFile, seedPoolExhausted = false, referenceImage = null) {
   if (!fs.existsSync(postsDir)) fs.mkdirSync(postsDir, { recursive: true });
 
   let existingFrontmatter;
@@ -397,7 +442,7 @@ async function saveArticle(result, topic, category, forceFile, seedPoolExhausted
   // Se falhar (timeout, API fora do ar), continua sem imagem — não bloqueia.
   // Slug temporário derivado do título para nomear o arquivo antes do buildArticleFile.
   const tempSlug = ag.slugify(result.title || topic);
-  const coverImage = await generateCoverImage(result.title || topic, topic, category, tempSlug);
+  const coverImage = await generateCoverImage(result.title || topic, topic, category, tempSlug, referenceImage);
 
   const article = ag.buildArticleFile({
     title: result.title,
@@ -459,7 +504,7 @@ async function main() {
         generation,
         existingSignatures: getExistingSignatures(),
       });
-      const file = await saveArticle(result, topicArg, category, forceFileArg);
+      const file = await saveArticle(result, topicArg, category, forceFileArg, false, referenceImageArg);
       console.log(`💾 Atualizado: ${file} (${result.wordCount} palavras, via ${result.provider})`);
     } catch (err) {
       console.error(`❌ Erro ao regenerar: ${err.message}`);
@@ -481,7 +526,7 @@ async function main() {
         generation,
         existingSignatures: getExistingSignatures(),
       });
-      const file = await saveArticle(result, topic, category, null, seedPoolExhausted);
+      const file = await saveArticle(result, topic, category, null, seedPoolExhausted, referenceImageArg);
 
       const used = loadJson(usedTopicsLogPath, []);
       used.push(topic);
