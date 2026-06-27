@@ -32,7 +32,14 @@ export async function generateMetadata({ params }) {
   const siteUrl = config.url;
   const pageUrl = `${siteUrl}/blog/${params.slug}`;
   // OG image: usa a rota /og/[slug] que gera a capa automaticamente
-  const ogImageUrl = `${siteUrl}/og/${params.slug}`;
+  // (dados passados via query string, já que a rota roda no Edge Runtime)
+  const ogParams = new URLSearchParams({
+    title: post.title,
+    category: post.category ?? "Concursos",
+    excerpt: post.excerpt ?? "",
+    readingTime: post.readingTime ?? "",
+  });
+  const ogImageUrl = `${siteUrl}/og/${params.slug}?${ogParams.toString()}`;
 
   return {
     title: post.title,
@@ -109,7 +116,13 @@ export default async function PostPage({ params }) {
 
   const siteUrl  = config.url;
   const pageUrl  = `${siteUrl}/blog/${params.slug}`;
-  const ogImage  = `${siteUrl}/og/${params.slug}`;
+  const ogParams = new URLSearchParams({
+    title: post.title,
+    category: post.category ?? "Concursos",
+    excerpt: post.excerpt ?? "",
+    readingTime: post.readingTime ?? "",
+  });
+  const ogImage  = `${siteUrl}/og/${params.slug}?${ogParams.toString()}`;
 
   // JSON-LD Article — com image e dateModified corretos
   const articleSchema = {

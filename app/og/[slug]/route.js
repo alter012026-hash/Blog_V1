@@ -1,7 +1,9 @@
 import { ImageResponse } from "next/og";
-import { getPostBySlug } from "../../../lib/posts";
 import config from "../../../site.config";
 
+// Esta rota precisa ficar no Edge Runtime para funcionar com next/og.
+// Por isso ela NUNCA importa lib/posts.js (que usa fs/path do Node) —
+// os dados do post chegam via query string, passados por quem gera o link.
 export const runtime = "edge";
 
 // Paleta de cores por categoria
@@ -17,14 +19,15 @@ const CATEGORY_COLORS = {
 
 const DEFAULT_COLORS = { bg: "#1B3A6B", accent: "#F59E0B" };
 
-export async function GET(request, { params }) {
-  const post = getPostBySlug(params.slug);
+export async function GET(request) {
+  const { searchParams } = new URL(request.url);
 
-  // Fallback genérico se o post não existir
-  const title       = post?.title    ?? config.name;
-  const category    = post?.category ?? "Concursos";
-  const excerpt     = post?.excerpt  ?? config.description;
-  const readingTime = post?.readingTime ?? "";
+  // Dados do post chegam via query string (?title=...&category=...&excerpt=...&readingTime=...)
+  // Fallback genérico caso algum parâmetro não seja enviado
+  const title       = searchParams.get("title")       ?? config.name;
+  const category    = searchParams.get("category")    ?? "Concursos";
+  const excerpt     = searchParams.get("excerpt")     ?? config.description;
+  const readingTime = searchParams.get("readingTime") ?? "";
 
   const { bg, accent } = CATEGORY_COLORS[category] ?? DEFAULT_COLORS;
 
