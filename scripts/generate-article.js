@@ -24,8 +24,102 @@ require("dotenv").config({ path: ".env.local", override: false });
 
 const fs = require("fs");
 const path = require("path");
+const https = require("https");
 const qe = require("../lib/quality-engine.js");
 const ag = require("../lib/article-generator.js");
+
+// ─── Geração de Imagem via Pollinations.ai (gratuito, sem chave) ──────────
+// Pollinations.ai oferece API pública gratuita de geração de imagem (FLUX).
+// Não requer API key para uso básico — ideal para 1 imagem/dia.
+// Documentação: https://github.com/pollinations/pollinations
+async function generateCoverImage(title, topic, category, slug) {
+  const prompt = buildImagePrompt(title, topic, category);
+  const encodedPrompt = encodeURIComponent(prompt);
+  const seed = Math.floor(Math.random() * 99999);
+
+  // 1200x630 = proporção ideal para OG image / capa de blog
+  const imageUrl =
+    `https://image.pollinations.ai/prompt/${encodedPrompt}` +
+    `?width=1200&height=630&model=flux&nologo=true&enhance=true&seed=${seed}`;
+
+  const outputDir = path.resolve(__dirname, "../public/images");
+  if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
+
+  const outputPath = path.join(outputDir, `${slug}.jpg`);
+
+  return new Promise((resolve) => {
+    const download = (url, redirectCount = 0) => {
+      if (redirectCount > 5) {
+        console.warn("⚠️  Imagem: muitos redirecionamentos, pulando.");
+        return resolve(null);
+      }
+      https.get(url, (res) => {
+        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+          return download(res.headers.location, redirectCount + 1);
+        }
+        if (res.statusCode !== 200) {
+          console.warn(`⚠️  Imagem: HTTP ${res.statusCode}, pulando.`);
+          res.resume();
+          return resolve(null);
+        }
+        const chunks = [];
+        res.on("data", (chunk) => chunks.push(chunk));
+        res.on("end", () => {
+          const buf = Buffer.concat(chunks);
+          if (buf.length < 5000) {
+            // resposta muito pequena = erro silencioso da API
+            console.warn("⚠️  Imagem: resposta muito pequena da API, pulando.");
+            return resolve(null);
+          }
+          fs.writeFileSync(outputPath, buf);
+          console.log(`🖼️  Imagem gerada: public/images/${slug}.jpg`);
+          resolve(`/images/${slug}.jpg`);
+        });
+        res.on("error", (err) => {
+          console.warn(`⚠️  Imagem: erro de rede (${err.message}), pulando.`);
+          resolve(null);
+        });
+      }).on("error", (err) => {
+        console.warn(`⚠️  Imagem: falha no request (${err.message}), pulando.`);
+        resolve(null);
+      });
+    };
+    console.log(`🎨 Gerando imagem para: "${title}"`);
+    download(imageUrl);
+  });
+}
+
+function buildImagePrompt(title, topic, category) {
+  // Mapeia categorias para estilos visuais adequados ao nicho de concursos
+  const styleMap = {
+    "Editais": "official government document, desk, pen, seal, professional lighting",
+    "Técnicas de Estudo": "student studying at desk with books and notes, focused, bright",
+    "Concursos Abertos": "open door opportunity, career path, success concept",
+    "Materiais Gratuitos": "open books, educational materials, library, knowledge",
+    "Cronograma de Estudos": "calendar, planner, organized schedule, productivity",
+    "Carreiras Públicas": "government building, public service, professional career",
+    "Questões Comentadas": "exam questions, multiple choice, test paper, analysis",
+    "Informática para Concursos": "computer, keyboard, technology, digital learning",
+    "Redação e Discursiva": "writing, pen on paper, essay, formal composition",
+    "Direito Administrativo": "law books, justice, gavel, administrative law",
+    "Concursos de Tribunais": "courthouse, justice scales, tribunal, formal setting",
+  };
+
+  const style = styleMap[category] || "education, study, professional, books";
+
+  const keywords = topic
+    .replace(/[^\w\s]/g, " ")
+    .split(/\s+/)
+    .filter((w) => w.length > 3)
+    .slice(0, 4)
+    .join(", ");
+
+  return (
+    `Brazilian public service exam preparation concept, ${style}, ` +
+    `${keywords}, modern flat design illustration, professional blog cover, ` +
+    `blue and white color scheme, high quality, no text, no watermark`
+  );
+}
 
 // ─────────────────────────────────────────────
 // SAFE CONFIG LOADER (mantido do original)
@@ -289,6 +383,7 @@ async function saveArticle(result, topic, category, forceFile, seedPoolExhausted
       date: oldRaw.match(/^date:\s*"([^"]*)"/m)?.[1],
       category: oldRaw.match(/^category:\s*"([^"]*)"/m)?.[1],
       curiosity: oldRaw.match(/^curiosity:\s*"([^"]*)"/m)?.[1],
+      coverImage: oldRaw.match(/^coverImage:\s*"([^"]*)"/m)?.[1],
     };
   }
 
@@ -296,6 +391,13 @@ async function saveArticle(result, topic, category, forceFile, seedPoolExhausted
   // artigo, e nunca em runtime. Se falhar, buildArticleFile cai de volta
   // pra curiosidade anterior (regeneração) ou simplesmente omite o campo.
   const curiosity = await ag.generateCuriosity(result.body);
+
+  // Imagem de capa via Pollinations.ai (FLUX, gratuito, sem chave).
+  // Gera 1 imagem/artigo e salva em public/images/<slug>.jpg.
+  // Se falhar (timeout, API fora do ar), continua sem imagem — não bloqueia.
+  // Slug temporário derivado do título para nomear o arquivo antes do buildArticleFile.
+  const tempSlug = ag.slugify(result.title || topic);
+  const coverImage = await generateCoverImage(result.title || topic, topic, category, tempSlug);
 
   const article = ag.buildArticleFile({
     title: result.title,
@@ -305,6 +407,7 @@ async function saveArticle(result, topic, category, forceFile, seedPoolExhausted
     forceFile,
     existingFrontmatter,
     curiosity,
+    coverImage: coverImage || existingFrontmatter?.coverImage || null,
   });
 
   fs.writeFileSync(path.join(postsDir, article.file), article.content);
