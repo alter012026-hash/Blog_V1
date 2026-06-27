@@ -1026,13 +1026,254 @@ function QualityTab({ toast }) {
   );
 }
 
+/* ─── IDEAS TAB ─── */
+const FORUM_URLS = [
+  { label: "Reddit r/concursospublicos", url: "https://www.reddit.com/r/concursospublicos/new.json?limit=50&t=week" },
+  { label: "Reddit r/servidorpublico",   url: "https://www.reddit.com/r/servidorpublico/new.json?limit=50&t=week" },
+];
+
+const CATEGORIES_LIST = [
+  "Editais","Técnicas de Estudo","Concursos Abertos",
+  "Materiais Gratuitos","Cronograma de Estudos","Carreiras Públicas","Questões Comentadas",
+];
+
+function IdeasTab({ toast }) {
+  const [mode, setMode] = useState("text"); // "text" | "url"
+  const [rawText, setRawText] = useState("");
+  const [forumUrl, setForumUrl] = useState(FORUM_URLS[0].url);
+  const [customUrl, setCustomUrl] = useState("");
+  const [doubts, setDoubts] = useState([]);
+  const [selected, setSelected] = useState(new Set());
+  const [category, setCategory] = useState(CATEGORIES_LIST[0]);
+  const [loading, setLoading] = useState(false);
+  const [extracting, setExtracting] = useState(false);
+  const [results, setResults] = useState(null);
+
+  // ── Extrai dúvidas do texto colado ──────────────────────────
+  function extractFromText() {
+    const lines = rawText
+      .split(/\n/)
+      .map(l => l.replace(/^[-•*>\d.]+\s*/, "").trim())
+      .filter(l => l.length > 20 && l.length < 300);
+    const unique = [...new Set(lines)];
+    setDoubts(unique);
+    setSelected(new Set(unique));
+  }
+
+  // ── Busca dúvidas de fórum via Reddit JSON API ───────────────
+  async function fetchFromForum() {
+    setExtracting(true);
+    try {
+      const targetUrl = customUrl.trim() || forumUrl;
+      // Reddit: converte URL normal em .json
+      const jsonUrl = targetUrl.includes("reddit.com")
+        ? targetUrl.replace(/\/?(\?|$)/, ".json$1").replace("reddit.com/r/", "reddit.com/r/")
+        : targetUrl;
+
+      const res = await fetch(`/api/admin/ideas/fetch?url=${encodeURIComponent(jsonUrl)}`);
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "Erro ao buscar");
+
+      setDoubts(data.doubts);
+      setSelected(new Set(data.doubts));
+      if (data.doubts.length === 0) toast("Nenhuma dúvida encontrada nessa URL.", "err");
+      else toast(`${data.doubts.length} dúvidas extraídas!`, "ok");
+    } catch (e) {
+      toast("Erro: " + e.message, "err");
+    } finally {
+      setExtracting(false);
+    }
+  }
+
+  function toggleDoubt(d) {
+    const s = new Set(selected);
+    s.has(d) ? s.delete(d) : s.add(d);
+    setSelected(s);
+  }
+
+  function toggleAll() {
+    selected.size === doubts.length ? setSelected(new Set()) : setSelected(new Set(doubts));
+  }
+
+  // ── Gera artigos das dúvidas selecionadas ────────────────────
+  async function generate() {
+    const list = doubts.filter(d => selected.has(d));
+    if (list.length === 0) { toast("Selecione ao menos uma dúvida.", "err"); return; }
+    if (list.length > 5)  { toast("Máximo 5 por vez para não estourar a API.", "err"); return; }
+
+    setLoading(true);
+    setResults(null);
+    try {
+      const res = await fetch("/api/admin/ideas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ doubts: list, category }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setResults(data);
+      const ok = data.generated?.length || 0;
+      const err = data.errors?.length || 0;
+      toast(`${ok} artigo(s) gerado(s)${err ? `, ${err} erro(s)` : ""}.`, ok > 0 ? "ok" : "err");
+    } catch (e) {
+      toast("Erro: " + e.message, "err");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const boxStyle = {
+    background: C.bgElevated, border: `1px solid ${C.border}`,
+    borderRadius: 12, padding: 20, marginBottom: 16,
+  };
+  const labelStyle = { fontSize: 11, fontWeight: 700, color: C.textMuted, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8, display: "block" };
+  const inputStyle = { width: "100%", background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, color: C.text, padding: "9px 12px", fontSize: 13, outline: "none", boxSizing: "border-box" };
+  const btnPrimary = { background: C.primary, color: "#fff", border: "none", borderRadius: 8, padding: "10px 20px", fontSize: 13, fontWeight: 700, cursor: "pointer" };
+  const btnGhost  = { background: "transparent", color: C.textMuted, border: `1px solid ${C.border}`, borderRadius: 8, padding: "8px 16px", fontSize: 13, cursor: "pointer" };
+
+  return (
+    <div>
+      {/* Modo de entrada */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
+        {[["text","✏️ Colar texto / dúvidas"], ["url","🌐 Buscar de fórum"]].map(([id, label]) => (
+          <button key={id} onClick={() => { setMode(id); setDoubts([]); setSelected(new Set()); setResults(null); }}
+            style={{ ...btnGhost, ...(mode === id ? { borderColor: C.primary, color: C.primary, background: C.primaryGlow } : {}) }}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* MODO TEXTO */}
+      {mode === "text" && (
+        <div style={boxStyle}>
+          <label style={labelStyle}>Cole aqui as dúvidas (uma por linha, ou texto livre do grupo):</label>
+          <textarea
+            value={rawText}
+            onChange={e => setRawText(e.target.value)}
+            rows={7}
+            placeholder={"Como tirar atestado de saúde pré-concurso?\nQuais documentos levar na posse?\nComo ativar o vale-transporte no serviço público?"}
+            style={{ ...inputStyle, resize: "vertical", fontFamily: "inherit", lineHeight: 1.6 }}
+          />
+          <button onClick={extractFromText} style={{ ...btnPrimary, marginTop: 12 }}>
+            Extrair dúvidas →
+          </button>
+        </div>
+      )}
+
+      {/* MODO URL */}
+      {mode === "url" && (
+        <div style={boxStyle}>
+          <label style={labelStyle}>Fórum pré-configurado:</label>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
+            {FORUM_URLS.map(f => (
+              <button key={f.url} onClick={() => setForumUrl(f.url)}
+                style={{ ...btnGhost, ...(forumUrl === f.url && !customUrl ? { borderColor: C.primary, color: C.primary, background: C.primaryGlow } : {}) }}>
+                {f.label}
+              </button>
+            ))}
+          </div>
+          <label style={labelStyle}>Ou cole uma URL de fórum / Reddit personalizado:</label>
+          <input
+            value={customUrl}
+            onChange={e => setCustomUrl(e.target.value)}
+            placeholder="https://www.reddit.com/r/concursospublicos/new/"
+            style={{ ...inputStyle, marginBottom: 12 }}
+          />
+          <button onClick={fetchFromForum} disabled={extracting}
+            style={{ ...btnPrimary, opacity: extracting ? 0.6 : 1 }}>
+            {extracting ? "Buscando…" : "Buscar dúvidas →"}
+          </button>
+          <p style={{ fontSize: 11, color: C.textFaint, marginTop: 10 }}>
+            Funciona com Reddit (JSON público). Para grupos do Facebook, cole o texto das dúvidas no modo "Colar texto".
+          </p>
+        </div>
+      )}
+
+      {/* Lista de dúvidas extraídas */}
+      {doubts.length > 0 && (
+        <div style={boxStyle}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
+            <span style={{ ...labelStyle, marginBottom: 0 }}>{doubts.length} dúvida(s) encontrada(s) — selecione para gerar artigos:</span>
+            <button onClick={toggleAll} style={btnGhost}>{selected.size === doubts.length ? "Desmarcar tudo" : "Selecionar tudo"}</button>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 340, overflowY: "auto" }}>
+            {doubts.map((d, i) => (
+              <label key={i} style={{
+                display: "flex", alignItems: "flex-start", gap: 10, padding: "10px 12px",
+                background: selected.has(d) ? C.primaryGlow : C.surface,
+                border: `1px solid ${selected.has(d) ? C.primary + "55" : C.border}`,
+                borderRadius: 8, cursor: "pointer", fontSize: 13, color: C.text, lineHeight: 1.5,
+              }}>
+                <input type="checkbox" checked={selected.has(d)} onChange={() => toggleDoubt(d)}
+                  style={{ marginTop: 2, accentColor: C.primary, flexShrink: 0 }} />
+                {d}
+              </label>
+            ))}
+          </div>
+
+          {/* Categoria + botão gerar */}
+          <div style={{ marginTop: 16, display: "flex", flexWrap: "wrap", gap: 12, alignItems: "flex-end" }}>
+            <div style={{ flex: "1 1 200px" }}>
+              <label style={labelStyle}>Categoria dos artigos:</label>
+              <select value={category} onChange={e => setCategory(e.target.value)} style={{ ...inputStyle }}>
+                {CATEGORIES_LIST.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div>
+              <p style={{ fontSize: 11, color: C.textFaint, marginBottom: 6 }}>
+                {selected.size} selecionada(s) · máx 5 por vez
+              </p>
+              <button onClick={generate} disabled={loading || selected.size === 0}
+                style={{ ...btnPrimary, opacity: (loading || selected.size === 0) ? 0.6 : 1, minWidth: 160 }}>
+                {loading ? "Gerando…" : `✨ Gerar ${Math.min(selected.size, 5)} artigo(s)`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Resultados */}
+      {results && (
+        <div style={boxStyle}>
+          <span style={labelStyle}>Resultado</span>
+          {results.generated?.map((r, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: C.greenGlow, border: `1px solid ${C.green}44`, borderRadius: 8, marginBottom: 8, fontSize: 13 }}>
+              <span style={{ color: C.green, fontWeight: 700 }}>✓</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ color: C.text, fontWeight: 600 }}>{r.topic}</div>
+                <div style={{ color: C.textFaint, fontSize: 11, marginTop: 2 }}>{r.file} · {r.words} palavras · via {r.provider}</div>
+              </div>
+              <a href={`/blog/${r.file.replace(/^\d{4}-\d{2}-\d{2}-/, "").replace(/\.md$/, "")}`}
+                target="_blank" rel="noreferrer"
+                style={{ color: C.primary, fontSize: 11, textDecoration: "none", flexShrink: 0 }}>
+                Ver →
+              </a>
+            </div>
+          ))}
+          {results.errors?.map((e, i) => (
+            <div key={i} style={{ display: "flex", gap: 10, padding: "10px 12px", background: C.redGlow, border: `1px solid ${C.red}44`, borderRadius: 8, marginBottom: 8, fontSize: 13 }}>
+              <span style={{ color: C.red, fontWeight: 700 }}>✗</span>
+              <div>
+                <div style={{ color: C.text }}>{e.topic}</div>
+                <div style={{ color: C.textFaint, fontSize: 11 }}>{e.error}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ─── TABS config ─── */
 const TABS = [
   { id: "metrics", label: "Métricas", icon: "📊", shortLabel: "Métricas" },
   { id: "quality", label: "Qualidade", icon: "🎯", shortLabel: "Qualidade" },
   { id: "affiliates", label: "Afiliados", icon: "🔗", shortLabel: "Afiliados" },
   { id: "config", label: "Configurações", icon: "⚙️", shortLabel: "Config" },
-  { id: "indexing", label: "Indexação", icon: "🚀", shortLabel: "Indexação" },
+  { id: "ideas",   label: "💡 Ideias",    icon: "💡", shortLabel: "Ideias" },
 ];
 
 /* ─── PÁGINA PRINCIPAL ─── */
@@ -1154,7 +1395,7 @@ export default function AdminPage() {
           {tab === "quality" && <QualityTab toast={showToast} />}
           {tab === "affiliates" && <AffiliatesTab toast={showToast} />}
           {tab === "config" && <ConfigTab toast={showToast} />}
-          {tab === "indexing" && <IndexingTab toast={showToast} />}
+          {tab === "ideas"    && <IdeasTab    toast={showToast} />}
         </main>
       </div>
 
