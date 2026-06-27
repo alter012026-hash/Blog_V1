@@ -3,7 +3,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import PostCard from "../components/PostCard";
 import ScrollReveal from "../components/ScrollReveal";
-import NextPostCountdown from "../components/NextPostCountdown";
+import WelcomeCountdownRotator from "../components/WelcomeCountdownRotator";
 import { getAllPosts, getAllCategories } from "../lib/posts";
 import { getSearchIndex } from "../lib/search-index";
 import config from "../site.config";
@@ -38,9 +38,9 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Countdown — próximo post */}
+        {/* Boas-vindas ↔ Countdown — próximo post */}
         <section className="cd-section">
-          <NextPostCountdown />
+          <WelcomeCountdownRotator postCount={allPosts.length} categoryCount={categories.length} />
         </section>
 
         {/* Destaque */}
