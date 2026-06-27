@@ -800,7 +800,15 @@ time {
   padding: 48px 24px 80px;
 }
 
-.article-layout > * { grid-column: 2; }
+/* Itens de grid têm min-width:auto por padrão, ou seja, NÃO encolhem
+   além do tamanho do próprio conteúdo. Se algo dentro do artigo for
+   mais largo que a tela (tabela, bloco de código, link longo sem
+   quebra), a coluna do grid cresce para acomodar — e como o html/body
+   usa overflow-x:clip (não scroll), esse excesso fica simplesmente
+   cortado visualmente em vez de quebrar linha. min-width:0 permite
+   que a coluna encolha até a largura do viewport e deixa o conteúdo
+   interno (overflow-wrap, table-scroll etc.) lidar com o excesso. */
+.article-layout > * { grid-column: 2; min-width: 0; }
 
 .article-header { margin-bottom: 40px; }
 
@@ -1395,6 +1403,8 @@ a { transition: color 0.15s; }
     grid-template-columns: 1fr;
     padding: 28px 18px 56px;
   }
+
+  .article-layout > * { min-width: 0; }
 
   .article-title { margin-bottom: 14px; }
 

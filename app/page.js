@@ -1,103 +1,156 @@
-import Link from "next/link";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-import PostCard from "../components/PostCard";
-import ScrollReveal from "../components/ScrollReveal";
-import { getAllPosts, getAllCategories } from "../lib/posts";
-import { getSearchIndex } from "../lib/search-index";
-import config from "../site.config";
+import { notFound } from "next/navigation";
+import Header from "../../../components/Header";
+import Footer from "../../../components/Footer";
+import PostCard from "../../../components/PostCard";
+import AffiliateBox from "../../../components/AffiliateBox";
+import ReadProgress from "../../../components/ReadProgress";
+import ScrollReveal from "../../../components/ScrollReveal";
+import { getAllSlugs, getPostBySlug, getPostContentHtml, getRelatedPosts, getAllPosts } from "../../../lib/posts";
+import { getSearchIndex } from "../../../lib/search-index";
+import { matchAffiliate, getPinnedAffiliates } from "../../../lib/affiliate-matcher";
+import config from "../../../site.config";
 
-export const revalidate = 3600; // revalida a cada hora
+export const revalidate = 3600;
 
-export default function HomePage() {
-  const allPosts = getAllPosts();
-  const featuredPost = allPosts[0];
-  const latestPosts = allPosts.slice(1, 7);
-  const categories = getAllCategories();
+// Gera todas as páginas estáticas no build
+export async function generateStaticParams() {
+  const slugs = getAllSlugs();
+  return slugs.map(slug => ({ slug }));
+}
+
+// Metadata dinâmica por artigo
+export async function generateMetadata({ params }) {
+  const post = getPostBySlug(params.slug);
+  if (!post) return {};
+
+  const siteUrl = config.url;
+  const pageUrl = `${siteUrl}/blog/${params.slug}`;
+
+  return {
+    title: post.title,
+    description: post.excerpt,
+    keywords: [post.targetKeyword, ...post.secondaryKeywords],
+    authors: [{ name: config.author.name }],
+    openGraph: {
+      type: "article",
+      url: pageUrl,
+      title: post.title,
+      description: post.excerpt,
+      publishedTime: post.date,
+      authors: [config.author.name],
+      tags: [post.targetKeyword, ...post.secondaryKeywords],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+    },
+    alternates: { canonical: pageUrl },
+  };
+}
+
+export default async function PostPage({ params }) {
+  const post = getPostBySlug(params.slug);
+  if (!post) notFound();
+
+  const contentHtml = await getPostContentHtml(post.content);
+  const relatedPosts = getRelatedPosts(params.slug, post.category);
+  const matchedAffiliate = matchAffiliate(post.content, config.affiliates);
+  const pinnedAffiliates = getPinnedAffiliates(config.affiliates);
   const searchIndex = getSearchIndex();
+
+  // post.date já é uma string ISO completa (ex.: "2026-06-27T00:00:00.000Z"),
+  // gerada por safeDate.toISOString() em lib/posts.js — não concatenar mais
+  // nada nela, ou o new Date() recebe um formato inválido e retorna "Invalid Date".
+  const parsedDate = post.date ? new Date(post.date) : null;
+  const formattedDate =
+    parsedDate && !isNaN(parsedDate.getTime())
+      ? parsedDate.toLocaleDateString("pt-BR", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })
+      : "Data não informada";
+
+  // JSON-LD Article
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.excerpt,
+    datePublished: post.date,
+    dateModified: post.date,
+    author: { "@type": "Person", name: config.author.name },
+    publisher: {
+      "@type": "Organization",
+      name: config.name,
+      logo: { "@type": "ImageObject", url: `${config.url}/logo.png` },
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": `${config.url}/blog/${params.slug}` },
+    keywords: [post.targetKeyword, ...post.secondaryKeywords].join(", "),
+    wordCount: post.wordCount,
+    articleSection: post.category,
+    inLanguage: config.language,
+  };
 
   return (
     <>
-      <Header posts={searchIndex} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+
+      <ReadProgress />
       <ScrollReveal />
+      <Header posts={searchIndex} />
 
       <main>
-        {/* Hero */}
-        <section className="hero">
-          <div className="container">
-            <p className="hero-eyebrow">✦ {config.niche}</p>
-            <h1>
-              Tudo Sobre Concursos<br />
-              para quem quer <em>ser aprovado</em>
-            </h1>
-            <p className="hero-desc">{config.description}</p>
-            <Link href="/blog" className="hero-cta">
-              Explorar artigos →
-            </Link>
-          </div>
-        </section>
-
-        {/* Destaque */}
-        {featuredPost && (
-          <section className="section section--light reveal">
-            <div className="container">
-              <div className="section-header">
-                <p className="section-label">Artigo em destaque</p>
-                <h2 className="section-title">Última publicação</h2>
+        <article>
+          <div className="article-layout">
+            {/* Header do artigo */}
+            <header className="article-header">
+              <div className="article-category-bar">
+                <span className="article-cat-badge">{post.category}</span>
+                <span className="article-meta-item">
+                  <time dateTime={post.date}>{formattedDate}</time>
+                </span>
+                <span className="article-meta-item">{post.readingTime} de leitura</span>
+                <span className="article-meta-item">{post.wordCount.toLocaleString("pt-BR")} palavras</span>
               </div>
-              <PostCard post={featuredPost} featured />
-            </div>
-          </section>
-        )}
 
-        {/* Categorias */}
-        {categories.length > 0 && (
-          <section className="section section--alt reveal">
-            <div className="container">
-              <div className="section-header">
-                <p className="section-label">Navegue por tema</p>
-                <h2 className="section-title">Categorias</h2>
-              </div>
-              <div className="categories-filter">
-                {categories.map(cat => (
-                  <Link key={cat} href={`/blog?categoria=${encodeURIComponent(cat)}`} className="cat-btn">
-                    {cat}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
+              <h1 className="article-title">{post.title}</h1>
+              <p className="article-excerpt">{post.excerpt}</p>
+            </header>
 
-        {/* Posts recentes */}
-        <section className="section section--light">
-          <div className="container">
-            <div className="section-header reveal">
-              <p className="section-label">Conteúdo recente</p>
-              <h2 className="section-title">Artigos publicados</h2>
-            </div>
+            <hr className="article-divider" />
 
-            {latestPosts.length > 0 ? (
-              <div className="posts-grid reveal-stagger">
-                {latestPosts.map(post => (
-                  <PostCard key={post.slug} post={post} />
-                ))}
-              </div>
-            ) : (
-              <p style={{ color: "var(--text-muted)", textAlign: "center", padding: "48px 0" }}>
-                Os artigos serão publicados em breve. Execute o script de geração para começar.
-              </p>
-            )}
+            {/* Corpo do artigo */}
+            <div
+              className="prose"
+              dangerouslySetInnerHTML={{ __html: contentHtml }}
+            />
 
-            {allPosts.length > 7 && (
-              <div style={{ textAlign: "center", marginTop: "40px" }}>
-                <Link href="/blog" className="hero-cta">
-                  Ver todos os artigos →
-                </Link>
-              </div>
+            {/* Indicação de afiliado relevante ao tema do post */}
+            {matchedAffiliate && <AffiliateBox affiliate={matchedAffiliate} />}
+
+            {/* Afiliados fixos (sem relação temática com o conteúdo, exibidos sempre) */}
+            {pinnedAffiliates.map((aff) => (
+              <AffiliateBox key={aff.id} affiliate={aff} />
+            ))}
+
+            {/* Posts relacionados */}
+            {relatedPosts.length > 0 && (
+              <aside className="related-posts reveal">
+                <h3>Artigos relacionados</h3>
+                <div className="posts-grid reveal-stagger">
+                  {relatedPosts.map(p => (
+                    <PostCard key={p.slug} post={p} />
+                  ))}
+                </div>
+              </aside>
             )}
           </div>
-        </section>
+        </article>
       </main>
 
       <Footer />
