@@ -41,13 +41,6 @@ const siteConfig = {
   // --- AFILIADOS ---
   affiliates: [
     {
-      id: "estrategia",
-      name: "Estratégia Concursos",
-      url: "https://www.estrategiaconcursos.com.br/",
-      keywords: ["curso para concurso", "apostila", "pdf", "questões", "preparação"],
-      cta: "Conheça os cursos do Estratégia Concursos",
-    },
-    {
       id: "gran",
       name: "Gran Cursos",
       url: "https://mais.app/Vt6W6u",
