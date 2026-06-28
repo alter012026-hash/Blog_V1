@@ -809,5 +809,19 @@
     "similarTo": "biologia-e-ciencias-para-concursos-estrategias-precisas-para-alcancar-aprovados",
     "status": "ok",
     "issues": []
+  },
+  {
+    "timestamp": "2026-06-28T15:35:44.848Z",
+    "file": "2026-06-28-concursos-ja-confirmados-para-sao-paulo-2026.md",
+    "slug": "concursos-ja-confirmados-para-sao-paulo-2026",
+    "title": "Concursos Já Confirmados para São Paulo 2026",
+    "category": "Editais",
+    "provider": "Groq",
+    "wordCount": 2109,
+    "fillerCount": 0,
+    "similarity": 18,
+    "similarTo": "portugues-para-concursos",
+    "status": "ok",
+    "issues": []
   }
 ]
