@@ -1409,6 +1409,7 @@ time {
 
 /* =============================================
    NEWSLETTER INLINE (meio do artigo + homepage)
+   Usa variáveis do tema — funciona em light e dark
    ============================================= */
 
 .nl-inline {
@@ -1423,13 +1424,13 @@ time {
 }
 
 .nl-inline--article {
-  background: linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(139,92,246,0.08) 100%);
-  border: 1px solid rgba(59,130,246,0.25);
+  background: linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(139,92,246,0.06) 100%);
+  border: 1px solid rgba(59,130,246,0.2);
 }
 
 .nl-inline--home {
-  background: linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(59,130,246,0.08) 100%);
-  border: 1px solid rgba(16,185,129,0.2);
+  background: linear-gradient(135deg, rgba(16,185,129,0.07) 0%, rgba(59,130,246,0.07) 100%);
+  border: 1px solid rgba(16,185,129,0.18);
 }
 
 .nl-inline::before {
@@ -1439,7 +1440,7 @@ time {
   right: -60px;
   width: 180px;
   height: 180px;
-  background: radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -1471,10 +1472,11 @@ time {
   margin-bottom: 10px;
 }
 
+/* ── Texto usa variáveis do tema ── */
 .nl-inline-title {
   font-size: 1.15rem;
   font-weight: 800;
-  color: var(--text-primary, #F1F5F9);
+  color: var(--text);
   line-height: 1.3;
   margin: 0 0 8px;
   font-family: var(--font-display, inherit);
@@ -1482,7 +1484,7 @@ time {
 
 .nl-inline-sub {
   font-size: 0.85rem;
-  color: var(--text-muted, #94A3B8);
+  color: var(--text-muted);
   line-height: 1.6;
   margin: 0 0 12px;
 }
@@ -1498,7 +1500,7 @@ time {
 
 .nl-inline-bullets li {
   font-size: 0.8rem;
-  color: var(--text-muted, #94A3B8);
+  color: var(--text-muted);
 }
 
 .nl-inline-form {
@@ -1507,21 +1509,32 @@ time {
   gap: 8px;
 }
 
+/* ── Input adaptado ao tema ── */
 .nl-inline-input {
   width: 100%;
   padding: 11px 14px;
   border-radius: 9px;
-  border: 1px solid rgba(255,255,255,0.15);
-  background: rgba(255,255,255,0.07);
-  color: #fff;
+  border: 1px solid var(--border, rgba(0,0,0,0.15));
+  background: var(--surface, rgba(0,0,0,0.04));
+  color: var(--text);
   font-size: 0.87rem;
   outline: none;
   transition: border-color 0.15s, background 0.15s;
 }
 
-.nl-inline-input::placeholder { color: rgba(255,255,255,0.35); }
+.nl-inline-input::placeholder { color: var(--text-muted); }
 .nl-inline-input:focus {
-  border-color: var(--accent);
+  border-color: var(--primary);
+  background: var(--surface, rgba(0,0,0,0.04));
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+}
+
+/* Dark: bordas e fundo mais suaves */
+[data-theme="dark"] .nl-inline-input {
+  border-color: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.07);
+}
+[data-theme="dark"] .nl-inline-input:focus {
   background: rgba(255,255,255,0.1);
 }
 
@@ -1536,7 +1549,7 @@ time {
   font-weight: 700;
   cursor: pointer;
   transition: opacity 0.15s, transform 0.15s;
-  box-shadow: 0 4px 16px rgba(59,130,246,0.35);
+  box-shadow: 0 4px 16px rgba(59,130,246,0.3);
 }
 
 .nl-inline-btn:hover:not(:disabled) {
@@ -1551,21 +1564,26 @@ time {
 
 .nl-inline-feedback--error {
   font-size: 0.77rem;
-  color: #FCA5A5;
+  color: #DC2626;
   margin: 0;
+}
+
+[data-theme="dark"] .nl-inline-feedback--error {
+  color: #FCA5A5;
 }
 
 .nl-inline-disclaimer {
   font-size: 0.72rem;
-  color: rgba(255,255,255,0.3);
+  color: var(--text-muted);
   margin: 0;
   text-align: center;
+  opacity: 0.7;
 }
 
-/* Estado de sucesso */
+/* ── Estado de sucesso ── */
 .nl-inline--ok {
-  background: rgba(16,185,129,0.08);
-  border: 1px solid rgba(16,185,129,0.25);
+  background: rgba(16,185,129,0.07);
+  border: 1px solid rgba(16,185,129,0.22);
   gap: 16px;
   align-items: center;
   padding: 20px 28px;
@@ -1578,18 +1596,22 @@ time {
 
 .nl-inline-ok-title {
   font-weight: 700;
-  color: #6EE7B7;
+  color: #059669;
   margin: 0 0 4px;
   font-size: 1rem;
 }
 
+[data-theme="dark"] .nl-inline-ok-title {
+  color: #6EE7B7;
+}
+
 .nl-inline-ok-sub {
-  color: #94A3B8;
+  color: var(--text-muted);
   font-size: 0.83rem;
   margin: 0;
 }
 
-/* Mobile */
+/* ── Mobile ── */
 @media (max-width: 680px) {
   .nl-inline {
     flex-direction: column;
