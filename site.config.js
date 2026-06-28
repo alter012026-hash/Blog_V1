@@ -61,6 +61,13 @@ const siteConfig = {
       keywords: ["questões", "simulados", "banco de questões"],
       cta: "Pratique com milhares de questões no QConcursos",
     },
+    {
+      id: "Elite Concursos",
+      name: "Elite Concursos",
+      url: "https://go.hotmart.com/E106521171F?dp=1",
+      keywords: ["curso", "apostilas", "pdf"],
+      cta: "",
+    },
   ],
 
   // --- ADSENSE ---
