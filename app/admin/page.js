@@ -1327,10 +1327,143 @@ function IdeasTab({ toast }) {
   );
 }
 
+/* ─── ABA: NEWSLETTER ─── */
+function NewsletterTab({ toast }) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [testEmail, setTestEmail] = useState("");
+  const [sendingTest, setSendingTest] = useState(false);
+
+  async function load(isRefresh = false) {
+    if (isRefresh) setRefreshing(true);
+    try {
+      const r = await fetch("/api/admin/newsletter");
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || "Erro ao carregar");
+      setData(d);
+    } catch (err) {
+      toast(err.message || "Erro ao carregar newsletter", "error");
+    }
+    setLoading(false);
+    setRefreshing(false);
+  }
+
+  useEffect(() => { load(); }, []);
+
+  async function sendTest() {
+    if (!testEmail) {
+      toast("Informe um e-mail para o teste", "error");
+      return;
+    }
+    setSendingTest(true);
+    try {
+      const r = await fetch("/api/admin/newsletter/test-send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ testEmail }),
+      });
+      const d = await r.json();
+      if (!r.ok || !d.ok) throw new Error(d.error || "Falha ao enviar teste");
+      toast(`E-mail de teste enviado para ${testEmail}`, "ok");
+    } catch (err) {
+      toast(err.message, "error");
+    }
+    setSendingTest(false);
+  }
+
+  if (loading) return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      {[1, 2].map(i => (
+        <div key={i} style={{ ...s.card, height: 80, background: C.surfaceHover, animation: "pulse 1.5s infinite" }} />
+      ))}
+    </div>
+  );
+  if (!data) return null;
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      {/* Cards */}
+      <div className="stat-grid">
+        <StatCard label="Inscritos ativos" value={data.active} sub="recebendo e-mails" color={C.green} icon="📬" />
+        <StatCard label="Total cadastrado" value={data.total} sub="histórico" color={C.primary} icon="👥" />
+        <StatCard label="Descadastrados" value={data.unsubscribed} sub="optaram por sair" color={C.textFaint} icon="🚫" />
+        <StatCard
+          label="Último envio"
+          value={data.lastNotifiedDate ? new Date(data.lastNotifiedDate).toLocaleDateString("pt-BR") : "—"}
+          sub={data.lastNotifiedSlug || "nenhum ainda"}
+          color={C.accent}
+          icon="🕒"
+        />
+      </div>
+
+      {/* Como funciona */}
+      <div style={s.card}>
+        <div style={s.sectionTitle}>Como funciona o envio automático</div>
+        <p style={{ fontSize: 13, color: C.textMuted, lineHeight: 1.7, margin: 0 }}>
+          Um GitHub Action roda 1x por dia e verifica se saiu post novo desde o
+          último aviso. Se sim, envia automaticamente um e-mail para todos os
+          inscritos ativos com o(s) post(s) novo(s). Se não saiu nada novo, o
+          dia é pulado — sem e-mails repetidos ou vazios.
+        </p>
+      </div>
+
+      {/* Teste manual */}
+      <div style={s.card}>
+        <div style={s.sectionTitle}>Enviar e-mail de teste</div>
+        <p style={{ fontSize: 12, color: C.textFaint, marginBottom: 12 }}>
+          Envia o template com o post mais recente apenas para o e-mail abaixo
+          (não dispara para a lista de inscritos).
+        </p>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <input
+            type="email"
+            placeholder="seu@email.com"
+            value={testEmail}
+            onChange={(e) => setTestEmail(e.target.value)}
+            style={{ ...s.input, maxWidth: 280 }}
+          />
+          <button style={s.btn} onClick={sendTest} disabled={sendingTest}>
+            {sendingTest ? "Enviando…" : "Enviar teste"}
+          </button>
+        </div>
+      </div>
+
+      {/* Lista de inscritos */}
+      <div style={s.card}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+          <div style={{ ...s.sectionTitle, marginBottom: 0 }}>Inscritos ({data.contacts.length})</div>
+          <button style={{ ...s.btnGhost, padding: "6px 12px", fontSize: 12 }} onClick={() => load(true)} disabled={refreshing}>
+            {refreshing ? "Atualizando…" : "↻ Atualizar"}
+          </button>
+        </div>
+        {data.contacts.length === 0 ? (
+          <p style={{ color: C.textFaint, fontSize: 13 }}>Nenhum inscrito ainda.</p>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 360, overflowY: "auto" }}>
+            {data.contacts.map((c) => (
+              <div key={c.email} style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                padding: "8px 12px", background: C.bgElevated, borderRadius: 8, fontSize: 13,
+              }}>
+                <span style={{ color: C.text }}>{c.email}</span>
+                <span style={c.unsubscribed ? s.tag(C.textFaint) : s.tag(C.green)}>
+                  {c.unsubscribed ? "Descadastrado" : "Ativo"}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ─── TABS config ─── */
 const TABS = [
   { id: "metrics", label: "Métricas", icon: "📊", shortLabel: "Métricas" },
   { id: "quality", label: "Qualidade", icon: "🎯", shortLabel: "Qualidade" },
+  { id: "newsletter", label: "Newsletter", icon: "📬", shortLabel: "Newsletter" },
   { id: "affiliates", label: "Afiliados", icon: "🔗", shortLabel: "Afiliados" },
   { id: "config", label: "Configurações", icon: "⚙️", shortLabel: "Config" },
   { id: "ideas",   label: "💡 Ideias",    icon: "💡", shortLabel: "Ideias" },
@@ -1453,6 +1586,7 @@ export default function AdminPage() {
           </h1>
           {tab === "metrics" && <MetricsTab toast={showToast} />}
           {tab === "quality" && <QualityTab toast={showToast} />}
+          {tab === "newsletter" && <NewsletterTab toast={showToast} />}
           {tab === "affiliates" && <AffiliatesTab toast={showToast} />}
           {tab === "config" && <ConfigTab toast={showToast} />}
           {tab === "ideas"    && <IdeasTab    toast={showToast} />}

@@ -1,6 +1,7 @@
 
 import Link from "next/link";
 import config from "../site.config";
+import NewsletterBox from "./NewsletterBox";
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -25,6 +26,8 @@ export default function Footer() {
               </Link>
             ))}
           </nav>
+
+          <NewsletterBox />
         </div>
 
         <div className="footer-bottom">
