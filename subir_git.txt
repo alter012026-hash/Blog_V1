@@ -1,4 +1,34 @@
-git status
-git add .
-git commit -m "update: Afiliados"
-git push origin main
+# ============================================================
+# COMANDOS PARA SUBIR AS ATUALIZAÇÕES AO GIT
+# Newsletter: popup pulsante + inline + footer melhorado
+# ============================================================
+
+# 1. Acesse a pasta do projeto
+cd Blog_V1
+
+# 2. Garanta que está atualizado com o remoto (evita conflito com Actions)
+git pull --rebase
+
+# 3. Adiciona os arquivos alterados/novos
+git add components/NewsletterPopup.jsx
+git add components/NewsletterInline.jsx
+git add components/NewsletterBox.jsx
+git add app/blog/[slug]/page.js
+git add app/page.js
+git add app/globals.css
+
+# 4. Commit
+git commit -m "feat: sistema de captação de newsletter — popup pulsante, inline no artigo e homepage
+
+- NewsletterPopup: aparece após 30s OU 40% de rolagem, anima suavemente, fecha com ESC ou clique fora, não repete na sessão
+- NewsletterInline: bloco persuasivo no meio dos artigos e na homepage com bullets de benefícios
+- NewsletterBox (footer): copy atualizado — mais direto e persuasivo
+- globals.css: CSS completo para nl-inline (2 variantes: article / home) e estados ok/error"
+
+# 5. Sobe
+git push
+
+# ============================================================
+# ✅ A Vercel faz rebuild automático após o push.
+#    Em 1-2 min o popup e o inline já estão no ar.
+# ============================================================

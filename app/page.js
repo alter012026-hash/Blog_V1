@@ -4,6 +4,7 @@ import Footer from "../components/Footer";
 import PostCard from "../components/PostCard";
 import ScrollReveal from "../components/ScrollReveal";
 import WelcomeCountdownRotator from "../components/WelcomeCountdownRotator";
+import NewsletterInline from "../components/NewsletterInline";
 import { getAllPosts, getAllCategories } from "../lib/posts";
 import { getSearchIndex } from "../lib/search-index";
 import config from "../site.config";
@@ -141,6 +142,13 @@ export default function HomePage() {
             )}
           </div>
         </section>
+        {/* 📬 Newsletter — após os artigos recentes, momento de maior engajamento */}
+        <section className="section section--alt reveal">
+          <div className="container">
+            <NewsletterInline variant="home" />
+          </div>
+        </section>
+
       </main>
 
       <Footer />

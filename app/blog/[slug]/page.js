@@ -6,6 +6,8 @@ import AffiliateBox from "../../../components/AffiliateBox";
 import CuriosityCard from "../../../components/CuriosityCard";
 import ReadProgressEnhanced from "../../../components/ReadProgressEnhanced";
 import ScrollReveal from "../../../components/ScrollReveal";
+import NewsletterInline from "../../../components/NewsletterInline";
+import NewsletterPopup from "../../../components/NewsletterPopup";
 import { getAllSlugs, getPostBySlug, getPostContentHtml, getRelatedPosts, getAllPosts } from "../../../lib/posts";
 import { getSearchIndex } from "../../../lib/search-index";
 import { matchAffiliate, getPinnedAffiliates } from "../../../lib/affiliate-matcher";
@@ -227,6 +229,11 @@ export default async function PostPage({ params }) {
               <AffiliateBox affiliate={matchedAffiliate} />
             )}
 
+            {/* 📬 Newsletter inline no meio do artigo — alta conversão */}
+            {contentAfter && (
+              <NewsletterInline variant="article" />
+            )}
+
             {/* Segunda metade do conteúdo (ou nada se artigo for curto) */}
             {contentAfter && (
               <div
@@ -261,6 +268,7 @@ export default async function PostPage({ params }) {
         </article>
       </main>
 
+      <NewsletterPopup />
       <Footer />
     </>
   );
