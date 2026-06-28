@@ -50,7 +50,7 @@ const siteConfig = {
     {
       id: "gran",
       name: "Gran Cursos",
-      url: "https://mais.app/2H2IHgs",
+      url: "https://mais.app/Vt6W6u",
       keywords: ["concursos públicos", "curso online", "questões comentadas"],
       cta: "Estude com o Gran Cursos",
     },
