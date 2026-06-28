@@ -48,13 +48,6 @@ const siteConfig = {
       cta: "Estude com o Gran Cursos",
     },
     {
-      id: "qconcursos",
-      name: "QConcursos",
-      url: "https://www.qconcursos.com/",
-      keywords: ["questões", "simulados", "banco de questões"],
-      cta: "Pratique com milhares de questões no QConcursos",
-    },
-    {
       id: "Elite Concursos",
       name: "Elite Concursos",
       url: "https://go.hotmart.com/E106521171F?dp=1",
