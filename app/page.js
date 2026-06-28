@@ -75,6 +75,43 @@ export default function HomePage() {
           </section>
         )}
 
+        {/* Banner Simulado */}
+        <section className="section section--alt reveal">
+          <div className="container">
+            <Link href="/simulado" style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%)",
+              borderRadius: "var(--radius-xl)", padding: "36px 40px",
+              textDecoration: "none", color: "#fff", gap: 24, flexWrap: "wrap",
+              boxShadow: "var(--shadow-lg)", position: "relative", overflow: "hidden"
+            }}>
+              <div style={{
+                position: "absolute", top: -40, right: -40, width: 200, height: 200,
+                background: "rgba(255,255,255,0.05)", borderRadius: "50%", pointerEvents: "none"
+              }} />
+              <div>
+                <p style={{ fontSize: "0.8rem", fontWeight: 700, opacity: 0.75, marginBottom: 6, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                  ✦ Novo recurso
+                </p>
+                <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(1.3rem,3vw,1.8rem)", fontWeight: 800, marginBottom: 8, lineHeight: 1.2 }}>
+                  🎯 Simulado Gamificado
+                </h2>
+                <p style={{ opacity: 0.88, maxWidth: 480, lineHeight: 1.6, fontSize: "0.95rem" }}>
+                  Teste seus conhecimentos com questões reais de concursos. Escolha a banca, a matéria e receba feedback instantâneo com XP e rankings.
+                </p>
+              </div>
+              <div style={{
+                background: "rgba(255,255,255,0.15)", borderRadius: "var(--radius)",
+                padding: "14px 28px", fontWeight: 700, fontSize: "1rem",
+                whiteSpace: "nowrap", backdropFilter: "blur(4px)",
+                border: "1px solid rgba(255,255,255,0.25)", flexShrink: 0
+              }}>
+                Iniciar simulado →
+              </div>
+            </Link>
+          </div>
+        </section>
+
         {/* Posts recentes */}
         <section className="section section--light">
           <div className="container">

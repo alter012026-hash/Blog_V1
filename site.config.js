@@ -115,6 +115,7 @@ const siteConfig = {
     { label: "Início", href: "/" },
     { label: "Concursos Abertos", href: "/blog?categoria=Concursos+Abertos" },
     { label: "Editais", href: "/blog?categoria=Editais" },
+    { label: "🎯 Simulado", href: "/simulado" },
     { label: "Técnicas de Estudo", href: "/blog?categoria=Técnicas+de+Estudo" },
     { label: "Materiais Gratuitos", href: "/blog?categoria=Materiais+Gratuitos" },
     { label: "Carreiras Públicas", href: "/blog?categoria=Carreiras+Públicas" },
