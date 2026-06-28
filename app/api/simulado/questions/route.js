@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { generateQuizWithAI } from "../../../../lib/quiz-generator";
 import { getQuestions } from "../../../../lib/quiz-bank";
 
-// Chamadas de IA (Groq → OpenRouter → Gemini) costumam responder em poucos
-// segundos, mas o plano padrão da Vercel corta funções serverless em 10s.
-// 30s dá margem confortável sem precisar de plano pago para isso funcionar.
+// Chamadas de IA pro simulado (OpenRouter → Gemini, sem Groq — ver
+// lib/quiz-generator.js) costumam responder em poucos segundos, mas o
+// plano padrão da Vercel corta funções serverless em 10s. 30s dá margem
+// confortável sem precisar de plano pago para isso funcionar.
 export const maxDuration = 30;
 
 const MIN_QUESTIONS = 5;

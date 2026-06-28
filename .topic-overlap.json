@@ -1,7 +1,296 @@
 {
-  "generatedAt": "2026-06-27T20:45:15.675Z",
-  "totalPosts": 51,
-  "overlapGroupCount": 0,
-  "affectedFileCount": 0,
-  "groups": []
+  "generatedAt": "2026-06-28T12:13:12.299Z",
+  "totalPosts": 74,
+  "overlapGroupCount": 15,
+  "affectedFileCount": 33,
+  "groups": [
+    {
+      "topicKey": "como concurso cronograma estudos montar publico",
+      "count": 3,
+      "suggestedKeep": {
+        "file": "2026-06-25-como-montar-cronograma-de-estudos-para-concurso-publico-guia-atualizado.md",
+        "title": "Como Montar Cronograma de Estudos para Concurso Público (Guia Atualizado)",
+        "wordCount": 1394,
+        "date": "2026-06-25"
+      },
+      "suggestedMergeOrRedirect": [
+        {
+          "file": "2026-06-27-como-montar-cronograma-de-estudos-para-concurso-publico-dicas-praticas.md",
+          "title": "Como Montar Cronograma de Estudos para Concurso Público (Dicas Práticas)",
+          "wordCount": 1354,
+          "date": "2026-06-27"
+        },
+        {
+          "file": "2026-06-15-como-montar-cronograma-de-estudos-para-concurso-publico.md",
+          "title": "Como Montar Cronograma de Estudos para Concurso Público",
+          "wordCount": 1190,
+          "date": "2026-06-15"
+        }
+      ]
+    },
+    {
+      "topicKey": "como concurso estudos organizar rotina",
+      "count": 3,
+      "suggestedKeep": {
+        "file": "2026-06-25-como-organizar-rotina-de-estudos-para-concurso-dicas-praticas.md",
+        "title": "Como Organizar Rotina de Estudos para Concurso – Dicas Práticas",
+        "wordCount": 1830,
+        "date": "2026-06-25"
+      },
+      "suggestedMergeOrRedirect": [
+        {
+          "file": "2026-06-24-como-organizar-rotina-de-estudos-para-concurso-dicas-praticas.md",
+          "title": "Como Organizar Rotina de Estudos para Concurso (Dicas Práticas)",
+          "wordCount": 1747,
+          "date": "2026-06-24"
+        },
+        {
+          "file": "2026-06-15-como-organizar-rotina-de-estudos-para-concurso.md",
+          "title": "Como Organizar Rotina de Estudos para Concurso",
+          "wordCount": 665,
+          "date": "2026-06-15"
+        }
+      ]
+    },
+    {
+      "topicKey": "cronograma estudos quem trabalha",
+      "count": 3,
+      "suggestedKeep": {
+        "file": "2026-06-23-cronograma-de-estudos-para-quem-trabalha.md",
+        "title": "Cronograma de Estudos para Quem Trabalha",
+        "wordCount": 1961,
+        "date": "2026-06-23"
+      },
+      "suggestedMergeOrRedirect": [
+        {
+          "file": "2026-06-22-cronograma-de-estudos-para-quem-trabalha-estrategias-praticas-e-mensuraveis.md",
+          "title": "Cronograma de Estudos para Quem Trabalha: Estratégias Práticas e Mensuráveis",
+          "wordCount": 1776,
+          "date": "2026-06-22"
+        },
+        {
+          "file": "2026-06-23-cronograma-de-estudos-para-quem-trabalha-estrategia-pratica-e-mensuravel.md",
+          "title": "Cronograma de Estudos para Quem Trabalha: Estratégia Prática e Mensurável",
+          "wordCount": 1647,
+          "date": "2026-06-23"
+        }
+      ]
+    },
+    {
+      "topicKey": "carreira federal policial preparacao requisitos",
+      "count": 2,
+      "suggestedKeep": {
+        "file": "2026-06-25-carreira-policial-federal-requisitos-e-preparacao-o-que-mudou-em-2026.md",
+        "title": "Carreira Policial Federal: Requisitos e Preparação (O que Mudou em 2026)",
+        "wordCount": 1848,
+        "date": "2026-06-25"
+      },
+      "suggestedMergeOrRedirect": [
+        {
+          "file": "2026-06-14-carreira-policial-federal-requisitos-e-preparacao.md",
+          "title": "Carreira Policial Federal: Requisitos e Preparação",
+          "wordCount": 809,
+          "date": "2026-06-14"
+        }
+      ]
+    },
+    {
+      "topicKey": "como concursos logico questoes raciocinio resolver",
+      "count": 2,
+      "suggestedKeep": {
+        "file": "2026-06-26-como-resolver-questoes-de-raciocinio-logico-em-concursos-dicas-praticas.md",
+        "title": "Como Resolver Questões de Raciocínio Lógico em Concursos – Dicas Práticas",
+        "wordCount": 1638,
+        "date": "2026-06-26"
+      },
+      "suggestedMergeOrRedirect": [
+        {
+          "file": "2026-06-14-como-resolver-questoes-de-raciocinio-logico-em-concursos.md",
+          "title": "Como Resolver Questões de Raciocínio Lógico em Concursos",
+          "wordCount": 744,
+          "date": "2026-06-14"
+        }
+      ]
+    },
+    {
+      "topicKey": "concursos estrategia portugues publicos questoes",
+      "count": 2,
+      "suggestedKeep": {
+        "file": "2026-06-24-estrategia-para-questoes-de-portugues-em-concursos-publicos-guia-atualizado.md",
+        "title": "Estratégia para Questões de Português em Concursos Públicos (Guia Atualizado)",
+        "wordCount": 1828,
+        "date": "2026-06-24"
+      },
+      "suggestedMergeOrRedirect": [
+        {
+          "file": "2026-06-14-estrategia-para-questoes-de-portugues-em-concursos-publicos.md",
+          "title": "Estratégia para Questões de Português em Concursos Públicos",
+          "wordCount": 640,
+          "date": "2026-06-14"
+        }
+      ]
+    },
+    {
+      "topicKey": "2026 concursos iniciantes melhores",
+      "count": 2,
+      "suggestedKeep": {
+        "file": "2026-06-24-melhores-concursos-para-iniciantes-em-2026-o-que-mudou-neste-ano.md",
+        "title": "Melhores Concursos para Iniciantes em 2026 – o que Mudou Neste Ano",
+        "wordCount": 1763,
+        "date": "2026-06-24"
+      },
+      "suggestedMergeOrRedirect": [
+        {
+          "file": "2026-06-14-melhores-concursos-para-iniciantes-em-2026.md",
+          "title": "Melhores Concursos para Iniciantes em 2026",
+          "wordCount": 710,
+          "date": "2026-06-14"
+        }
+      ]
+    },
+    {
+      "topicKey": "cargos diferencas entre medio nivel publico setor superior",
+      "count": 2,
+      "suggestedKeep": {
+        "file": "2026-06-26-diferencas-entre-cargos-de-nivel-medio-e-superior-no-setor-publico-dicas-pratica.md",
+        "title": "Diferenças Entre Cargos de Nível Médio e Superior no Setor Público (Dicas Práticas)",
+        "wordCount": 1920,
+        "date": "2026-06-26"
+      },
+      "suggestedMergeOrRedirect": [
+        {
+          "file": "2026-06-15-diferencas-entre-cargos-de-nivel-medio-e-superior-no-setor-publico.md",
+          "title": "Diferenças Entre Cargos de Nível Médio e Superior no Setor Público",
+          "wordCount": 1004,
+          "date": "2026-06-15"
+        }
+      ]
+    },
+    {
+      "topicKey": "apostilas concursos gratuitas melhores publicos",
+      "count": 2,
+      "suggestedKeep": {
+        "file": "2026-06-25-melhores-apostilas-gratuitas-para-concursos-publicos-passo-a-passo.md",
+        "title": "Melhores Apostilas Gratuitas para Concursos Públicos – Passo a Passo",
+        "wordCount": 1687,
+        "date": "2026-06-25"
+      },
+      "suggestedMergeOrRedirect": [
+        {
+          "file": "2026-06-16-melhores-apostilas-gratuitas-para-concursos-publicos.md",
+          "title": "Melhores Apostilas Gratuitas para Concursos Públicos",
+          "wordCount": 669,
+          "date": "2026-06-16"
+        }
+      ]
+    },
+    {
+      "topicKey": "carreira como funciona inss",
+      "count": 2,
+      "suggestedKeep": {
+        "file": "2026-06-27-carreira-no-inss-como-funciona-guia-atualizado.md",
+        "title": "Carreira no INSS: Como Funciona (Guia Atualizado)",
+        "wordCount": 2205,
+        "date": "2026-06-27"
+      },
+      "suggestedMergeOrRedirect": [
+        {
+          "file": "2026-06-21-carreira-no-inss-como-funciona.md",
+          "title": "Carreira no INSS: Como Funciona",
+          "wordCount": 1724,
+          "date": "2026-06-21"
+        }
+      ]
+    },
+    {
+      "topicKey": "como constitucional direito gabaritar questoes",
+      "count": 2,
+      "suggestedKeep": {
+        "file": "2026-06-25-como-gabaritar-questoes-de-direito-constitucional-guia-atualizado.md",
+        "title": "Como Gabaritar Questões de Direito Constitucional (Guia Atualizado)",
+        "wordCount": 1781,
+        "date": "2026-06-25"
+      },
+      "suggestedMergeOrRedirect": [
+        {
+          "file": "2026-06-21-como-gabaritar-questoes-de-direito-constitucional.md",
+          "title": "Como Gabaritar Questões de Direito Constitucional",
+          "wordCount": 1755,
+          "date": "2026-06-21"
+        }
+      ]
+    },
+    {
+      "topicKey": "abertas area concursos inscricoes saude",
+      "count": 2,
+      "suggestedKeep": {
+        "file": "2026-06-22-concursos-da-area-de-saude-com-inscricoes-abertas.md",
+        "title": "Concursos da Área de Saúde com Inscrições Abertas",
+        "wordCount": 1824,
+        "date": "2026-06-22"
+      },
+      "suggestedMergeOrRedirect": [
+        {
+          "file": "2026-06-26-concursos-da-area-de-saude-com-inscricoes-abertas-passo-a-passo.md",
+          "title": "Concursos da Área de Saúde com Inscrições Abertas (Passo a Passo)",
+          "wordCount": 1597,
+          "date": "2026-06-26"
+        }
+      ]
+    },
+    {
+      "topicKey": "comuns editais glossario publicos termos",
+      "count": 2,
+      "suggestedKeep": {
+        "file": "2026-06-27-glossario-de-termos-comuns-em-editais-publicos-dicas-praticas.md",
+        "title": "Glossário de Termos Comuns em Editais Públicos (Dicas Práticas)",
+        "wordCount": 1831,
+        "date": "2026-06-27"
+      },
+      "suggestedMergeOrRedirect": [
+        {
+          "file": "2026-06-22-glossario-de-termos-comuns-em-editais-publicos.md",
+          "title": "Glossário de Termos Comuns em Editais Públicos",
+          "wordCount": 1800,
+          "date": "2026-06-22"
+        }
+      ]
+    },
+    {
+      "topicKey": "comentadas concursos gratuitas questoes sites",
+      "count": 2,
+      "suggestedKeep": {
+        "file": "2026-06-22-sites-com-questoes-comentadas-gratuitas-para-concursos-passo-a-passo.md",
+        "title": "Sites com Questões Comentadas Gratuitas para Concursos (Passo a Passo)",
+        "wordCount": 1963,
+        "date": "2026-06-22"
+      },
+      "suggestedMergeOrRedirect": [
+        {
+          "file": "2026-06-22-sites-com-questoes-comentadas-gratuitas-para-concursos.md",
+          "title": "Sites com Questões Comentadas Gratuitas para Concursos",
+          "wordCount": 1768,
+          "date": "2026-06-22"
+        }
+      ]
+    },
+    {
+      "topicKey": "ativa concurseiros leitura tecnicas",
+      "count": 2,
+      "suggestedKeep": {
+        "file": "2026-06-26-tecnicas-de-leitura-ativa-para-concurseiros-dicas-praticas.md",
+        "title": "Técnicas de Leitura Ativa para Concurseiros: Dicas Práticas",
+        "wordCount": 2007,
+        "date": "2026-06-26"
+      },
+      "suggestedMergeOrRedirect": [
+        {
+          "file": "2026-06-22-tecnicas-de-leitura-ativa-para-concurseiros.md",
+          "title": "Técnicas de Leitura Ativa para Concurseiros",
+          "wordCount": 1737,
+          "date": "2026-06-22"
+        }
+      ]
+    }
+  ]
 }
