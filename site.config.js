@@ -41,11 +41,25 @@ const siteConfig = {
   // --- AFILIADOS ---
   affiliates: [
     {
+      id: "estrategia",
+      name: "Estratégia Concursos",
+      url: "https://www.estrategiaconcursos.com.br/",
+      keywords: ["curso para concurso", "apostila", "pdf", "questões", "preparação"],
+      cta: "Conheça os cursos do Estratégia Concursos",
+    },
+    {
       id: "gran",
       name: "Gran Cursos",
-      url: "https://mais.app/Vt6W6u",
+      url: "https://mais.app/2H2IHgs",
       keywords: ["concursos públicos", "curso online", "questões comentadas"],
       cta: "Estude com o Gran Cursos",
+    },
+    {
+      id: "qconcursos",
+      name: "QConcursos",
+      url: "https://www.qconcursos.com/",
+      keywords: ["questões", "simulados", "banco de questões"],
+      cta: "Pratique com milhares de questões no QConcursos",
     },
     {
       id: "Elite Concursos",
@@ -108,6 +122,7 @@ const siteConfig = {
     { label: "Início", href: "/" },
     { label: "Concursos Abertos", href: "/blog?categoria=Concursos+Abertos" },
     { label: "Editais", href: "/blog?categoria=Editais" },
+    { label: "🎯 Simulado", href: "/simulado" },
     { label: "Técnicas de Estudo", href: "/blog?categoria=Técnicas+de+Estudo" },
     { label: "Materiais Gratuitos", href: "/blog?categoria=Materiais+Gratuitos" },
     { label: "Carreiras Públicas", href: "/blog?categoria=Carreiras+Públicas" },

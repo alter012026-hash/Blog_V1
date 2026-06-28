@@ -194,6 +194,48 @@ Cada blog é independente. Mesma base de código, configuração diferente.
 
 ---
 
+## Simulado com IA (Tutor + Geração de Questões) e E-mail Real
+
+A página `/simulado` foi atualizada para gerar questões inéditas via IA (em vez
+de um banco fixo de ~90 questões) e dar feedback personalizado de um "Tutor IA"
+ao final da prova. O envio do resultado por e-mail também passou a ser real
+(antes era só um link `mailto:`).
+
+**O que mudou:**
+
+- `lib/quiz-bank.js` — o banco de questões estático antigo, extraído da página.
+  Agora serve só de **fallback**: se a IA falhar (provedores fora do ar, JSON
+  inválido), o simulado continua funcionando com essas questões fixas.
+- `lib/quiz-generator.js` — gera questões e o feedback do tutor, reaproveitando
+  a mesma cadeia Groq → OpenRouter → Gemini já configurada em
+  `lib/article-generator.js`. **Não precisa de nenhuma chave nova** para isso.
+- `lib/email-service.js` + `app/api/simulado/send-result/route.js` — envio
+  real de e-mail via [Resend](https://resend.com). Precisa de uma chave nova:
+
+  ```bash
+  # .env.local
+  RESEND_API_KEY=re_xxxxxxxx       # https://resend.com/api-keys (free: 100/dia)
+  RESEND_FROM_EMAIL="Passeja Concursos <onboarding@resend.dev>"
+  ```
+
+  Sem domínio verificado no Resend, o remetente padrão
+  (`onboarding@resend.dev`) só entrega para o e-mail da própria conta Resend —
+  bom para testar, mas para enviar a qualquer aluno em produção é necessário
+  verificar um domínio em [resend.com/domains](https://resend.com/domains) e
+  trocar `RESEND_FROM_EMAIL` para um endereço desse domínio.
+
+- Novas rotas: `app/api/simulado/questions` (gera as questões) e
+  `app/api/simulado/tutor-feedback` (gera o feedback pós-prova). Ambas
+  retornam `200` mesmo quando a IA falha — o front-end degrada para o banco
+  estático ou esconde o card de feedback, nunca quebra a experiência.
+
+Sem nenhuma configuração extra, o simulado continua 100% funcional usando
+apenas o banco estático (como antes). As chaves de Groq/OpenRouter/Gemini que
+já existem habilitam a geração ilimitada de questões; a `RESEND_API_KEY`
+habilita o envio real de e-mail.
+
+---
+
 ## Aviso Legal
 
 Artigos gerados por IA devem ser revisados antes da publicação em escala. O Google penaliza conteúdo sem valor ou experiência real (E-E-A-T). Os prompts do sistema foram otimizados para gerar conteúdo de qualidade, mas revisão humana periódica é recomendada.
