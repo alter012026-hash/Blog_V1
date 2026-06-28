@@ -199,19 +199,7 @@ export default async function PostPage({ params }) {
               <p className="article-excerpt">{post.excerpt}</p>
             </header>
 
-            {/* 🖼️ Imagem de capa gerada por IA (Pollinations/FLUX) — relacionada ao tema do post */}
-            {post.coverImage && (
-              <div className="article-cover-image" style={{ margin: "1.5rem 0", borderRadius: "0.75rem", overflow: "hidden" }}>
-                <img
-                  src={post.coverImage}
-                  alt={post.title}
-                  style={{ width: "100%", height: "auto", display: "block", maxHeight: "400px", objectFit: "cover" }}
-                  loading="eager"
-                />
-              </div>
-            )}
-
-            {/* 💡 Curiosidade — card educativo gerado junto com o artigo */}
+            {/* 💡 Curiosidade — substitui a antiga imagem hero (sem relação com o conteúdo) */}
             <CuriosityCard curiosity={post.curiosity} />
 
             <hr className="article-divider" />
