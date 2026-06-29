@@ -44,29 +44,33 @@ const siteConfig = {
       id: "estrategia",
       name: "Estratégia Concursos",
       url: "https://www.estrategiaconcursos.com.br/",
-      keywords: ["curso para concurso", "apostila", "pdf", "questões", "preparação"],
-      cta: "Conheça os cursos do Estratégia Concursos",
+      // Foco: conteúdo jurídico, administrativo, tributário, bancário
+      keywords: ["direito", "administrativo", "constitucional", "tributário", "bancário", "fiscal", "procurador", "delegado", "policial", "magistratura"],
+      cta: "Conheça os cursos do Estratégia Concursos — líderes em conteúdo jurídico",
     },
     {
       id: "gran",
       name: "Gran Cursos",
       url: "https://mais.app/2H2IHgs",
-      keywords: ["concursos públicos", "curso online", "questões comentadas"],
-      cta: "Estude com o Gran Cursos",
+      // Foco: concursos federais, INSS, Receita, concursos abertos
+      keywords: ["inss", "receita federal", "federal", "concurso aberto", "edital", "autorizado", "vagas", "inscrição", "2026", "carreira federal"],
+      cta: "Prepare-se com o Gran Cursos — especialistas em concursos federais",
     },
     {
       id: "qconcursos",
       name: "QConcursos",
       url: "https://www.qconcursos.com/",
-      keywords: ["questões", "simulados", "banco de questões"],
-      cta: "Pratique com milhares de questões no QConcursos",
+      // Foco: prática com questões, simulados, gabarito
+      keywords: ["questões", "simulado", "gabarito", "resolução", "banco de questões", "exercícios", "prova anterior", "cespe", "fcc", "fgv", "banca"],
+      cta: "Pratique com mais de 3 milhões de questões no QConcursos",
     },
     {
-      id: "Elite Concursos",
+      id: "elite",
       name: "Elite Concursos",
       url: "https://go.hotmart.com/E106521171F?dp=1",
-      keywords: ["curso", "apostilas", "pdf"],
-      cta: "",
+      // Foco: nível médio, técnico, estadual, municipal
+      keywords: ["nível médio", "técnico", "técnico administrativo", "estadual", "municipal", "prefeitura", "câmara", "assembleia", "polícia civil", "agente"],
+      cta: "Conheça o método Elite Concursos para aprovação rápida",
     },
   ],
 

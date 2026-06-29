@@ -10,7 +10,7 @@ import NewsletterInline from "../../../components/NewsletterInline";
 import NewsletterPopup from "../../../components/NewsletterPopup";
 import { getAllSlugs, getPostBySlug, getPostContentHtml, getRelatedPosts, getAllPosts } from "../../../lib/posts";
 import { getSearchIndex } from "../../../lib/search-index";
-import { matchAffiliate, getPinnedAffiliates } from "../../../lib/affiliate-matcher";
+import { matchAffiliate, getAffiliatePair, getPinnedAffiliates } from "../../../lib/affiliate-matcher";
 import config from "../../../site.config";
 
 export const revalidate = 3600;
@@ -103,8 +103,10 @@ export default async function PostPage({ params }) {
 
   const contentHtml   = await getPostContentHtml(post.content);
   const relatedPosts  = getRelatedPosts(params.slug, post.category);
-  const matchedAffiliate  = matchAffiliate(post.content, config.affiliates);
-  const pinnedAffiliates  = getPinnedAffiliates(config.affiliates);
+  const affiliatePair    = getAffiliatePair(post.content, config.affiliates, params.slug);
+  const matchedAffiliate = affiliatePair[0] || null;
+  const secondAffiliate  = affiliatePair[1] || null;
+  const pinnedAffiliates = getPinnedAffiliates(config.affiliates);
   const searchIndex   = getSearchIndex();
 
   // Divide conteúdo para inserir afiliado no meio
@@ -245,6 +247,11 @@ export default async function PostPage({ params }) {
             {/* Afiliado contextual no fim (só se NÃO foi inserido no meio) */}
             {!contentAfter && matchedAffiliate && (
               <AffiliateBox affiliate={matchedAffiliate} />
+            )}
+
+            {/* Segundo afiliado — sempre no fim do artigo, diferente do primeiro */}
+            {secondAffiliate && (
+              <AffiliateBox affiliate={secondAffiliate} />
             )}
 
             {/* Afiliados fixos — sempre exibidos */}
