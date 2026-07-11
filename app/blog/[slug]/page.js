@@ -205,11 +205,11 @@ export default async function PostPage({ params }) {
 
             {/* 🖼️ Imagem de capa gerada por IA (Pollinations/FLUX) — relacionada ao tema do post */}
             {post.coverImage && (
-              <div className="article-cover-image" style={{ margin: "1.5rem 0", borderRadius: "0.75rem", overflow: "hidden" }}>
+              <div className="article-cover-image" style={{ margin: "1.5rem 0", borderRadius: "0.75rem", overflow: "visible" }}>
                 <img
                   src={post.coverImage}
                   alt={post.title}
-                  style={{ width: "100%", height: "auto", display: "block", maxHeight: "400px", objectFit: "cover" }}
+                  style={{ width: "100%", height: "auto", display: "block", maxWidth: "100%", objectFit: "contain", borderRadius: "inherit" }}
                   loading="eager"
                 />
               </div>

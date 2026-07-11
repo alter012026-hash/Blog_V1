@@ -41,9 +41,9 @@ export async function POST(request) {
         {
           topic: title,
           generation: {
-            tone: "didático e direto",
-            audienceLevel: "iniciantes",
-            minWords: 450,
+            tone: "didático, objetivo e atualizado",
+            audienceLevel: "candidatos de concursos públicos",
+            minWords: 900,
           },
           previousContent: null,
         },
