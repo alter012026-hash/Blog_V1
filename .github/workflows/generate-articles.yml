@@ -78,7 +78,13 @@ jobs:
       - name: Check changes
         id: changes
         run: |
-          git add posts/ public/images/
+          # IMPORTANTE: .used-topics.json, .content-signatures.json e
+          # .quality-log.json também precisam ser commitados — são a
+          # "memória" que impede o pipeline de gerar posts quase-duplicados.
+          # Antes só posts/ e public/images/ eram commitados, então esses
+          # arquivos eram recriados vazios a cada execução do Actions e a
+          # checagem de duplicidade nunca enxergava o histórico real.
+          git add posts/ public/images/ .used-topics.json .content-signatures.json .quality-log.json
 
           if git diff --cached --quiet; then
             echo "has_changes=false" >> $GITHUB_OUTPUT

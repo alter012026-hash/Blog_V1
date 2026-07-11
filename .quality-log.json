@@ -823,19 +823,5 @@
     "similarTo": "portugues-para-concursos",
     "status": "ok",
     "issues": []
-  },
-  {
-    "timestamp": "2026-07-11T10:45:50.668Z",
-    "file": "2026-06-15-como-interpretar-um-edital-de-concurso-publico.md",
-    "slug": "como-interpretar-um-edital-de-concurso-publico",
-    "title": "Como Decifrar um Edital de Concurso Público e Evitar Armadilhas",
-    "category": "Editais",
-    "provider": "Groq",
-    "wordCount": 2000,
-    "fillerCount": 0,
-    "similarity": 18,
-    "similarTo": "glossario-de-termos-comuns-em-editais-publicos-dicas-praticas",
-    "status": "ok",
-    "issues": []
   }
 ]

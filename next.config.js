@@ -101,6 +101,35 @@ const nextConfig = {
         destination: '/blog/tecnicas-de-leitura-ativa-para-concurseiros-dicas-praticas',
         permanent: true,
       },
+
+      // Redirects adicionados em 2026-07-11 — segunda rodada de limpeza de
+      // duplicatas (ver DEDUP-2026-07-11.md). Os arquivos-fonte abaixo já
+      // não existem mais em posts/.
+      {
+        source: '/blog/cronograma-de-estudos-para-concurso-em-6-meses',
+        destination: '/blog/como-montar-cronograma-de-estudos-para-concurso-publico-guia-atualizado',
+        permanent: true,
+      },
+      {
+        source: '/blog/tecnicas-para-questoes-de-matematica-financeira-em-concursos',
+        destination: '/blog/tecnicas-avancadas-para-questoes-de-matematica-financeira-em-concursos',
+        permanent: true,
+      },
+      {
+        source: '/blog/melhores-apostilas-gratas-para-concursos-publicos-o-que-mudou-em-2026',
+        destination: '/blog/melhores-apostilas-gratuitas-para-concursos-publicos-passo-a-passo',
+        permanent: true,
+      },
+      {
+        source: '/blog/concursos-publicos-com-mais-vagas-para-nivel-medio',
+        destination: '/blog/concursos-publicos-com-mais-vagas-para-nivel-medio-passo-a-passo-estrategico',
+        permanent: true,
+      },
+      {
+        source: '/blog/diferencas-entre-cargos-de-nivel-medio-e-superior-no-setor-publico-o-que-mudou-e',
+        destination: '/blog/diferencas-entre-cargos-de-nivel-medio-e-superior-no-setor-publico-dicas-pratica',
+        permanent: true,
+      },
     ];
   },
 
