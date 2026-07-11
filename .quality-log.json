@@ -823,5 +823,19 @@
     "similarTo": "portugues-para-concursos",
     "status": "ok",
     "issues": []
+  },
+  {
+    "timestamp": "2026-07-11T19:59:26.397Z",
+    "file": "2026-06-14-concursos-publicos-com-mais-vagas-para-nivel-medio.md",
+    "slug": "concursos-publicos-com-mais-vagas-para-nivel-medio",
+    "title": "Concursos Públicos com Mais Vagas para Nível Médio: Análise Estratégica 2026",
+    "category": "Concursos Abertos",
+    "provider": "Groq",
+    "wordCount": 2080,
+    "fillerCount": 0,
+    "similarity": 11,
+    "similarTo": "carreira-de-auditor-fiscal-vale-a-pena",
+    "status": "ok",
+    "issues": []
   }
 ]
