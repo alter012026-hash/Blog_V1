@@ -8,6 +8,7 @@ import ReadProgressEnhanced from "../../../components/ReadProgressEnhanced";
 import ScrollReveal from "../../../components/ScrollReveal";
 import NewsletterInline from "../../../components/NewsletterInline";
 import NewsletterPopup from "../../../components/NewsletterPopup";
+import ArticleQA from "../../../components/ArticleQA";
 import { getAllSlugs, getPostBySlug, getPostContentHtml, getRelatedPosts, getAllPosts } from "../../../lib/posts";
 import { getSearchIndex } from "../../../lib/search-index";
 import { matchAffiliate, getAffiliatePair, getPinnedAffiliates } from "../../../lib/affiliate-matcher";
@@ -271,6 +272,9 @@ export default async function PostPage({ params }) {
             {pinnedAffiliates.map((aff) => (
               <AffiliateBox key={aff.id} affiliate={aff} />
             ))}
+
+            {/* 🤖 Tire sua dúvida — Q&A via IA com contexto do artigo */}
+            <ArticleQA slug={params.slug} />
 
             {/* Posts relacionados */}
             {relatedPosts.length > 0 && (
