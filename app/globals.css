@@ -1107,6 +1107,7 @@ time {
   border: 1px solid var(--border);
   scrollbar-width: thin;
   scrollbar-color: var(--primary-light) var(--surface-2);
+  position: relative;
 }
 
 .table-scroll::-webkit-scrollbar { height: 6px; }
@@ -1120,6 +1121,39 @@ time {
 .prose th { background: var(--primary); color: #fff; padding: 10px 16px; text-align: left; font-family: var(--font-display); font-weight: 700; font-size: 0.8rem; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; }
 .prose td { padding: 10px 16px; border-bottom: 1px solid var(--border); }
 .prose tr:hover td { background: var(--surface-2); }
+
+/* ✅ Corrige quebra de linha estranha dentro de células: .prose herda
+   `overflow-wrap: anywhere` (bom pro texto corrido, ruim numa coluna
+   estreita — quebra a palavra em qualquer letra). Dentro da tabela,
+   volta pro comportamento padrão do navegador: só quebra entre
+   palavras, e só parte uma palavra ao meio se ela sozinha não couber
+   de jeito nenhum na coluna (ex: uma URL longa). */
+.prose td, .prose th {
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: auto;
+}
+
+/* Em telas pequenas, aperta um pouco o espaçamento pra caber mais
+   conteúdo visível antes de precisar rolar, e sinaliza com um
+   degradê na borda direita que dá pra arrastar a tabela pro lado. */
+@media (max-width: 640px) {
+  .prose th, .prose td {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+
+  .table-scroll::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 24px;
+    height: 100%;
+    pointer-events: none;
+    background: linear-gradient(to right, transparent, var(--bg) 92%);
+  }
+}
 
 /* ── AdSense ─────────────────────────────────────────────────── */
 .adsense-wrapper {
