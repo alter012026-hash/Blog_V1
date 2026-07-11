@@ -76,6 +76,11 @@ const globalCSS = `
     grid-template-columns: 1fr 1fr;
     gap: 16px;
   }
+  .manual-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
 
   /* Bottom nav for mobile */
   .mobile-nav {
@@ -96,6 +101,7 @@ const globalCSS = `
     .stat-grid { grid-template-columns: 1fr 1fr; }
     .aff-form-grid { grid-template-columns: 1fr; }
     .config-grid { grid-template-columns: 1fr; }
+    .manual-grid { grid-template-columns: 1fr; }
 
     .mobile-nav {
       display: flex;
@@ -1327,6 +1333,623 @@ function IdeasTab({ toast }) {
   );
 }
 
+/* ─── ABA: POST MANUAL / LEGO ─── */
+function ManualComposerTab({ toast, mode = "manual" }) {
+  const [form, setForm] = useState({
+    title: "",
+    slug: "",
+    category: "Geral",
+    excerpt: "",
+    body: "",
+    coverImage: "",
+    file: "",
+  });
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [previewMode, setPreviewMode] = useState(false);
+  const [publishedPosts, setPublishedPosts] = useState([]);
+  const [drafts, setDrafts] = useState([]);
+  const [loadingLibrary, setLoadingLibrary] = useState(true);
+  const [draftEditingId, setDraftEditingId] = useState(null);
+  const [editingPostFile, setEditingPostFile] = useState(null);
+  const textareaRef = useRef(null);
+
+  async function loadPublishedPosts() {
+    try {
+      const r = await fetch("/api/admin/manual-post");
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || "Erro ao carregar posts publicados");
+      setPublishedPosts(d.posts || []);
+    } catch (err) {
+      toast(err.message || "Erro ao carregar posts publicados", "error");
+    }
+  }
+
+  async function loadDrafts() {
+    try {
+      const r = await fetch("/api/admin/manual-post/drafts");
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || "Erro ao carregar rascunhos");
+      setDrafts(d.items || []);
+    } catch (err) {
+      toast(err.message || "Erro ao carregar rascunhos", "error");
+    }
+  }
+
+  useEffect(() => {
+    (async () => {
+      await Promise.all([loadPublishedPosts(), loadDrafts()]);
+      setLoadingLibrary(false);
+    })();
+  }, []);
+
+  function resetForm() {
+    setForm({
+      title: "",
+      slug: "",
+      category: "Geral",
+      excerpt: "",
+      body: "",
+      coverImage: "",
+      file: "",
+    });
+    setDraftEditingId(null);
+    setEditingPostFile(null);
+  }
+
+  async function uploadCoverImage(file) {
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      setUploading(true);
+      try {
+        const res = await fetch("/api/admin/manual-post/upload-image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fileName: file.name,
+            mimeType: file.type || "image/png",
+            contentBase64: reader.result,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Falha no upload da imagem");
+        setForm((prev) => ({ ...prev, coverImage: data.url }));
+        toast("Imagem carregada com sucesso!", "ok");
+      } catch (err) {
+        toast(err.message || "Erro ao carregar imagem", "error");
+      } finally {
+        setUploading(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function insertSnippet(before, after = "", placeholder = "texto") {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = form.body.slice(start, end) || placeholder;
+    const nextBody = `${form.body.slice(0, start)}${before}${selected}${after}${form.body.slice(end)}`;
+
+    setForm((prev) => ({ ...prev, body: nextBody }));
+    requestAnimationFrame(() => {
+      textarea.focus();
+      const cursorStart = start + before.length;
+      const cursorEnd = cursorStart + selected.length;
+      textarea.setSelectionRange(cursorStart, cursorEnd);
+    });
+  }
+
+  function applyAction(action) {
+    if (action === "heading") insertSnippet("## ", "", "Título");
+    if (action === "bold") insertSnippet("**", "**", "texto em negrito");
+    if (action === "italic") insertSnippet("*", "*", "texto em itálico");
+    if (action === "list") {
+      const textarea = textareaRef.current;
+      if (!textarea) return;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selected = form.body.slice(start, end).split(/\n/).filter(Boolean);
+      const lines = selected.length ? selected : ["item"];
+      const wrapped = lines.map((line) => `- ${line}`).join("\n");
+      const nextBody = `${form.body.slice(0, start)}${wrapped}${form.body.slice(end)}`;
+      setForm((prev) => ({ ...prev, body: nextBody }));
+      requestAnimationFrame(() => textarea.focus());
+    }
+    if (action === "quote") insertSnippet("> ", "", "citação");
+    if (action === "code") insertSnippet("```js\n", "\n```", "código");
+    if (action === "link") insertSnippet("[texto](", ")", "https://exemplo.com");
+    if (action === "image") insertSnippet("![Legenda](", ")", "/images/exemplo.png");
+  }
+
+  async function runAiAction(action) {
+    if (!form.title.trim() && action === "generate") {
+      toast("Informe um título para gerar um texto com a IA.", "error");
+      return;
+    }
+    if (!form.body.trim() && (action === "review" || action === "correct")) {
+      toast("Escreva algo antes de usar a IA para revisar ou corrigir.", "error");
+      return;
+    }
+
+    setAiLoading(true);
+    try {
+      const res = await fetch("/api/admin/manual-post/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action,
+          title: form.title,
+          category: form.category,
+          body: form.body,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao usar a IA");
+
+      if (action === "generate") {
+        setForm((prev) => ({
+          ...prev,
+          title: data.title || prev.title,
+          body: data.body || prev.body,
+          excerpt: data.excerpt || prev.excerpt,
+        }));
+        toast(`Texto gerado com IA via ${data.provider}.`, "ok");
+        return;
+      }
+
+      setForm((prev) => ({ ...prev, body: data.body || prev.body }));
+      toast(`Texto ${action === "review" ? "revisado" : "corrigido"} com IA via ${data.provider}.`, "ok");
+    } catch (err) {
+      toast(err.message || "Erro ao consultar a IA", "error");
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
+  async function publish() {
+    if (!form.title.trim()) {
+      toast("Informe um título para o post manual.", "error");
+      return;
+    }
+    if (!form.body.trim()) {
+      toast("Escreva o conteúdo do post antes de publicar.", "error");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/manual-post", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao publicar o post");
+      toast(`Post publicado: ${data.file}`, "ok");
+      resetForm();
+      setPreviewMode(false);
+      await loadPublishedPosts();
+      await loadDrafts();
+      window.open(data.url, "_blank", "noopener,noreferrer");
+    } catch (err) {
+      toast(err.message || "Erro ao publicar", "error");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function saveDraft() {
+    if (!form.title.trim() && !form.body.trim()) {
+      toast("Escreva algo antes de salvar um rascunho.", "error");
+      return;
+    }
+
+    try {
+      const payload = {
+        draftId: draftEditingId,
+        ...form,
+        updatedAt: new Date().toISOString(),
+      };
+      const res = await fetch("/api/admin/manual-post/drafts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ draft: payload }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao salvar rascunho");
+      setDraftEditingId(data.draftId || draftEditingId);
+      toast("Rascunho salvo com sucesso.", "ok");
+      await loadDrafts();
+    } catch (err) {
+      toast(err.message || "Erro ao salvar rascunho", "error");
+    }
+  }
+
+  async function loadDraftFromList(draft) {
+    if (!draft) return;
+    setForm({
+      title: draft.title || "",
+      slug: draft.slug || "",
+      category: draft.category || "Geral",
+      excerpt: draft.excerpt || "",
+      body: draft.body || "",
+      coverImage: draft.coverImage || "",
+      file: draft.file || "",
+    });
+    setDraftEditingId(draft.id || null);
+    setEditingPostFile(draft.file || null);
+    toast("Rascunho carregado para revisão.", "ok");
+  }
+
+  async function deleteDraft(draftId) {
+    if (!draftId || !confirm("Remover este rascunho?")) return;
+    try {
+      const res = await fetch("/api/admin/manual-post/drafts", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ draftId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao remover rascunho");
+      toast("Rascunho removido.", "ok");
+      await loadDrafts();
+    } catch (err) {
+      toast(err.message || "Erro ao remover rascunho", "error");
+    }
+  }
+
+  async function editPublishedPost(post) {
+    try {
+      const res = await fetch(`/api/admin/manual-post?file=${encodeURIComponent(post.file)}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao carregar post");
+      setForm({
+        title: data.post?.title || "",
+        slug: data.post?.slug || "",
+        category: data.post?.category || "Geral",
+        excerpt: data.post?.excerpt || "",
+        body: data.post?.content || "",
+        coverImage: data.post?.coverImage || "",
+        file: post.file || "",
+      });
+      setEditingPostFile(post.file || null);
+      setDraftEditingId(null);
+      toast(`Editando ${post.file}`, "ok");
+    } catch (err) {
+      toast(err.message || "Erro ao abrir post para edição", "error");
+    }
+  }
+
+  async function deletePublishedPost(post) {
+    if (!confirm(`Remover permanentemente "${post.title}"?`)) return;
+    try {
+      const res = await fetch("/api/admin/manual-post", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ file: post.file }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao remover post");
+      toast("Post removido do site.", "ok");
+      await loadPublishedPosts();
+      if (editingPostFile === post.file) resetForm();
+    } catch (err) {
+      toast(err.message || "Erro ao remover post", "error");
+    }
+  }
+
+  const isLego = mode === "lego";
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      <div style={s.card}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap", marginBottom: 18 }}>
+          <div>
+            <div style={s.sectionTitle}>{isLego ? "🧱 LEGO — montar post livre" : "📝 Post manual"}</div>
+            <p style={{ color: C.textMuted, fontSize: 13, lineHeight: 1.7, margin: 0 }}>
+              {isLego
+                ? "Monte um post manualmente em markdown, adicione imagens e publique direto no blog."
+                : "Crie um artigo com capa, resumo e conteúdo em markdown. O sistema publica automaticamente no site."}
+            </p>
+          </div>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <button style={s.btnGhost} onClick={() => setPreviewMode((prev) => !prev)}>
+              {previewMode ? "Esconder preview" : "Mostrar preview"}
+            </button>
+            <button style={s.btnGhost} onClick={saveDraft}>
+              💾 Salvar rascunho
+            </button>
+          </div>
+        </div>
+
+        {editingPostFile && (
+          <div style={{ background: C.primaryGlow, border: `1px solid ${C.primary}44`, borderRadius: 10, padding: "10px 12px", marginBottom: 16, color: C.text, fontSize: 12 }}>
+            Editando post publicado: <strong>{editingPostFile}</strong>
+          </div>
+        )}
+
+        <div className="manual-grid">
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div>
+              <label style={s.label}>Título do post</label>
+              <input
+                style={s.input}
+                placeholder="Ex.: Como montar um cronograma eficiente"
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+              />
+            </div>
+            <div>
+              <label style={s.label}>Slug / URL</label>
+              <input
+                style={s.input}
+                placeholder="opcional — se vazio, será gerado automaticamente"
+                value={form.slug}
+                onChange={(e) => setForm({ ...form, slug: e.target.value })}
+              />
+            </div>
+            <div>
+              <label style={s.label}>Categoria</label>
+              <input
+                style={s.input}
+                placeholder="Geral"
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+              />
+            </div>
+            <div>
+              <label style={s.label}>Resumo / excerpt</label>
+              <textarea
+                rows={3}
+                style={{ ...s.input, resize: "vertical" }}
+                placeholder="Resumo curto para o card e a página do post"
+                value={form.excerpt}
+                onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div>
+              <label style={s.label}>Imagem de capa</label>
+              <input
+                style={s.input}
+                placeholder="URL externa ou imagem já carregada"
+                value={form.coverImage}
+                onChange={(e) => setForm({ ...form, coverImage: e.target.value })}
+              />
+            </div>
+            <div>
+              <label style={s.label}>Enviar imagem local</label>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => uploadCoverImage(e.target.files?.[0])}
+                  style={{ display: "none" }}
+                  id="manual-cover-upload"
+                />
+                <label htmlFor="manual-cover-upload" style={{ ...s.btnGhost, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  {uploading ? "Subindo…" : "📎 Escolher imagem"}
+                </label>
+                {form.coverImage && (
+                  <span style={{ color: C.textFaint, fontSize: 12 }}>Capa pronta: {form.coverImage.slice(0, 48)}…</span>
+                )}
+              </div>
+            </div>
+            <div>
+              <label style={s.label}>Mini-toolbar</label>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {[
+                  ["H2", "heading"],
+                  ["B", "bold"],
+                  ["I", "italic"],
+                  ["Lista", "list"],
+                  ["Citação", "quote"],
+                  ["Código", "code"],
+                  ["Link", "link"],
+                  ["Imagem", "image"],
+                ].map(([label, action]) => (
+                  <button
+                    key={action}
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => applyAction(action)}
+                    style={{ ...s.btnGhost, padding: "6px 10px", fontSize: 12 }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label style={s.label}>IA do editor</label>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <button style={s.btnGhost} disabled={aiLoading} onClick={() => runAiAction("generate")}>✨ Gerar post por IA</button>
+                <button style={s.btnGhost} disabled={aiLoading} onClick={() => runAiAction("review")}>🧠 Revisar com IA</button>
+                <button style={s.btnGhost} disabled={aiLoading} onClick={() => runAiAction("correct")}>🛠️ Correção automática</button>
+              </div>
+            </div>
+            <div>
+              <label style={s.label}>Dica de uso</label>
+              <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 10, padding: "12px 14px", color: C.textMuted, fontSize: 12, lineHeight: 1.7 }}>
+                Use markdown normal. Para inserir imagem, escreva <strong style={{ color: C.text }}>![Legenda](/images/arquivo.png)</strong> ou cole a URL retornada pelo upload.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ marginTop: 18 }}>
+          <label style={s.label}>Conteúdo do artigo (markdown)</label>
+          <textarea
+            ref={textareaRef}
+            rows={16}
+            style={{ ...s.input, resize: "vertical", minHeight: 280 }}
+            placeholder={isLego
+              ? "Escreva o conteúdo livre do seu post aqui…\n\nUse títulos, listas e imagens com markdown."
+              : "Escreva o conteúdo do artigo manualmente…"}
+            value={form.body}
+            onChange={(e) => setForm({ ...form, body: e.target.value })}
+          />
+        </div>
+
+        {previewMode && (
+          <div style={{ marginTop: 18, background: C.bg, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16 }}>
+            <div style={s.sectionTitle}>Preview rápido</div>
+            <div style={{ color: C.text, fontWeight: 700, fontSize: 16, marginBottom: 8 }}>{form.title || "Título do post"}</div>
+            <div style={{ color: C.textMuted, fontSize: 13, lineHeight: 1.65, whiteSpace: "pre-wrap" }}>{form.body || "Seu conteúdo aparecerá aqui em preview."}</div>
+          </div>
+        )}
+
+        <div style={{ marginTop: 18, display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <button style={s.btn} onClick={publish} disabled={saving || uploading}>
+            {saving ? "Publicando…" : `🚀 Publicar ${isLego ? "Lego" : "manual"}`}
+          </button>
+          <button style={s.btnGhost} onClick={resetForm}>
+            Limpar
+          </button>
+        </div>
+      </div>
+
+      <div style={s.card}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <div style={s.sectionTitle}>🗂️ Rascunhos</div>
+            <div style={{ color: C.textFaint, fontSize: 12 }}>Revise antes de publicar e volte ao que precisa corrigir.</div>
+          </div>
+          <button style={s.btnGhost} onClick={loadDrafts}>↻ Atualizar</button>
+        </div>
+
+        {drafts.length === 0 ? (
+          <div style={{ color: C.textMuted, fontSize: 13, marginTop: 10 }}>Nenhum rascunho salvo ainda.</div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
+            {drafts.map((draft) => (
+              <div key={draft.id} style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 10, padding: 12 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ color: C.text, fontWeight: 700, fontSize: 13 }}>{draft.title || "Rascunho sem título"}</div>
+                    <div style={{ color: C.textFaint, fontSize: 11, marginTop: 3 }}>
+                      {draft.category || "Geral"} · {draft.updatedAt ? new Date(draft.updatedAt).toLocaleString("pt-BR") : "agora"}
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <button style={s.btnGhost} onClick={() => loadDraftFromList(draft)}>Carregar</button>
+                    <button style={s.btnDanger} onClick={() => deleteDraft(draft.id)}>Excluir</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div style={s.card}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+          <div>
+            <div style={s.sectionTitle}>📚 Posts publicados</div>
+            <div style={{ color: C.textFaint, fontSize: 12 }}>Edite um post já no ar ou remova o arquivo diretamente do repositório.</div>
+          </div>
+          <button style={s.btnGhost} onClick={loadPublishedPosts}>↻ Atualizar</button>
+        </div>
+
+        {loadingLibrary ? (
+          <div style={{ color: C.textMuted, fontSize: 13, marginTop: 10 }}>Carregando lista de posts…</div>
+        ) : publishedPosts.length === 0 ? (
+          <div style={{ color: C.textMuted, fontSize: 13, marginTop: 10 }}>Nenhum post encontrado.</div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 12 }}>
+            {publishedPosts.map((post) => (
+              <div key={post.file} style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 10, padding: 12 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ color: C.text, fontWeight: 700, fontSize: 13 }}>{post.title}</div>
+                    <div style={{ color: C.textFaint, fontSize: 11, marginTop: 3 }}>
+                      {post.file} · {post.category} · {post.date}
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <a href={`/blog/${post.slug}`} target="_blank" rel="noreferrer" style={{ ...s.btnGhost, textDecoration: "none" }}>Abrir</a>
+                    <button style={s.btnGhost} onClick={() => editPublishedPost(post)}>Editar</button>
+                    <button style={s.btnDanger} onClick={() => deletePublishedPost(post)}>Remover</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─── ABA: FEEDBACKS REAIS ─── */
+function FeedbacksTab({ toast }) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  async function load() {
+    try {
+      const r = await fetch("/api/admin/feedbacks");
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || "Erro ao carregar feedbacks");
+      setData(d);
+    } catch (err) {
+      toast(err.message || "Erro ao carregar feedbacks", "error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { load(); }, []);
+
+  if (loading) return <p style={{ color: C.textMuted }}>Carregando feedbacks reais…</p>;
+  if (!data) return null;
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      <div className="stat-grid">
+        <StatCard label="Feedbacks" value={data.total} sub="capturados no sistema" color={C.primary} icon="💬" />
+        <StatCard label="Média" value={`${data.averageScore}/100`} sub="score médio" color={C.green} icon="📈" />
+        <StatCard label="Último envio" value={data.latest ? new Date(data.latest.createdAt).toLocaleDateString("pt-BR") : "—"} sub={data.latest?.materia || "sem registro"} color={C.accent} icon="🕒" />
+        <StatCard label="Estado" value={data.total > 0 ? "Ativo" : "Sem dados"} sub={data.total > 0 ? "coletando dados reais" : "pendente de envio"} color={C.purple} icon="🧠" />
+      </div>
+
+      <div style={s.card}>
+        <div style={s.sectionTitle}>Feedbacks reais recentes</div>
+        {data.items.length === 0 ? (
+          <p style={{ color: C.textMuted, fontSize: 13, lineHeight: 1.7 }}>
+            Ainda não há feedbacks persistidos. O sistema começa a registrar resultados reais quando um usuário envia o simulado completo pelo site.
+          </p>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, maxHeight: 420, overflowY: "auto" }}>
+            {data.items.map((item, idx) => (
+              <div key={`${item.createdAt}-${idx}`} style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 10, padding: 14 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 10 }}>
+                  <div>
+                    <div style={{ color: C.text, fontWeight: 700, fontSize: 13 }}>{item.nome || item.email || "Usuário"}</div>
+                    <div style={{ color: C.textFaint, fontSize: 11, marginTop: 2 }}>{item.email || "sem e-mail"} · {item.banca || "—"} · {item.materia || "—"}</div>
+                  </div>
+                  <span style={s.tag(C.green)}>{item.score || 0}/{item.total || 0} · {item.pct || 0}%</span>
+                </div>
+                <div style={{ color: C.textMuted, fontSize: 12, lineHeight: 1.7 }}>
+                  {item.tutorFeedback || item.feedback || "Sem texto de feedback registrado."}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ─── ABA: NEWSLETTER ─── */
 function NewsletterTab({ toast }) {
   const [data, setData] = useState(null);
@@ -1463,6 +2086,9 @@ function NewsletterTab({ toast }) {
 const TABS = [
   { id: "metrics", label: "Métricas", icon: "📊", shortLabel: "Métricas" },
   { id: "quality", label: "Qualidade", icon: "🎯", shortLabel: "Qualidade" },
+  { id: "manual", label: "Post Manual", icon: "📝", shortLabel: "Manual" },
+  { id: "lego", label: "🧱 Lego", icon: "🧱", shortLabel: "Lego" },
+  { id: "feedbacks", label: "Feedbacks", icon: "💬", shortLabel: "Feedbacks" },
   { id: "newsletter", label: "Newsletter", icon: "📬", shortLabel: "Newsletter" },
   { id: "affiliates", label: "Afiliados", icon: "🔗", shortLabel: "Afiliados" },
   { id: "config", label: "Configurações", icon: "⚙️", shortLabel: "Config" },
@@ -1586,6 +2212,9 @@ export default function AdminPage() {
           </h1>
           {tab === "metrics" && <MetricsTab toast={showToast} />}
           {tab === "quality" && <QualityTab toast={showToast} />}
+          {tab === "manual" && <ManualComposerTab toast={showToast} mode="manual" />}
+          {tab === "lego" && <ManualComposerTab toast={showToast} mode="lego" />}
+          {tab === "feedbacks" && <FeedbacksTab toast={showToast} />}
           {tab === "newsletter" && <NewsletterTab toast={showToast} />}
           {tab === "affiliates" && <AffiliatesTab toast={showToast} />}
           {tab === "config" && <ConfigTab toast={showToast} />}
