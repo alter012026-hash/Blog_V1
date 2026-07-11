@@ -11,6 +11,7 @@ import NewsletterPopup from "../../../components/NewsletterPopup";
 import { getAllSlugs, getPostBySlug, getPostContentHtml, getRelatedPosts, getAllPosts } from "../../../lib/posts";
 import { getSearchIndex } from "../../../lib/search-index";
 import { matchAffiliate, getAffiliatePair, getPinnedAffiliates } from "../../../lib/affiliate-matcher";
+import { extractFAQs, generateFAQSchema } from "../../../lib/faq-extractor";
 import config from "../../../site.config";
 
 export const revalidate = 3600;
@@ -157,6 +158,12 @@ export default async function PostPage({ params }) {
     inLanguage: config.language,
   };
 
+  // FAQ schema — só gera quando o post tem uma seção "## FAQ" ou
+  // "## Perguntas Frequentes" com perguntas e respostas reais (nunca com
+  // texto placeholder), pra habilitar rich results de FAQ no Google.
+  const faqs = extractFAQs(post.content);
+  const faqSchema = generateFAQSchema(faqs);
+
   // BreadcrumbList schema
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -179,6 +186,12 @@ export default async function PostPage({ params }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
 
       <ReadProgressEnhanced />
       <ScrollReveal />

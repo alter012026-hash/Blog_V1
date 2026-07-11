@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { addSubscriber, isValidEmail } from "../../../../lib/newsletter-service";
+import { checkRateLimit, getClientIp } from "../../../../lib/rate-limit";
 
 export const maxDuration = 15;
+
+// Até 5 inscrições por IP a cada 10 minutos — evita spam automatizado
+// consumindo a cota diária do Resend (100 e-mails/dia no plano free).
+const SUBSCRIBE_LIMIT = { limit: 5, windowMs: 10 * 60 * 1000 };
 
 // Limite simples de tamanho para evitar abuso óbvio do campo "nome".
 function sanitizeName(name) {
@@ -12,6 +17,15 @@ function sanitizeName(name) {
 
 export async function POST(request) {
   try {
+    const ip = getClientIp(request);
+    const { allowed, retryAfterMs } = checkRateLimit(`newsletter-subscribe:${ip}`, SUBSCRIBE_LIMIT);
+    if (!allowed) {
+      return NextResponse.json(
+        { ok: false, error: "Muitas tentativas. Tente novamente em alguns minutos." },
+        { status: 429, headers: { "Retry-After": String(Math.ceil(retryAfterMs / 1000)) } }
+      );
+    }
+
     const body = await request.json().catch(() => ({}));
     const email = typeof body.email === "string" ? body.email.trim() : "";
     const firstName = sanitizeName(body.name);

@@ -11,10 +11,29 @@ import config from "../../site.config";
 // Com revalidate estático, o Next.js 14 ignora searchParams completamente
 export const dynamic = "force-dynamic";
 
-export const metadata = {
-  title: "Blog",
-  description: `Todos os artigos sobre ${config.niche} publicados no ${config.name}.`,
-};
+// generateMetadata (em vez de `metadata` estático) porque precisamos
+// reagir ao ?categoria= na URL:
+//  - canonical sempre aponta pra /blog "limpo" — isso diz ao Google que
+//    /blog?categoria=X é uma variação de /blog, não uma página nova.
+//  - noindex,follow nas variantes filtradas — evita que cada categoria vire
+//    uma página indexada duplicada (era o que estava acontecendo: o GSC
+//    mostrava /blog?categoria=Editais posicionado como página própria).
+//    "follow" mantém os links dos posts sendo rastreados normalmente.
+export function generateMetadata({ searchParams }) {
+  const categoria = searchParams?.categoria || null;
+  const baseUrl = `${config.url}/blog`;
+
+  return {
+    title: categoria ? `${categoria}` : "Blog",
+    description: categoria
+      ? `Artigos sobre ${categoria} no ${config.name}.`
+      : `Todos os artigos sobre ${config.niche} publicados no ${config.name}.`,
+    alternates: { canonical: baseUrl },
+    robots: categoria
+      ? { index: false, follow: true }
+      : { index: true, follow: true },
+  };
+}
 
 export default function BlogPage({ searchParams }) {
   const categoria = searchParams?.categoria || null;
