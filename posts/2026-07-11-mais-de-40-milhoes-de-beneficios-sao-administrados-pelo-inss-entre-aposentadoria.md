@@ -2,7 +2,7 @@
 title: "Plano De Carreira INSS 2026"
 date: "2026-07-11"
 category: "Carreiras"
-excerpt: "Introdução O Instituto Nacional do Seguro Social (INSS) abriu novo ciclo de recrutamento em 2026, trazendo alterações relevantes no plano de carreira, nas remun"
+excerpt: "O Instituto Nacional do Seguro Social (INSS) abriu novo ciclo de recrutamento em 2026, trazendo alterações relevantes no plano de carreira..."
 coverImage: "/images/manual-1783775461131-chatgpt-image-11-de-jul-de-2026-100919.png"
 ---## Introdução  
 
