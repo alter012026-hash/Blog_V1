@@ -1344,6 +1344,7 @@ function ManualComposerTab({ toast, mode = "manual" }) {
     coverImage: "",
     file: "",
   });
+  const [composerMode, setComposerMode] = useState(mode);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
@@ -1644,7 +1645,7 @@ function ManualComposerTab({ toast, mode = "manual" }) {
     }
   }
 
-  const isLego = mode === "lego";
+  const isLego = composerMode === "lego";
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -1658,7 +1659,29 @@ function ManualComposerTab({ toast, mode = "manual" }) {
                 : "Crie um artigo com capa, resumo e conteúdo em markdown. O sistema publica automaticamente no site."}
             </p>
           </div>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+            <div style={{ display: "flex", gap: 6, background: C.bg, border: `1px solid ${C.border}`, borderRadius: 999, padding: 4 }}>
+              {[
+                { id: "manual", label: "Manual" },
+                { id: "lego", label: "Lego" },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setComposerMode(item.id)}
+                  style={{
+                    ...s.btnGhost,
+                    padding: "6px 12px",
+                    fontSize: 12,
+                    border: "none",
+                    background: composerMode === item.id ? C.primaryGlow : "transparent",
+                    color: composerMode === item.id ? C.primary : C.textMuted,
+                  }}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
             <button style={s.btnGhost} onClick={() => setPreviewMode((prev) => !prev)}>
               {previewMode ? "Esconder preview" : "Mostrar preview"}
             </button>
@@ -2086,8 +2109,7 @@ function NewsletterTab({ toast }) {
 const TABS = [
   { id: "metrics", label: "Métricas", icon: "📊", shortLabel: "Métricas" },
   { id: "quality", label: "Qualidade", icon: "🎯", shortLabel: "Qualidade" },
-  { id: "manual", label: "Post Manual", icon: "📝", shortLabel: "Manual" },
-  { id: "lego", label: "🧱 Lego", icon: "🧱", shortLabel: "Lego" },
+  { id: "editor", label: "Editor", icon: "📝", shortLabel: "Editor" },
   { id: "feedbacks", label: "Feedbacks", icon: "💬", shortLabel: "Feedbacks" },
   { id: "newsletter", label: "Newsletter", icon: "📬", shortLabel: "Newsletter" },
   { id: "affiliates", label: "Afiliados", icon: "🔗", shortLabel: "Afiliados" },
@@ -2212,8 +2234,7 @@ export default function AdminPage() {
           </h1>
           {tab === "metrics" && <MetricsTab toast={showToast} />}
           {tab === "quality" && <QualityTab toast={showToast} />}
-          {tab === "manual" && <ManualComposerTab toast={showToast} mode="manual" />}
-          {tab === "lego" && <ManualComposerTab toast={showToast} mode="lego" />}
+          {tab === "editor" && <ManualComposerTab toast={showToast} mode="manual" />}
           {tab === "feedbacks" && <FeedbacksTab toast={showToast} />}
           {tab === "newsletter" && <NewsletterTab toast={showToast} />}
           {tab === "affiliates" && <AffiliatesTab toast={showToast} />}
