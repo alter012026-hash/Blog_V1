@@ -26,10 +26,13 @@ export default function HomePage() {
       <main>
         {/* Hero */}
         <section className="hero">
+          <div className="hero-seal" aria-hidden="true">
+            <span className="hero-seal-text">Guia do<br />Concurseiro</span>
+          </div>
           <div className="container">
-            <p className="hero-eyebrow">✦ {config.niche}</p>
+            <p className="hero-eyebrow">{config.niche}</p>
             <h1>
-              Tudo Sobre Concursos<br />
+              Tudo sobre concursos<br />
               para quem quer <em>ser aprovado</em>
             </h1>
             <p className="hero-desc">{config.description}</p>
