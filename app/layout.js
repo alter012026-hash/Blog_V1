@@ -2,6 +2,8 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import PageTransition from "../components/PageTransition";
 import RouteProgress from "../components/RouteProgress";
+import SideTicker from "../components/SideTicker";
+import { getTickerItems } from "../lib/ticker-data";
 import config from "../site.config";
 
 export const viewport = {
@@ -35,6 +37,8 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  const tickerItems = getTickerItems();
+
   return (
     <html lang={config.language.toLowerCase()}>
       <head>
@@ -60,6 +64,7 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         <RouteProgress />
+        <SideTicker items={tickerItems} />
         <PageTransition>{children}</PageTransition>
         <Analytics />
       </body>

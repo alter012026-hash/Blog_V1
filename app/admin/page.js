@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import RichEditor from "../../components/admin/RichEditor";
+import { markdownToHtml, htmlToMarkdown } from "../../lib/markdown-html";
 
 /* ─── Design tokens ─── */
 const C = {
@@ -146,6 +148,56 @@ const globalCSS = `
     .metrics-table thead th:nth-child(5),
     .metrics-table tbody td:nth-child(4),
     .metrics-table tbody td:nth-child(5) { display: none; }
+  }
+
+  /* Editor visual (TipTap) — tipografia do conteúdo digitado */
+  .rich-editor-content {
+    outline: none;
+    color: ${C.text};
+    font-size: 15px;
+    line-height: 1.75;
+    min-height: 260px;
+  }
+  .rich-editor-content p { margin: 0 0 14px; }
+  .rich-editor-content h2 { font-size: 1.4rem; font-weight: 700; margin: 24px 0 10px; }
+  .rich-editor-content h3 { font-size: 1.18rem; font-weight: 700; margin: 20px 0 8px; }
+  .rich-editor-content h4 { font-size: 1.02rem; font-weight: 700; margin: 16px 0 6px; }
+  .rich-editor-content ul, .rich-editor-content ol { margin: 0 0 14px; padding-left: 22px; }
+  .rich-editor-content li { margin-bottom: 4px; }
+  .rich-editor-content blockquote {
+    margin: 0 0 14px;
+    padding: 4px 16px;
+    border-left: 3px solid ${C.primary};
+    color: ${C.textMuted};
+    font-style: italic;
+  }
+  .rich-editor-content pre {
+    background: ${C.bgElevated};
+    border: 1px solid ${C.border};
+    border-radius: 8px;
+    padding: 12px 14px;
+    overflow-x: auto;
+    margin: 0 0 14px;
+  }
+  .rich-editor-content code {
+    background: ${C.bgElevated};
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 0.88em;
+  }
+  .rich-editor-content pre code { background: none; padding: 0; }
+  .rich-editor-content img { max-width: 100%; border-radius: 10px; display: block; margin: 10px 0; }
+  .rich-editor-content a { color: ${C.primary}; text-decoration: underline; }
+  .rich-editor-content hr { border: none; border-top: 1px solid ${C.border}; margin: 22px 0; }
+  .rich-editor-content p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    color: ${C.textFaint};
+    pointer-events: none;
+    height: 0;
+  }
+  @media (max-width: 640px) {
+    .rich-editor-content { font-size: 14.5px; }
   }
 `;
 
@@ -1348,13 +1400,23 @@ function ManualComposerTab({ toast, mode = "manual" }) {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
-  const [previewMode, setPreviewMode] = useState(false);
+  const [bodyHtml, setBodyHtml] = useState("");
   const [publishedPosts, setPublishedPosts] = useState([]);
   const [drafts, setDrafts] = useState([]);
   const [loadingLibrary, setLoadingLibrary] = useState(true);
   const [draftEditingId, setDraftEditingId] = useState(null);
   const [editingPostFile, setEditingPostFile] = useState(null);
-  const textareaRef = useRef(null);
+
+  // Mantém form.body (markdown, o que é salvo no arquivo .md) sincronizado
+  // com o HTML exibido no editor visual, nos dois sentidos.
+  function setBodyFromMarkdown(md) {
+    setForm((prev) => ({ ...prev, body: md || "" }));
+    setBodyHtml(markdownToHtml(md || ""));
+  }
+  function handleEditorChange(html) {
+    setBodyHtml(html);
+    setForm((prev) => ({ ...prev, body: htmlToMarkdown(html) }));
+  }
 
   async function loadPublishedPosts() {
     try {
@@ -1395,77 +1457,54 @@ function ManualComposerTab({ toast, mode = "manual" }) {
       coverImage: "",
       file: "",
     });
+    setBodyHtml("");
     setDraftEditingId(null);
     setEditingPostFile(null);
   }
 
+  async function uploadImage(file) {
+    if (!file) return null;
+    const reader = new FileReader();
+    const contentBase64 = await new Promise((resolve, reject) => {
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+    const res = await fetch("/api/admin/manual-post/upload-image", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fileName: file.name,
+        mimeType: file.type || "image/png",
+        contentBase64,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Falha no upload da imagem");
+    return data.url;
+  }
+
   async function uploadCoverImage(file) {
     if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = async () => {
-      setUploading(true);
-      try {
-        const res = await fetch("/api/admin/manual-post/upload-image", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            fileName: file.name,
-            mimeType: file.type || "image/png",
-            contentBase64: reader.result,
-          }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Falha no upload da imagem");
-        setForm((prev) => ({ ...prev, coverImage: data.url }));
-        toast("Imagem carregada com sucesso!", "ok");
-      } catch (err) {
-        toast(err.message || "Erro ao carregar imagem", "error");
-      } finally {
-        setUploading(false);
-      }
-    };
-    reader.readAsDataURL(file);
-  }
-
-  function insertSnippet(before, after = "", placeholder = "texto") {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selected = form.body.slice(start, end) || placeholder;
-    const nextBody = `${form.body.slice(0, start)}${before}${selected}${after}${form.body.slice(end)}`;
-
-    setForm((prev) => ({ ...prev, body: nextBody }));
-    requestAnimationFrame(() => {
-      textarea.focus();
-      const cursorStart = start + before.length;
-      const cursorEnd = cursorStart + selected.length;
-      textarea.setSelectionRange(cursorStart, cursorEnd);
-    });
-  }
-
-  function applyAction(action) {
-    if (action === "heading") insertSnippet("## ", "", "Título");
-    if (action === "bold") insertSnippet("**", "**", "texto em negrito");
-    if (action === "italic") insertSnippet("*", "*", "texto em itálico");
-    if (action === "list") {
-      const textarea = textareaRef.current;
-      if (!textarea) return;
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const selected = form.body.slice(start, end).split(/\n/).filter(Boolean);
-      const lines = selected.length ? selected : ["item"];
-      const wrapped = lines.map((line) => `- ${line}`).join("\n");
-      const nextBody = `${form.body.slice(0, start)}${wrapped}${form.body.slice(end)}`;
-      setForm((prev) => ({ ...prev, body: nextBody }));
-      requestAnimationFrame(() => textarea.focus());
+    setUploading(true);
+    try {
+      const url = await uploadImage(file);
+      setForm((prev) => ({ ...prev, coverImage: url }));
+      toast("Imagem carregada com sucesso!", "ok");
+    } catch (err) {
+      toast(err.message || "Erro ao carregar imagem", "error");
+    } finally {
+      setUploading(false);
     }
-    if (action === "quote") insertSnippet("> ", "", "citação");
-    if (action === "code") insertSnippet("```js\n", "\n```", "código");
-    if (action === "link") insertSnippet("[texto](", ")", "https://exemplo.com");
-    if (action === "image") insertSnippet("![Legenda](", ")", "/images/exemplo.png");
+  }
+
+  async function uploadInlineImage(file) {
+    try {
+      return await uploadImage(file);
+    } catch (err) {
+      toast(err.message || "Erro ao carregar imagem", "error");
+      throw err;
+    }
   }
 
   async function runAiAction(action) {
@@ -1497,14 +1536,14 @@ function ManualComposerTab({ toast, mode = "manual" }) {
         setForm((prev) => ({
           ...prev,
           title: data.title || prev.title,
-          body: data.body || prev.body,
           excerpt: data.excerpt || prev.excerpt,
         }));
+        setBodyFromMarkdown(data.body || form.body);
         toast(`Texto gerado com IA via ${data.provider}.`, "ok");
         return;
       }
 
-      setForm((prev) => ({ ...prev, body: data.body || prev.body }));
+      setBodyFromMarkdown(data.body || form.body);
       toast(`Texto ${action === "review" ? "revisado" : "corrigido"} com IA via ${data.provider}.`, "ok");
     } catch (err) {
       toast(err.message || "Erro ao consultar a IA", "error");
@@ -1534,7 +1573,6 @@ function ManualComposerTab({ toast, mode = "manual" }) {
       if (!res.ok) throw new Error(data.error || "Erro ao publicar o post");
       toast(`Post publicado: ${data.file}`, "ok");
       resetForm();
-      setPreviewMode(false);
       await loadPublishedPosts();
       await loadDrafts();
       window.open(data.url, "_blank", "noopener,noreferrer");
@@ -1583,6 +1621,7 @@ function ManualComposerTab({ toast, mode = "manual" }) {
       coverImage: draft.coverImage || "",
       file: draft.file || "",
     });
+    setBodyHtml(markdownToHtml(draft.body || ""));
     setDraftEditingId(draft.id || null);
     setEditingPostFile(draft.file || null);
     toast("Rascunho carregado para revisão.", "ok");
@@ -1619,6 +1658,7 @@ function ManualComposerTab({ toast, mode = "manual" }) {
         coverImage: data.post?.coverImage || "",
         file: post.file || "",
       });
+      setBodyHtml(markdownToHtml(data.post?.content || ""));
       setEditingPostFile(post.file || null);
       setDraftEditingId(null);
       toast(`Editando ${post.file}`, "ok");
@@ -1682,9 +1722,6 @@ function ManualComposerTab({ toast, mode = "manual" }) {
                 </button>
               ))}
             </div>
-            <button style={s.btnGhost} onClick={() => setPreviewMode((prev) => !prev)}>
-              {previewMode ? "Esconder preview" : "Mostrar preview"}
-            </button>
             <button style={s.btnGhost} onClick={saveDraft}>
               💾 Salvar rascunho
             </button>
@@ -1767,68 +1804,38 @@ function ManualComposerTab({ toast, mode = "manual" }) {
               </div>
             </div>
             <div>
-              <label style={s.label}>Mini-toolbar</label>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                {[
-                  ["H2", "heading"],
-                  ["B", "bold"],
-                  ["I", "italic"],
-                  ["Lista", "list"],
-                  ["Citação", "quote"],
-                  ["Código", "code"],
-                  ["Link", "link"],
-                  ["Imagem", "image"],
-                ].map(([label, action]) => (
-                  <button
-                    key={action}
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => applyAction(action)}
-                    style={{ ...s.btnGhost, padding: "6px 10px", fontSize: 12 }}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
               <label style={s.label}>IA do editor</label>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 <button style={s.btnGhost} disabled={aiLoading} onClick={() => runAiAction("generate")}>✨ Gerar post por IA</button>
                 <button style={s.btnGhost} disabled={aiLoading} onClick={() => runAiAction("review")}>🧠 Revisar com IA</button>
                 <button style={s.btnGhost} disabled={aiLoading} onClick={() => runAiAction("correct")}>🛠️ Correção automática</button>
               </div>
+              {aiLoading && (
+                <div style={{ marginTop: 8, color: C.textFaint, fontSize: 12 }}>
+                  A IA está trabalhando no texto — isso pode levar alguns segundos…
+                </div>
+              )}
             </div>
             <div>
               <label style={s.label}>Dica de uso</label>
               <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 10, padding: "12px 14px", color: C.textMuted, fontSize: 12, lineHeight: 1.7 }}>
-                Use markdown normal. Para inserir imagem, escreva <strong style={{ color: C.text }}>![Legenda](/images/arquivo.png)</strong> ou cole a URL retornada pelo upload.
+                Escreva direto no editor abaixo — formatação (títulos, negrito, listas, imagens) fica visível na hora, sem precisar de markdown. Use <strong style={{ color: C.text }}>🧠 Revisar</strong> para melhorar clareza e <strong style={{ color: C.text }}>🛠️ Correção automática</strong> para gramática e pontuação.
               </div>
             </div>
           </div>
         </div>
 
         <div style={{ marginTop: 18 }}>
-          <label style={s.label}>Conteúdo do artigo (markdown)</label>
-          <textarea
-            ref={textareaRef}
-            rows={16}
-            style={{ ...s.input, resize: "vertical", minHeight: 280 }}
+          <label style={s.label}>Conteúdo do artigo</label>
+          <RichEditor
+            html={bodyHtml}
+            onChangeHtml={handleEditorChange}
+            onUploadImage={uploadInlineImage}
             placeholder={isLego
-              ? "Escreva o conteúdo livre do seu post aqui…\n\nUse títulos, listas e imagens com markdown."
+              ? "Escreva o conteúdo livre do seu post aqui…"
               : "Escreva o conteúdo do artigo manualmente…"}
-            value={form.body}
-            onChange={(e) => setForm({ ...form, body: e.target.value })}
           />
         </div>
-
-        {previewMode && (
-          <div style={{ marginTop: 18, background: C.bg, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16 }}>
-            <div style={s.sectionTitle}>Preview rápido</div>
-            <div style={{ color: C.text, fontWeight: 700, fontSize: 16, marginBottom: 8 }}>{form.title || "Título do post"}</div>
-            <div style={{ color: C.textMuted, fontSize: 13, lineHeight: 1.65, whiteSpace: "pre-wrap" }}>{form.body || "Seu conteúdo aparecerá aqui em preview."}</div>
-          </div>
-        )}
 
         <div style={{ marginTop: 18, display: "flex", gap: 10, flexWrap: "wrap" }}>
           <button style={s.btn} onClick={publish} disabled={saving || uploading}>

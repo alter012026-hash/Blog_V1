@@ -188,6 +188,78 @@ time {
 .stagger-in > *:nth-child(6) { animation-delay: 200ms; }
 .stagger-in > *:nth-child(n+7) { animation-delay: 240ms; }
 
+/* ── Ticker lateral (curiosidades rolando nos vãos da tela) ──────── */
+/* Só existe visualmente em telas bem largas — abaixo do breakpoint fica
+   display:none, então não custa nada em mobile/tablet. */
+.side-ticker {
+  display: none;
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 208px;
+  max-height: 60vh;
+  overflow: hidden;
+  z-index: 40;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+}
+.side-ticker--left  { left: 28px; }
+.side-ticker--right { right: 28px; }
+
+.side-ticker-track {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: side-ticker-up 48s linear infinite;
+}
+.side-ticker-track--right { animation-name: side-ticker-down; }
+.side-ticker:hover .side-ticker-track { animation-play-state: paused; }
+
+@keyframes side-ticker-up {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}
+@keyframes side-ticker-down {
+  from { transform: translateY(-50%); }
+  to   { transform: translateY(0); }
+}
+
+.side-ticker-card {
+  display: block;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+  transition: border-color 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out), transform 0.25s var(--ease-out);
+}
+.side-ticker-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.side-ticker-tag {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.side-ticker-text {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Só liga quando sobra vão real dos dois lados do container (1200px +
+   ~470px de ticker/margens) — abaixo disso continua invisível. */
+@media (min-width: 1720px) {
+  .side-ticker { display: block; }
+}
+
 /* Barra fininha de progresso de navegação, no topo da viewport */
 .route-progress {
   position: fixed;
@@ -1981,6 +2053,7 @@ a { transition: color 0.15s; }
   .reveal, .reveal-stagger > * { opacity: 1 !important; transform: none !important; }
   .page-transition { animation: none !important; opacity: 1 !important; transform: none !important; }
   .stagger-in > * { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .side-ticker-track { animation: none !important; }
   .route-progress { display: none !important; }
 }
 
