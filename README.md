@@ -1,169 +1,182 @@
-# 🚀 Niche Blog — Blog Automatizado com IA
+# 📚 Passeja Concursos
 
-Blog de nicho em Next.js 14 com geração automática de artigos via Claude (Anthropic), SEO on-page completo, suporte a AdSense e links de afiliado.
+Blog automatizado em Next.js 14 sobre concursos públicos brasileiros, com
+geração diária de artigos por IA, simulado interativo, Q&A por artigo,
+newsletter automática e painel administrativo completo — tudo publicado em
+[passejaconcursos.com.br](https://passejaconcursos.com.br).
+
+> Este projeto começou como um template genérico de "blog de nicho" e foi
+> evoluindo especificamente para concursos públicos. Este README reflete o
+> estado atual real do código — não um template replicável para qualquer
+> nicho.
 
 ---
 
 ## Stack
 
-- **Next.js 14** (App Router)
-- **Claude claude-sonnet-4-20250514** para geração de conteúdo
-- **GitHub Actions** para automação (3 artigos/dia)
-- **Vercel** para deploy
-- **Markdown** como CMS (zero banco de dados)
+- **Next.js 14** (App Router), deploy na **Vercel**
+- **Markdown como CMS** — artigos ficam em `posts/`, sem banco de dados
+  (o filesystem da Vercel é somente leitura em produção; escrita acontece
+  via commit direto no GitHub, ver `lib/github-commit.js`)
+- **Geração de conteúdo por IA multi-provider com fallback em cadeia**:
+  `Grok → Groq → OpenRouter → Gemini` (`lib/article-generator.js`). Se um
+  provider falhar ou estourar rate limit, tenta o próximo automaticamente.
+- **GitHub Actions** para toda a automação (geração diária de posts, envio
+  de newsletter, ping de indexação)
+- **Resend** para e-mail transacional e newsletter (Contacts + Segments)
 
 ---
 
-## Setup em 5 Passos
+## Automações (GitHub Actions)
 
-### 1. Clone e instale
+| Workflow | Quando roda | O que faz |
+|---|---|---|
+| `.github/workflows/generate-articles.yml` | 08:00 BRT, 1x/dia (+ manual) | Gera 1 artigo novo via IA, valida qualidade/duplicidade, commita em `posts/`, dispara deploy na Vercel e avisa os buscadores (IndexNow + Google Indexing API) |
+| `.github/workflows/send-newsletter.yml` | 11:00 BRT, 1x/dia (+ manual) | Verifica se saiu post novo nas últimas 48h; se sim, dispara e-mail para os inscritos via Resend Broadcast; se não, pula o dia silenciosamente |
 
-```bash
-git clone https://github.com/seu-usuario/seu-repo
-cd seu-repo
-npm install
-```
+Ambos podem ser disparados manualmente na aba **Actions** do GitHub
+(`workflow_dispatch`).
 
-### 2. Configure o blog
+### Pipeline de geração de artigos — o que garante qualidade
 
-Edite **`site.config.js`** — é o único arquivo que você precisa mudar:
+A geração não é um prompt solto — passa por várias camadas em
+`lib/article-generator.js` + `lib/quality-engine.js`:
 
-```js
-name: "Seu Blog",
-niche: "seu nicho aqui",
-url: "https://seu-dominio.com.br",
-// adicione seus links de afiliado...
-```
-
-### 3. Configure as variáveis de ambiente
-
-```bash
-cp .env.example .env.local
-# Edite .env.local com sua ANTHROPIC_API_KEY
-```
-
-Obtenha sua chave em: https://console.anthropic.com/
-
-### 4. Gere os primeiros artigos
-
-```bash
-# Gera 3 artigos (padrão do config)
-npm run generate-article
-
-# Gera 1 artigo sobre tema específico
-node scripts/generate-article.js --topic "como guardar dinheiro" --count 1
-```
-
-### 5. Rode e faça deploy
-
-```bash
-npm run dev          # Desenvolvimento local
-npm run build        # Build de produção
-```
-
-**Deploy na Vercel:**
-1. Importe o repositório em [vercel.com](https://vercel.com)
-2. Adicione `ANTHROPIC_API_KEY` nas Environment Variables da Vercel
-3. Deploy automático a cada push
+- Deduplicação por **similaridade de Jaccard** contra `.content-signatures.json`
+  (impede publicar dois artigos quase-idênticos)
+- Controle de tópicos já usados (`.used-topics.json`)
+- Validação de qualidade (tamanho mínimo, estrutura, título não vazio/lowercase)
+- Log de execução em `.quality-log.json`, consultável na aba **Qualidade** do admin
+- Card "Curiosidade" gerado por IA ao final de cada post (substituiu a
+  integração anterior com banco de imagens de stock/Pexels)
 
 ---
 
-## Automação com GitHub Actions
+## Painel Admin (`/admin`)
 
-A pipeline roda 3x por dia e gera 1 artigo por execução.
+Protegido por senha (`ADMIN_PASSWORD`). Abas disponíveis:
 
-### Configurar Secrets no GitHub
+| Aba | Para quê |
+|---|---|
+| 📊 **Métricas** | Vercel Analytics + Google Search Console num só lugar |
+| 🎯 **Qualidade** | Relatório de duplicidade/qualidade dos posts, regenerar ou remover artigos problemáticos |
+| 📝 **Editor** | Criar post manual (modo "Manual" ou com apoio de IA — "Lego") |
+| 💬 **Feedbacks** | Feedbacks deixados por visitantes no site |
+| 📬 **Newsletter** | Total de inscritos, lista de e-mails, botão de envio de teste |
+| 🔗 **Afiliados** | Cadastrar/editar links de afiliado sem mexer em código |
+| ⚙️ **Configurações** | Ajustes gerais do blog |
+| 💡 **Ideias** | Sugestões de pauta puxadas do Reddit (r/concursospublicos, r/servidorpublico) |
 
-Vá em **Settings → Secrets and variables → Actions** e adicione:
-
-| Secret | Valor |
-|--------|-------|
-| `ANTHROPIC_API_KEY` | Sua chave da Anthropic |
-| `VERCEL_DEPLOY_HOOK` | URL do Deploy Hook da Vercel (opcional) |
-
-### Obter o Vercel Deploy Hook
-
-1. No dashboard da Vercel, acesse seu projeto
-2. **Settings → Git → Deploy Hooks**
-3. Crie um hook chamado "github-actions"
-4. Copie a URL e cole no Secret `VERCEL_DEPLOY_HOOK`
-
-### Rodar manualmente
-
-Na aba **Actions** do GitHub → **Gerar e Publicar Artigos** → **Run workflow**
+Os botões de **Regenerar**/**Remover** rodam dentro de uma function
+serverless (filesystem somente leitura em produção) — por isso commitam
+direto no GitHub via API em vez de escrever em disco, e a Vercel rebuilda a
+partir do novo commit (1–3 min).
 
 ---
 
-## Painel Admin: Regenerar, remover posts e editar afiliados em produção
+## Funcionalidades da experiência de leitura
 
-O `/admin` tem botões para **regenerar** o conteúdo de um post (mantendo a mesma
-URL), **remover duplicatas**, e a aba **Afiliados** permite cadastrar/editar os
-links de afiliado direto pelo navegador. Todos esses botões rodam dentro de uma
-function serverless da Vercel — que tem filesystem **somente leitura** em
-produção — então eles não escrevem em disco. Em vez disso, comitam direto no
-GitHub via API (mesma lógica que o GitHub Action de geração automática já
-usa), e a Vercel rebuilda a partir do novo commit.
+### 🧪 Simulado com IA (`/simulado`)
+Gera questões inéditas via IA (fallback: banco estático em
+`lib/quiz-bank.js` se todos os providers falharem) e dá feedback
+personalizado de um "Tutor IA" ao final da prova. Usa
+`OpenRouter → Gemini` (sem Groq — reservado exclusivamente para a geração
+diária de posts, para não competir pela cota). Resultado pode ser enviado
+por e-mail real via Resend (`lib/email-service.js`).
 
-### Variáveis de ambiente necessárias na Vercel
+### 🤖 "Tire sua dúvida" — Q&A por artigo
+No rodapé de cada post, o leitor pode perguntar algo e recebe uma resposta
+gerada com base no conteúdo daquele artigo específico
+(`lib/article-qa.js` + `components/ArticleQA.jsx`). Usa a mesma cadeia de
+providers da geração de posts (`Grok → Groq → OpenRouter → Gemini`).
+Rate-limit de 8 perguntas/10min por IP.
 
-Configure em **Settings → Environment Variables** no seu projeto na Vercel:
+### 📬 Newsletter diária
+Captura e-mail no rodapé do blog, guarda como Contact global no Resend e
+associa a um Segment (`lib/newsletter-service.js`). Todo dia, se saiu post
+novo, dispara um Broadcast para o Segment. Não precisa de banco de dados —
+o Resend guarda os inscritos (grátis até 1.000 contacts).
 
-| Variável | Valor |
-|----------|-------|
-| `GITHUB_TOKEN` | Personal Access Token com permissão de escrita no repo ([criar aqui](https://github.com/settings/tokens)) |
-| `GITHUB_REPO` | `usuario/repositorio` |
-| `GITHUB_BRANCH` | `main` (ou a branch que a Vercel builda) |
-| `VERCEL_DEPLOY_HOOK` | Mesma URL de Deploy Hook usada no GitHub Action (opcional, acelera o rebuild) |
-
-> Sem `GITHUB_TOKEN`/`GITHUB_REPO`, os botões de Regenerar/Remover retornam erro
-> explicando o que falta — eles nunca tentam escrever no disco da Vercel.
-
-Depois de clicar em Regenerar ou Remover, o painel mostra que o commit foi
-enviado, mas o site só reflete a mudança depois que a Vercel terminar o
-próximo deploy (1–3 minutos).
+> ⚠️ **Nota de manutenção**: a Resend renomeou "Audiences" para "Segments"
+> e mudou o modelo de Contacts (agora são globais, associados
+> explicitamente a um Segment). O arquivo `NEWSLETTER_SETUP.md` neste repo
+> ainda descreve o modelo antigo ("Audience") e precisa de uma atualização
+> — o comportamento real já está no modelo novo.
 
 ---
 
 ## Estrutura do Projeto
 
 ```
-niche-blog/
-├── app/                    # Next.js App Router
-│   ├── page.js             # Homepage
-│   ├── blog/
-│   │   ├── page.js         # Listagem de artigos
-│   │   └── [slug]/page.js  # Artigo individual
-│   ├── sitemap.js          # Sitemap dinâmico
-│   └── robots.js           # robots.txt
-├── components/             # Componentes React
-│   ├── Header.jsx
-│   ├── Footer.jsx
-│   ├── PostCard.jsx
-│   ├── SEO.jsx
-│   └── AdSense.jsx
+Blog_V1/
+├── app/
+│   ├── page.js                     # Homepage
+│   ├── blog/[slug]/page.js         # Artigo individual (+ ArticleQA no rodapé)
+│   ├── simulado/                   # Simulado com IA
+│   ├── concursos/                  # Listagem de concursos
+│   ├── admin/page.js               # Painel admin (todas as abas)
+│   ├── og/[slug]/                  # Imagem OG dinâmica por post
+│   └── api/
+│       ├── admin/                  # Rotas do painel (métricas, qualidade, afiliados, newsletter...)
+│       ├── article-qa/             # "Tire sua dúvida"
+│       ├── newsletter/             # subscribe + send-daily
+│       └── simulado/               # questions, tutor-feedback, send-result
+├── components/                     # ArticleQA, NewsletterInline/Popup, Header, Footer...
 ├── lib/
-│   └── posts.js            # Leitura de artigos Markdown
-├── posts/                  # ← Artigos gerados ficam aqui
+│   ├── article-generator.js        # Fallback multi-provider (Grok/Groq/OpenRouter/Gemini)
+│   ├── article-qa.js                # "Tire sua dúvida"
+│   ├── quality-engine.js           # Deduplicação + validação de qualidade
+│   ├── quiz-generator.js / quiz-bank.js  # Simulado
+│   ├── newsletter-service.js       # Resend Contacts + Segments + Broadcasts
+│   ├── email-service.js            # E-mail transacional (resultado do simulado)
+│   ├── github-commit.js            # Escrita em produção via commit no GitHub
+│   ├── seo-engine.js / faq-extractor.js / search-index.js
+│   └── posts.js                    # Leitura de artigos Markdown
+├── posts/                          # Artigos gerados (Markdown) — ~75+ atualmente
 ├── scripts/
-│   └── generate-article.js # Script de geração
+│   ├── generate-article.js         # Geração via CLI/Action
+│   ├── ping-indexing.js            # IndexNow + Google Indexing API
+│   └── backfill-curiosity.js       # Gera cards de Curiosidade retroativos
 ├── .github/workflows/
-│   └── generate-articles.yml
-└── site.config.js          # ← CONFIGURE AQUI
+│   ├── generate-articles.yml
+│   └── send-newsletter.yml
+└── site.config.js                  # Identidade, afiliados, categorias, AdSense
 ```
 
 ---
 
-## Configurar AdSense
+## Variáveis de ambiente
 
-1. Crie conta em [Google AdSense](https://adsense.google.com)
-2. Adicione seu site e aguarde aprovação (pode levar dias)
-3. Após aprovado, insira seu Publisher ID em `site.config.js`:
-   ```js
-   adsense: {
-     enabled: true,
-     publisherId: "ca-pub-XXXXXXXXXXXXXXXX",
-   }
-   ```
+Veja `.env.example` para a lista completa e comentada. Resumo por área:
+
+| Área | Variáveis |
+|---|---|
+| Geração de conteúdo | `GROK_API_KEY`, `GROQ_API_KEY`, `OPENROUTER_API_KEY`, `GEMINI_API_KEY` |
+| Indexação | `INDEXNOW_KEY`, `GOOGLE_SERVICE_ACCOUNT_B64` |
+| E-mail (simulado + newsletter) | `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_SEGMENT_ID` (opcional) |
+| Newsletter (cron) | `NEWSLETTER_CRON_SECRET`, `SITE_URL` (secret do GitHub Actions) |
+| Admin | `ADMIN_PASSWORD` |
+| Escrita em produção (admin → GitHub) | `GITHUB_TOKEN`, `GITHUB_REPO`, `GITHUB_BRANCH`, `VERCEL_DEPLOY_HOOK` |
+
+`RESEND_AUDIENCE_ID` (nome antigo) também é aceito como fallback de
+`RESEND_SEGMENT_ID`, para não quebrar ambientes configurados antes da
+migração da Resend — mas prefira a variável nova.
+
+---
+
+## Rodando localmente
+
+```bash
+npm install
+cp .env.example .env.local   # preencha as chaves reais
+npm run dev
+```
+
+```bash
+npm run build        # build de produção
+npm run generate-article -- --topic "tema específico" --count 1   # gerar 1 artigo manualmente
+npm run backfill-curiosity                                        # gerar cards de Curiosidade em posts antigos que não têm
+```
 
 ---
 
@@ -171,73 +184,28 @@ niche-blog/
 
 - ✅ Metadata dinâmica por página (title, description, OG, Twitter)
 - ✅ JSON-LD structured data (Article schema)
-- ✅ Sitemap.xml automático
-- ✅ robots.txt
-- ✅ Canonical URLs
-- ✅ Tempo de leitura e contagem de palavras
-- ✅ Posts relacionados por categoria
-- ✅ Headers semânticos (H1→H2→H3)
-- ✅ Filtro por categoria
+- ✅ Imagem OG dinâmica por post (`app/og/[slug]`)
+- ✅ Sitemap.xml + robots.txt automáticos
+- ✅ IndexNow + Google Indexing API (ping automático após publicar)
+- ✅ Canonical URLs, tempo de leitura, posts relacionados por categoria
+- ✅ Headers semânticos (H1→H2→H3), filtro por categoria
 
 ---
 
-## Replicar para Outros Nichos
+## Monetização
 
-Para criar um novo blog em outro nicho:
-
-1. Faça fork ou clone do repositório
-2. Edite **apenas** `site.config.js` com o novo nicho
-3. Apague os artigos em `posts/` (ou mantenha como base)
-4. Configure novo repositório no GitHub + novo projeto na Vercel
-
-Cada blog é independente. Mesma base de código, configuração diferente.
-
----
-
-## Simulado com IA (Tutor + Geração de Questões) e E-mail Real
-
-A página `/simulado` foi atualizada para gerar questões inéditas via IA (em vez
-de um banco fixo de ~90 questões) e dar feedback personalizado de um "Tutor IA"
-ao final da prova. O envio do resultado por e-mail também passou a ser real
-(antes era só um link `mailto:`).
-
-**O que mudou:**
-
-- `lib/quiz-bank.js` — o banco de questões estático antigo, extraído da página.
-  Agora serve só de **fallback**: se a IA falhar (provedores fora do ar, JSON
-  inválido), o simulado continua funcionando com essas questões fixas.
-- `lib/quiz-generator.js` — gera questões e o feedback do tutor, reaproveitando
-  a mesma cadeia Groq → OpenRouter → Gemini já configurada em
-  `lib/article-generator.js`. **Não precisa de nenhuma chave nova** para isso.
-- `lib/email-service.js` + `app/api/simulado/send-result/route.js` — envio
-  real de e-mail via [Resend](https://resend.com). Precisa de uma chave nova:
-
-  ```bash
-  # .env.local
-  RESEND_API_KEY=re_xxxxxxxx       # https://resend.com/api-keys (free: 100/dia)
-  RESEND_FROM_EMAIL="Passeja Concursos <onboarding@resend.dev>"
-  ```
-
-  Sem domínio verificado no Resend, o remetente padrão
-  (`onboarding@resend.dev`) só entrega para o e-mail da própria conta Resend —
-  bom para testar, mas para enviar a qualquer aluno em produção é necessário
-  verificar um domínio em [resend.com/domains](https://resend.com/domains) e
-  trocar `RESEND_FROM_EMAIL` para um endereço desse domínio.
-
-- Novas rotas: `app/api/simulado/questions` (gera as questões) e
-  `app/api/simulado/tutor-feedback` (gera o feedback pós-prova). Ambas
-  retornam `200` mesmo quando a IA falha — o front-end degrada para o banco
-  estático ou esconde o card de feedback, nunca quebra a experiência.
-
-Sem nenhuma configuração extra, o simulado continua 100% funcional usando
-apenas o banco estático (como antes). As chaves de Groq/OpenRouter/Gemini que
-já existem habilitam a geração ilimitada de questões; a `RESEND_API_KEY`
-habilita o envio real de e-mail.
+- **AdSense**: configurado em `site.config.js` (`adsense.publisherId` +
+  slots de anúncio)
+- **Afiliados**: lista em `site.config.js` (Estratégia Concursos, Gran
+  Cursos, QConcursos, Elite Concursos), com matching automático por
+  palavra-chave do artigo (`lib/affiliate-matcher.js`) — editável também
+  pela aba Afiliados do admin
 
 ---
 
 ## Aviso Legal
 
-Artigos gerados por IA devem ser revisados antes da publicação em escala. O Google penaliza conteúdo sem valor ou experiência real (E-E-A-T). Os prompts do sistema foram otimizados para gerar conteúdo de qualidade, mas revisão humana periódica é recomendada.
-
-Links de afiliado devem ser declarados conforme exigências do CONAR e boas práticas de transparência.
+Artigos gerados por IA são revisados por camadas automáticas de qualidade
+e deduplicação, mas revisão humana periódica é recomendada — o Google
+penaliza conteúdo sem valor real (E-E-A-T). Links de afiliado devem ser
+declarados conforme exigências do CONAR e boas práticas de transparência.
