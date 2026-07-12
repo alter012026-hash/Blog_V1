@@ -2,7 +2,7 @@
 title: "Plano De Carreira INSS 2026"
 date: "2026-07-11"
 category: "Carreiras"
-excerpt: "mais-de-40-milhoes-de-beneficios-sao-administrados-pelo-inss-entre-aposentadoria"
+excerpt: "Mais de 40 milhões de benefícios são administrados pelo INSS, entre aposentadorias e pensões."
 coverImage: "/images/manual-1783775461131-chatgpt-image-11-de-jul-de-2026-100919.png"
 ---## Introdução  
 
