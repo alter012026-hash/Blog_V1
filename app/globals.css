@@ -16,6 +16,7 @@
   --primary-light:  #34323D;
   --primary-dark:   #100F14;
   --ink:            #1C1B22;
+  --on-primary:     #F6F4EE;
   --accent:         #A93226;
   --accent-light:   #C24A3B;
   --accent-dark:    #7E2419;
@@ -211,7 +212,7 @@ time {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--bg);
+  color: var(--on-primary);
   font-size: 14px;
   font-weight: 600;
   font-family: var(--font-display);
@@ -509,7 +510,7 @@ time {
    radiais, sem texto com gradiente, sem CTA em pílula. */
 .hero {
   background: var(--primary-dark);
-  color: var(--bg);
+  color: #F6F4EE;
   padding: 76px 0 68px;
   position: relative;
   overflow: hidden;
@@ -604,7 +605,7 @@ time {
   font-weight: 500;
   line-height: 1.14;
   margin-bottom: 20px;
-  color: var(--bg);
+  color: #F6F4EE;
   letter-spacing: -0.01em;
   animation: fadeInUp 0.6s var(--ease-out) 0.08s both;
 }
@@ -1614,7 +1615,7 @@ time {
   border-radius: var(--radius-sm);
   border: none;
   background: var(--primary);
-  color: var(--bg);
+  color: var(--on-primary);
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
