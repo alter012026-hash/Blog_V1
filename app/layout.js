@@ -1,5 +1,7 @@
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
+import PageTransition from "../components/PageTransition";
+import RouteProgress from "../components/RouteProgress";
 import config from "../site.config";
 
 export const viewport = {
@@ -57,7 +59,8 @@ export default function RootLayout({ children }) {
         )}
       </head>
       <body>
-        {children}
+        <RouteProgress />
+        <PageTransition>{children}</PageTransition>
         <Analytics />
       </body>
     </html>

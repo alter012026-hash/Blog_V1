@@ -154,6 +154,53 @@ time {
 .reveal-stagger.is-visible > *:nth-child(6) { transition-delay: 250ms; }
 .reveal-stagger.is-visible > *:nth-child(n+7) { transition-delay: 300ms; }
 
+/* ── Transição de página (estilo "Apple") ─────────────────────── */
+/* Fade + leve slide-up ao trocar de rota. Curto, GPU-friendly (só
+   opacity/transform), pra não pesar em celular. */
+.page-transition {
+  animation: page-enter 0.5s var(--ease-out) both;
+}
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 640px) {
+  /* Em telas pequenas o deslocamento fica mais sutil e mais rápido —
+     evita sensação de "atraso" no scroll/toque em dispositivos móveis. */
+  .page-transition { animation-duration: 0.38s; }
+  @keyframes page-enter {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* Variante do stagger que anima sozinha ao entrar no DOM (sem depender do
+   IntersectionObserver do ScrollReveal) — usada em grids que só existem
+   depois de um fetch client-side, como a página /concursos. */
+.stagger-in > * {
+  animation: page-enter 0.45s var(--ease-out) both;
+}
+.stagger-in > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-in > *:nth-child(2) { animation-delay: 40ms; }
+.stagger-in > *:nth-child(3) { animation-delay: 80ms; }
+.stagger-in > *:nth-child(4) { animation-delay: 120ms; }
+.stagger-in > *:nth-child(5) { animation-delay: 160ms; }
+.stagger-in > *:nth-child(6) { animation-delay: 200ms; }
+.stagger-in > *:nth-child(n+7) { animation-delay: 240ms; }
+
+/* Barra fininha de progresso de navegação, no topo da viewport */
+.route-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: var(--accent);
+  z-index: 9999;
+  border-radius: 0 2px 2px 0;
+  transition: width 0.3s var(--ease-out), opacity 0.2s ease;
+  pointer-events: none;
+}
+
 /* Barra de progresso de leitura no topo (artigo) */
 .read-progress {
   position: fixed;
@@ -1932,6 +1979,9 @@ a { transition: color 0.15s; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
   .reveal, .reveal-stagger > * { opacity: 1 !important; transform: none !important; }
+  .page-transition { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .stagger-in > * { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .route-progress { display: none !important; }
 }
 
 

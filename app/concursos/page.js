@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import ScrollReveal from "../../components/ScrollReveal";
 
 const estados = [
   { uf: "sp", nome: "São Paulo" },
@@ -50,22 +51,23 @@ export default function ConcursosPage() {
 
   return (
     <>
+      <ScrollReveal />
       <Header posts={[]} />
       <main className="section section--light">
       <div className="container">
 
-        <h1 className="section-title">
+        <h1 className="section-title reveal">
           Concursos por Estado no Brasil
         </h1>
 
-        <p style={{ marginBottom: "32px", color: "var(--text-secondary)" }}>
+        <p className="reveal" style={{ marginBottom: "32px", color: "var(--text-secondary)" }}>
           Dados atualizados com concursos abertos e previstos por estado.
         </p>
 
         {loading ? (
-          <p>Carregando dados...</p>
+          <p className="reveal is-visible">Carregando dados...</p>
         ) : (
-          <div className="posts-grid">
+          <div className="posts-grid stagger-in">
 
             {Object.entries(data).map(([uf, info]) => (
               <div key={uf} className="post-card">
