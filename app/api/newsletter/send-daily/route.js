@@ -121,6 +121,20 @@ export async function GET(request) {
       broadcastId: result?.id || null,
     });
   } catch (err) {
+    // "Segment sem contatos" não é uma falha real do sistema — é um
+    // estado normal enquanto ninguém se inscreveu ainda (ou logo após a
+    // correção de jul/2026, quando um Segment novo foi criado do zero).
+    // Sem esse tratamento, o GitHub Action falha (exit 1) todo santo dia
+    // até a primeira inscrição chegar, gerando alerta de falha por nada.
+    const noContacts = /has no contacts|no contacts/i.test(err.message || "");
+    if (noContacts) {
+      return NextResponse.json({
+        ok: true,
+        sent: false,
+        reason: "Segment da newsletter ainda não tem nenhum inscrito — nada para enviar.",
+      });
+    }
+
     return NextResponse.json({ ok: false, error: err.message }, { status: 500 });
   }
 }
