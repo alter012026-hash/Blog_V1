@@ -9,6 +9,7 @@ import ScrollReveal from "../../../components/ScrollReveal";
 import NewsletterInline from "../../../components/NewsletterInline";
 import NewsletterPopup from "../../../components/NewsletterPopup";
 import ArticleQA from "../../../components/ArticleQA";
+import ArticleByline from "../../../components/ArticleByline";
 import { getAllSlugs, getPostBySlug, getPostContentHtml, getRelatedPosts, getAllPosts } from "../../../lib/posts";
 import { getSearchIndex } from "../../../lib/search-index";
 import { matchAffiliate, getAffiliatePair, getPinnedAffiliates } from "../../../lib/affiliate-matcher";
@@ -139,7 +140,7 @@ export default async function PostPage({ params }) {
     datePublished: post.date,
     // ✅ dateModified separado — usa updatedAt do frontmatter se existir
     dateModified: post.updatedAt ?? post.date,
-    author: { "@type": "Person", name: config.author.name },
+    author: { "@type": "Organization", name: config.author.name, url: config.url },
     publisher: {
       "@type": "Organization",
       name: config.name,
@@ -215,6 +216,7 @@ export default async function PostPage({ params }) {
 
               <h1 className="article-title">{post.title}</h1>
               <p className="article-excerpt">{post.excerpt}</p>
+              <ArticleByline />
             </header>
 
             {/* 🖼️ Imagem de capa gerada por IA (Pollinations/FLUX) — relacionada ao tema do post */}

@@ -27,7 +27,7 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    site: config.seo.twitterHandle,
+    ...(config.seo.twitterHandle ? { site: config.seo.twitterHandle } : {}),
   },
   robots: {
     index: true,

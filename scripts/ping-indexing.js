@@ -265,7 +265,7 @@ async function pingSitemapGoogle() {
 
 // ── MAIN ──────────────────────────────────────────────────────────────────────
 async function main() {
-  console.log("🚀 Ping de Indexação — Aprovado Já");
+  console.log("🚀 Ping de Indexação — Passeja Concursos");
   console.log(`   Site: ${SITE_URL}`);
 
   let urls;

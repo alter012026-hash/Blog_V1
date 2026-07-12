@@ -31,11 +31,19 @@ const siteConfig = {
     "aprovação em concurso",
   ],
 
-  // --- AUTOR ---
+  // --- AUTOR / IDENTIDADE EDITORIAL ---
+  // "Redação Passeja" é a assinatura editorial do site — não uma pessoa
+  // fictícia. O conteúdo é produzido com apoio de IA e curadoria de fontes
+  // oficiais; ver /metodologia para o processo completo e honesto.
   author: {
-    name: "Equipe Aprovado Já",
-    bio: "Especialistas em preparação para concursos públicos e técnicas de aprendizagem.",
-    avatar: "/avatar.jpg",
+    name: "Redação Passeja",
+    bio: "Equipe editorial do Passeja Concursos, responsável pela curadoria de fontes oficiais (editais, Diário Oficial, legislação) e pela revisão do conteúdo antes da publicação.",
+    avatar: null,
+  },
+
+  methodology: {
+    summary:
+      "Conteúdo produzido com apoio de inteligência artificial, com curadoria de fontes oficiais e checagem antes da publicação.",
   },
 
   // --- AFILIADOS ---
@@ -115,7 +123,7 @@ const siteConfig = {
 
   // --- SEO ---
   seo: {
-    twitterHandle: "@aprovadoja",
+    twitterHandle: null, // sem conta oficial confirmada ainda — não usar @aprovadoja (é de outro projeto)
     ogImage: "/og-default.jpg",
     googleSiteVerification: "EMQ4ibn6YHecVCgCRbTG-HMfXdtS7hnhXZj1clWB5HE",
     
@@ -131,6 +139,7 @@ const siteConfig = {
     { label: "Materiais Gratuitos", href: "/blog?categoria=Materiais+Gratuitos" },
     { label: "Carreiras Públicas", href: "/blog?categoria=Carreiras+Públicas" },
     { label: "Sobre", href: "/sobre" },
+    { label: "Metodologia", href: "/metodologia" },
   ],
 };
 

@@ -416,7 +416,7 @@ function LoginScreen({ onLogin }) {
             fontSize: 24, margin: "0 auto 16px",
           }}>🔐</div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: C.text, marginBottom: 4 }}>Painel Admin</h1>
-          <p style={{ color: C.textFaint, fontSize: 13 }}>Aprovado Já</p>
+          <p style={{ color: C.textFaint, fontSize: 13 }}>Passeja Concursos</p>
         </div>
 
         <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -795,11 +795,11 @@ function ConfigTab({ toast }) {
       <div style={s.card}>
         <div style={s.sectionTitle}>🏷️ Identidade do blog</div>
         <div className="config-grid" style={{ gap: 16 }}>
-          <Field label="Nome do blog" field="name" placeholder="Aprovado Já" />
+          <Field label="Nome do blog" field="name" placeholder="Passeja Concursos" />
           <Field label="URL do site" field="url" placeholder="https://..." />
           <Field label="Tagline" field="tagline" placeholder="Sua tagline aqui" fullWidth />
           <Field label="Descrição" field="description" placeholder="Descrição do site..." type="textarea" fullWidth />
-          <Field label="Twitter Handle" field="twitterHandle" placeholder="@aprovadoja" />
+          <Field label="Twitter Handle" field="twitterHandle" placeholder="@passejaconcursos" />
           <Field label="Google Site Verification" field="googleSiteVerification" placeholder="código" />
         </div>
       </div>

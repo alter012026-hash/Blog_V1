@@ -3,7 +3,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import PostCard from "../components/PostCard";
 import ScrollReveal from "../components/ScrollReveal";
-import WelcomeCountdownRotator from "../components/WelcomeCountdownRotator";
+import WelcomeBanner from "../components/WelcomeBanner";
 import NewsletterInline from "../components/NewsletterInline";
 import { getAllPosts, getAllCategories } from "../lib/posts";
 import { getSearchIndex } from "../lib/search-index";
@@ -42,9 +42,9 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Boas-vindas ↔ Countdown — próximo post */}
+        {/* Boas-vindas */}
         <section className="cd-section">
-          <WelcomeCountdownRotator postCount={allPosts.length} categoryCount={categories.length} />
+          <WelcomeBanner postCount={allPosts.length} categoryCount={categories.length} />
         </section>
 
         {/* Destaque */}

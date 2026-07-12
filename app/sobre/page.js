@@ -60,8 +60,10 @@ export default function SobrePage() {
           <div className="reveal">
             <h2>Como criamos o conteúdo</h2>
             <p>
-              Os artigos são estruturados para leitura rápida e aplicação imediata.
-              A ideia é reduzir o tempo desperdiçado com métodos pouco eficientes.
+              Os artigos são produzidos com apoio de inteligência artificial, a partir da
+              curadoria de fontes oficiais (editais, Diário Oficial, legislação), e passam por
+              revisão antes de publicar. Contamos o processo completo, sem enrolação, na{" "}
+              <Link href="/metodologia">página de metodologia</Link>.
             </p>
 
             <blockquote>

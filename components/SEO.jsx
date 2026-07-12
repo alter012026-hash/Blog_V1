@@ -26,8 +26,9 @@ export default function SEO({
         datePublished: article.date,
         dateModified: article.date,
         author: {
-          "@type": "Person",
+          "@type": "Organization",
           name: config.author.name,
+          url: `${siteUrl}/metodologia`,
         },
         publisher: {
           "@type": "Organization",
