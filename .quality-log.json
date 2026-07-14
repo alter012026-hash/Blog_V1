@@ -851,5 +851,12 @@
     "similarTo": "cronograma-de-estudos-para-concurso-em-6-meses",
     "status": "ok",
     "issues": []
+  },
+  {
+    "timestamp": "2026-07-14T12:08:22.457Z",
+    "topic": "licitações e contratos administrativos para concursos",
+    "category": "Direito Administrativo",
+    "status": "erro",
+    "error": "Todos os provedores falharam — Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 429 | OpenRouter: OpenRouter HTTP 429 | Gemini: Gemini falhou em todos os modelos"
   }
 ]
