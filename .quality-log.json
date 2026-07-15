@@ -858,5 +858,12 @@
     "category": "Direito Administrativo",
     "status": "erro",
     "error": "Todos os provedores falharam — Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 429 | OpenRouter: OpenRouter HTTP 429 | Gemini: Gemini falhou em todos os modelos"
+  },
+  {
+    "timestamp": "2026-07-15T12:12:27.039Z",
+    "topic": "diferenças entre concursos de tribunais estaduais e federais",
+    "category": "Concursos de Tribunais",
+    "status": "erro",
+    "error": "Todos os provedores falharam — Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 429 | OpenRouter: OpenRouter HTTP 429 | Gemini: Gemini falhou em todos os modelos"
   }
 ]
