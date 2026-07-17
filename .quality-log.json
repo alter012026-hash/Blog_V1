@@ -872,5 +872,12 @@
     "category": "Carreiras Públicas",
     "status": "erro",
     "error": "Todos os provedores falharam — Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 429 | OpenRouter: OpenRouter HTTP 429 | Gemini: Gemini falhou em todos os modelos"
+  },
+  {
+    "timestamp": "2026-07-17T12:06:27.007Z",
+    "topic": "como estudar legislação seca sem decorar artigo por artigo",
+    "category": "Técnicas de Estudo",
+    "status": "erro",
+    "error": "Todos os provedores falharam — Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 429 | OpenRouter: OpenRouter HTTP 429 | Gemini: Gemini falhou em todos os modelos"
   }
 ]
