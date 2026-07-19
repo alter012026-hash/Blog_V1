@@ -886,5 +886,12 @@
     "category": "Carreiras Públicas",
     "status": "erro",
     "error": "Todos os provedores falharam — Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 429 | OpenRouter: OpenRouter HTTP 429 | Gemini: Gemini falhou em todos os modelos"
+  },
+  {
+    "timestamp": "2026-07-19T11:54:16.444Z",
+    "topic": "erros que zeram a redação em concursos públicos",
+    "category": "Redação e Discursiva",
+    "status": "erro",
+    "error": "Todos os provedores falharam — Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 429 | OpenRouter: OpenRouter HTTP 429 | Gemini: Gemini falhou em todos os modelos"
   }
 ]
