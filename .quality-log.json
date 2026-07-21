@@ -900,5 +900,12 @@
     "category": "Redação e Discursiva",
     "status": "erro",
     "error": "Todos os provedores falharam — Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 429 | OpenRouter: OpenRouter HTTP 404 | Gemini: Gemini falhou em todos os modelos"
+  },
+  {
+    "timestamp": "2026-07-21T12:22:27.792Z",
+    "topic": "carreira de analista judiciário: como funciona e quanto ganha",
+    "category": "Carreiras Públicas",
+    "status": "erro",
+    "error": "Todos os provedores falharam — Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 429 | OpenRouter: OpenRouter HTTP 404 | Gemini: Gemini falhou em todos os modelos"
   }
 ]
