@@ -914,5 +914,12 @@
     "category": "Materiais Gratuitos",
     "status": "erro",
     "error": "Todos os provedores falharam — Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 429 | OpenRouter: OpenRouter HTTP 404 | Gemini: Gemini falhou em todos os modelos"
+  },
+  {
+    "timestamp": "2026-07-23T12:21:51.451Z",
+    "topic": "técnica Feynman aplicada ao estudo para concursos",
+    "category": "Técnicas de Estudo",
+    "status": "erro",
+    "error": "Todos os provedores falharam — Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 429 | OpenRouter: OpenRouter HTTP 404 | Gemini: Gemini falhou em todos os modelos"
   }
 ]
