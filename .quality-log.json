@@ -921,5 +921,19 @@
     "category": "Técnicas de Estudo",
     "status": "erro",
     "error": "Todos os provedores falharam — Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 429 | OpenRouter: OpenRouter HTTP 404 | Gemini: Gemini falhou em todos os modelos"
+  },
+  {
+    "timestamp": "2026-07-24T12:17:22.334Z",
+    "file": "2026-07-24-cronograma-de-estudos-para-concurso-em-3-meses-estrategias-e-plano-de-acao.md",
+    "slug": "cronograma-de-estudos-para-concurso-em-3-meses-estrategias-e-plano-de-acao",
+    "title": "Cronograma de Estudos para Concurso em 3 Meses: Estratégias e Plano de Ação",
+    "category": "Cronograma de Estudos",
+    "provider": "Groq",
+    "wordCount": 1010,
+    "fillerCount": 1,
+    "similarity": 20,
+    "similarTo": "de-resto-e-estudar-muito-e-ler-muito-a-aprovacao-chega-para-todos-que-persistem",
+    "status": "ok",
+    "issues": []
   }
 ]
