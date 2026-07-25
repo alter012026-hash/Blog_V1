@@ -935,5 +935,21 @@
     "similarTo": "de-resto-e-estudar-muito-e-ler-muito-a-aprovacao-chega-para-todos-que-persistem",
     "status": "ok",
     "issues": []
+  },
+  {
+    "timestamp": "2026-07-25T12:01:10.341Z",
+    "file": "2026-07-25-conquistas-em-concursos-publicos-no-brasil-oportunidades-para-quem-nao-tem-ensin.md",
+    "slug": "conquistas-em-concursos-publicos-no-brasil-oportunidades-para-quem-nao-tem-ensin",
+    "title": "Conquistas em Concursos Públicos no Brasil: Oportunidades para Quem Não Tem Ensino Superior Completo",
+    "category": "Concursos Abertos",
+    "provider": "Groq",
+    "wordCount": 825,
+    "fillerCount": 1,
+    "similarity": 21,
+    "similarTo": "diferencas-entre-cargos-de-nivel-medio-e-superior-no-setor-publico-dicas-pratica",
+    "status": "ressalvas",
+    "issues": [
+      "abaixo do mínimo de palavras (825/1200)"
+    ]
   }
 ]
