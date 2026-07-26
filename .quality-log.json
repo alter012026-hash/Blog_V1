@@ -979,5 +979,12 @@
     "category": "Editais",
     "status": "erro",
     "error": "Todos os provedores falharam — Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 429 | OpenRouter: OpenRouter HTTP 404 | Gemini: Gemini falhou em todos os modelos"
+  },
+  {
+    "timestamp": "2026-07-26T16:38:02.474Z",
+    "topic": "Concurso no RS oferta 60 vagas e salários de até R$ 18,8 mil; confira! - Direção Concursos",
+    "category": "Direito Administrativo",
+    "status": "erro",
+    "error": "Todos os provedores falharam — Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 429 | OpenRouter: OpenRouter HTTP 404 | Gemini: Gemini falhou em todos os modelos"
   }
 ]
