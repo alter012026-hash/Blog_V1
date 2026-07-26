@@ -993,5 +993,21 @@
     "category": "Editais",
     "status": "erro",
     "error": "Todos os provedores falharam — Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 429 | OpenRouter: OpenRouter HTTP 404 | Gemini: Gemini falhou em todos os modelos"
+  },
+  {
+    "timestamp": "2026-07-26T16:49:04.495Z",
+    "file": "2026-07-26-edital-iss-manaus-publicado-guia-estrategico-de-preparacao-para-a-area-fiscal.md",
+    "slug": "edital-iss-manaus-publicado-guia-estrategico-de-preparacao-para-a-area-fiscal",
+    "title": "Edital Iss Manaus Publicado: Guia Estratégico de Preparação para a Área Fiscal",
+    "category": "Concursos Abertos",
+    "provider": "Gemini",
+    "wordCount": 178,
+    "fillerCount": 0,
+    "similarity": 9,
+    "similarTo": "como-interpretar-um-edital-de-concurso-publico",
+    "status": "ressalvas",
+    "issues": [
+      "abaixo do mínimo de palavras (178/1200)"
+    ]
   }
 ]
