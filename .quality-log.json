@@ -1041,5 +1041,19 @@
     "issues": [
       "abaixo do mínimo de palavras (608/1200)"
     ]
+  },
+  {
+    "timestamp": "2026-07-26T18:40:31.897Z",
+    "file": "2026-07-26-concurso-iss-manaus-e-o-cenario-fiscal-analise-completa-do-edital-publicado-e-es.md",
+    "slug": "concurso-iss-manaus-e-o-cenario-fiscal-analise-completa-do-edital-publicado-e-es",
+    "title": "Concurso Iss Manaus e o Cenário Fiscal: Análise Completa do Edital Publicado e Estratégias de Preparação",
+    "category": "Materiais Gratuitos",
+    "provider": "Gemini",
+    "wordCount": 1258,
+    "fillerCount": 0,
+    "similarity": 13,
+    "similarTo": "concurso-ata-ministerio-da-fazenda-2026",
+    "status": "ok",
+    "issues": []
   }
 ]
