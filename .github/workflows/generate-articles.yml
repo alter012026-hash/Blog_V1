@@ -49,6 +49,9 @@ jobs:
         run: |
           test -n "${{ secrets.GROQ_API_KEY }}" || (echo "Missing GROQ_API_KEY" && exit 1)
 
+      - name: Buscar notícias reais sobre concursos
+        run: node scripts/scrape-noticias-concursos.js
+
       - name: Generate articles
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
@@ -84,7 +87,7 @@ jobs:
           # Antes só posts/ e public/images/ eram commitados, então esses
           # arquivos eram recriados vazios a cada execução do Actions e a
           # checagem de duplicidade nunca enxergava o histórico real.
-          git add posts/ public/images/ .used-topics.json .content-signatures.json .quality-log.json
+          git add posts/ public/images/ .used-topics.json .content-signatures.json .quality-log.json .pending-news-topics.json .used-news-links.json
 
           if git diff --cached --quiet; then
             echo "has_changes=false" >> $GITHUB_OUTPUT

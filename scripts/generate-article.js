@@ -206,6 +206,8 @@ const postsDir = path.resolve(__dirname, "../posts");
 const usedTopicsLogPath = path.resolve(__dirname, "../.used-topics.json");
 const signaturesLogPath = path.resolve(__dirname, "../.content-signatures.json");
 const qualityLogPath = path.resolve(__dirname, "../.quality-log.json");
+const pendingNewsPath = path.resolve(__dirname, "../.pending-news-topics.json");
+const usedNewsLinksPath = path.resolve(__dirname, "../.used-news-links.json");
 
 // ─── Helpers ──────────────────────────────────────────────────────────
 function loadJson(filePath, fallback) {
@@ -363,10 +365,51 @@ const SEEDS = {
   ],
 };
 
+// Tenta gerar o tópico do dia a partir de uma notícia real, coletada por
+// scripts/scrape-noticias-concursos.js (fila em .pending-news-topics.json).
+// Só cai pro pool estático de SEEDS se a fila estiver vazia — é isso que dá
+// autenticidade: o artigo nasce de um edital/prova/resultado real e recente,
+// em vez de um tema evergreen genérico.
+function pickNewsTopic() {
+  const pending = loadJson(pendingNewsPath, []);
+  if (!pending.length) return null;
+
+  const usedLinks = new Set(loadJson(usedNewsLinksPath, []));
+  const idx = pending.findIndex((item) => !usedLinks.has(item.link));
+  if (idx === -1) return null;
+
+  const newsFact = pending[idx];
+
+  // Marca como consumida imediatamente (remove da fila, registra o link como
+  // usado) — assim, mesmo que a geração falhe depois, não reprocessamos a
+  // mesma notícia toda hora; ela some da fila e vai para o histórico.
+  const remaining = pending.slice(0, idx).concat(pending.slice(idx + 1));
+  saveJson(pendingNewsPath, remaining);
+
+  usedLinks.add(newsFact.link);
+  saveJson(usedNewsLinksPath, [...usedLinks].slice(-500)); // teto pra não crescer infinito
+
+  // A categoria é escolhida por palavras-chave simples no título; cai em
+  // "Atualidades" (ou a primeira categoria da lista) se nada bater.
+  const title = newsFact.title.toLowerCase();
+  let category = CATEGORIES.find((c) => title.includes(c.toLowerCase()));
+  if (!category) {
+    if (/redação|discursiva/.test(title)) category = "Redação e Discursiva";
+    else if (/administrativ/.test(title)) category = "Direito Administrativo";
+    else if (/tribunal/.test(title)) category = "Concursos de Tribunais";
+    else category = ag.randomItem(CATEGORIES);
+  }
+
+  return { topic: newsFact.title, category, newsFact };
+}
+
 function buildTopic() {
   if (topicArg) {
     return { topic: topicArg, category: ag.randomItem(CATEGORIES) };
   }
+
+  const newsTopic = pickNewsTopic();
+  if (newsTopic) return newsTopic;
 
   const usedTopics = loadJson(usedTopicsLogPath, []);
   const existingSlugs = getExistingSlugs();
@@ -516,8 +559,8 @@ async function main() {
   const count = countArg || 1;
 
   for (let i = 0; i < count; i++) {
-    const { topic, category, seedPoolExhausted } = buildTopic();
-    console.log(`\n📝 ${i + 1}/${count}: ${topic}`);
+    const { topic, category, seedPoolExhausted, newsFact } = buildTopic();
+    console.log(`\n📝 ${i + 1}/${count}: ${topic}${newsFact ? "  📰 (baseado em notícia real)" : ""}`);
 
     try {
       const result = await ag.generateValidatedArticle({
@@ -525,6 +568,7 @@ async function main() {
         category,
         generation,
         existingSignatures: getExistingSignatures(),
+        newsFact,
       });
       const file = await saveArticle(result, topic, category, null, seedPoolExhausted, referenceImageArg);
 
