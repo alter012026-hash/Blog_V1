@@ -27,6 +27,7 @@ const path = require("path");
 const https = require("https");
 const qe = require("../lib/quality-engine.js");
 const ag = require("../lib/article-generator.js");
+const { clusterNews, deriveClusterTopic } = require("../lib/news-clustering.js");
 
 // ─── Geração de Imagem via Pollinations.ai ───────────────────────────────
 // Melhorias implementadas conforme documentação oficial:
@@ -375,32 +376,49 @@ function pickNewsTopic() {
   if (!pending.length) return null;
 
   const usedLinks = new Set(loadJson(usedNewsLinksPath, []));
-  const idx = pending.findIndex((item) => !usedLinks.has(item.link));
-  if (idx === -1) return null;
+  const available = pending.filter((item) => !usedLinks.has(item.link));
+  if (!available.length) return null;
 
-  const newsFact = pending[idx];
+  // Em vez de consumir 1 notícia = 1 artigo, agrupa notícias sobre o mesmo
+  // assunto (mesmo órgão/concurso, ângulos diferentes) num único cluster —
+  // isso é o que permite gerar 1 artigo consolidado ("tudo que mudou nesta
+  // semana") em vez de vários artigos finos e quase-redundantes competindo
+  // entre si por SEO. Ver lib/news-clustering.js para o critério de agrupamento.
+  const clusters = clusterNews(available);
+  const best = clusters[0];
+  if (!best) return null;
 
-  // Marca como consumida imediatamente (remove da fila, registra o link como
-  // usado) — assim, mesmo que a geração falhe depois, não reprocessamos a
-  // mesma notícia toda hora; ela some da fila e vai para o histórico.
-  const remaining = pending.slice(0, idx).concat(pending.slice(idx + 1));
+  const items = best.items;
+  const consolidated = items.length >= 2;
+  const topic = consolidated ? deriveClusterTopic(items) : items[0].title;
+
+  // Marca como consumidas imediatamente TODAS as notícias do cluster escolhido
+  // (remove da fila, registra os links como usados) — mesmo que a geração
+  // falhe depois, não reprocessamos as mesmas notícias toda hora.
+  const selectedLinks = new Set(items.map((i) => i.link));
+  const remaining = pending.filter((p) => !selectedLinks.has(p.link));
   saveJson(pendingNewsPath, remaining);
 
-  usedLinks.add(newsFact.link);
-  saveJson(usedNewsLinksPath, [...usedLinks].slice(-500)); // teto pra não crescer infinito
+  const allUsedLinks = new Set([...usedLinks, ...selectedLinks]);
+  saveJson(usedNewsLinksPath, [...allUsedLinks].slice(-500)); // teto pra não crescer infinito
 
-  // A categoria é escolhida por palavras-chave simples no título; cai em
-  // "Atualidades" (ou a primeira categoria da lista) se nada bater.
-  const title = newsFact.title.toLowerCase();
-  let category = CATEGORIES.find((c) => title.includes(c.toLowerCase()));
+  // A categoria é escolhida por palavras-chave simples no título consolidado
+  // (ou no título da notícia, se for um item isolado); cai num fallback
+  // aleatório se nada bater.
+  const titleLower = topic.toLowerCase();
+  let category = CATEGORIES.find((c) => titleLower.includes(c.toLowerCase()));
   if (!category) {
-    if (/redação|discursiva/.test(title)) category = "Redação e Discursiva";
-    else if (/administrativ/.test(title)) category = "Direito Administrativo";
-    else if (/tribunal/.test(title)) category = "Concursos de Tribunais";
+    if (/redação|discursiva/.test(titleLower)) category = "Redação e Discursiva";
+    else if (/administrativ/.test(titleLower)) category = "Direito Administrativo";
+    else if (/tribunal/.test(titleLower)) category = "Concursos de Tribunais";
     else category = ag.randomItem(CATEGORIES);
   }
 
-  return { topic: newsFact.title, category, newsFact };
+  const newsFact = consolidated
+    ? { title: topic, consolidated: true, items }
+    : items[0];
+
+  return { topic, category, newsFact };
 }
 
 function buildTopic() {
@@ -560,7 +578,12 @@ async function main() {
 
   for (let i = 0; i < count; i++) {
     const { topic, category, seedPoolExhausted, newsFact } = buildTopic();
-    console.log(`\n📝 ${i + 1}/${count}: ${topic}${newsFact ? "  📰 (baseado em notícia real)" : ""}`);
+    const newsLabel = newsFact
+      ? newsFact.consolidated
+        ? `  📰 (consolidado de ${newsFact.items.length} notícias)`
+        : "  📰 (baseado em notícia real)"
+      : "";
+    console.log(`\n📝 ${i + 1}/${count}: ${topic}${newsLabel}`);
 
     try {
       const result = await ag.generateValidatedArticle({
