@@ -31,6 +31,9 @@ const siteConfig = {
     "aprovação em concurso",
   ],
 
+  // --- CONTATO ---
+  contactEmail: "passejaconcursos.oficial@outlook.com",
+
   // --- AUTOR / IDENTIDADE EDITORIAL ---
   // "Redação Passeja" é a assinatura editorial do site — não uma pessoa
   // fictícia. O conteúdo é produzido com apoio de IA e curadoria de fontes
@@ -140,6 +143,8 @@ const siteConfig = {
     { label: "Carreiras Públicas", href: "/blog?categoria=Carreiras+Públicas" },
     { label: "Sobre", href: "/sobre" },
     { label: "Metodologia", href: "/metodologia" },
+    { label: "Privacidade", href: "/privacidade" },
+    { label: "Contato", href: "/contato" },
   ],
 };
 

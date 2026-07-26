@@ -30,6 +30,24 @@ export default function sitemap() {
       priority: 0.5,
     },
     {
+      url: `${siteUrl}/metodologia`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
+      url: `${siteUrl}/privacidade`,
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
+    {
+      url: `${siteUrl}/contato`,
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
+    {
       url: `${siteUrl}/simulado`,
       lastModified: new Date(),
       changeFrequency: "weekly",
