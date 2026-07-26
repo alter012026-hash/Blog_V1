@@ -107,7 +107,28 @@ jobs:
 
           git commit -m "✍️ Artigos automáticos — $DATE"
 
-          git push
+          for i in 1 2 3 4 5; do
+            if git push; then
+              echo "Push ok (tentativa $i)"
+              break
+            fi
+
+            if [ "$i" -eq 5 ]; then
+              echo "Push falhou apos 5 tentativas - abortando sem sobrescrever nada."
+              exit 1
+            fi
+
+            echo "Push rejeitado (tentativa $i), sincronizando com origin/main..."
+            git fetch origin main
+
+            if ! git rebase origin/main; then
+              echo "Conflito real no rebase (provavel edicao simultanea do mesmo arquivo de estado, ex: .content-signatures.json). Abortando sem forcar."
+              git rebase --abort
+              exit 1
+            fi
+
+            sleep 5
+          done
 
       - name: Deploy Vercel
         if: steps.changes.outputs.has_changes == 'true'
