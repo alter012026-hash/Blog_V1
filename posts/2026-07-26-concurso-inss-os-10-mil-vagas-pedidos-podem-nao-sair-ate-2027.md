@@ -1,5 +1,5 @@
 ---
-title: "Concurso INSS: os 10 Mil Vagas Pedidos Podem Não Sair Até 2027"
+title: "Concurso INSS: As 10 Mil Vagas Pedidos Podem Não Sair Até 2027"
 date: "2026-07-26"
 category: "Editais"
 excerpt: "Resumo: O INSS pediu ao governo milhares de vagas para reforçar o quadro de servidores. Mas o próprio Ministério da Previdência já avisou que o processo não será rápido. Entenda o que aconteceu e por que isso muda (ou não) o seu planejamento de estudos."
