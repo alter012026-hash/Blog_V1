@@ -1009,5 +1009,21 @@
     "issues": [
       "abaixo do mínimo de palavras (178/1200)"
     ]
+  },
+  {
+    "timestamp": "2026-07-26T17:06:34.633Z",
+    "file": "2026-07-26-edital-ufpi-tae-publicado-como-conquistar-vagas-com-iniciais-de-ate-r-52-mil.md",
+    "slug": "edital-ufpi-tae-publicado-como-conquistar-vagas-com-iniciais-de-ate-r-52-mil",
+    "title": "Edital Ufpi Tae Publicado: Como Conquistar Vagas com Iniciais de Até R$ 5,2 Mil",
+    "category": "Concursos de Tribunais",
+    "provider": "Gemini",
+    "wordCount": 644,
+    "fillerCount": 0,
+    "similarity": 11,
+    "similarTo": "carreira-no-inss-como-funciona-guia-atualizado",
+    "status": "ressalvas",
+    "issues": [
+      "abaixo do mínimo de palavras (644/1200)"
+    ]
   }
 ]
