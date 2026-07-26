@@ -986,5 +986,12 @@
     "category": "Direito Administrativo",
     "status": "erro",
     "error": "Todos os provedores falharam — Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 429 | OpenRouter: OpenRouter HTTP 404 | Gemini: Gemini falhou em todos os modelos"
+  },
+  {
+    "timestamp": "2026-07-26T16:44:42.714Z",
+    "topic": "Concurso Público: 18 editais publicados nesta quinta-feira (23/07) - Blog Gran Cursos Online",
+    "category": "Editais",
+    "status": "erro",
+    "error": "Todos os provedores falharam — Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 429 | OpenRouter: OpenRouter HTTP 404 | Gemini: Gemini falhou em todos os modelos"
   }
 ]
