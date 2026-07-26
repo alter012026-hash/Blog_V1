@@ -951,5 +951,12 @@
     "issues": [
       "abaixo do mínimo de palavras (825/1200)"
     ]
+  },
+  {
+    "timestamp": "2026-07-26T12:00:12.920Z",
+    "topic": "carreira de diplomata: como funciona o concurso do Itamaraty",
+    "category": "Carreiras Públicas",
+    "status": "erro",
+    "error": "Todos os provedores falharam — Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 429 | OpenRouter: OpenRouter HTTP 404 | Gemini: Gemini falhou em todos os modelos"
   }
 ]
