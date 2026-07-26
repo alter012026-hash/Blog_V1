@@ -4,6 +4,7 @@ import Footer from "../../../components/Footer";
 import PostCard from "../../../components/PostCard";
 import AffiliateBox from "../../../components/AffiliateBox";
 import CuriosityCard from "../../../components/CuriosityCard";
+import TakeawaysCard from "../../../components/TakeawaysCard";
 import ReadProgressEnhanced from "../../../components/ReadProgressEnhanced";
 import ScrollReveal from "../../../components/ScrollReveal";
 import NewsletterInline from "../../../components/NewsletterInline";
@@ -218,6 +219,10 @@ export default async function PostPage({ params }) {
               <p className="article-excerpt">{post.excerpt}</p>
               <ArticleByline />
             </header>
+
+            {/* 🔎 Spoiler do artigo — o que o leitor vai encontrar/aprender,
+                pra ajudar a decidir em segundos se vale a pena continuar lendo */}
+            <TakeawaysCard takeaways={post.takeaways} />
 
             {/* 🖼️ Imagem de capa gerada por IA (Pollinations/FLUX) — relacionada ao tema do post */}
             {post.coverImage && (

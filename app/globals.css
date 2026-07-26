@@ -1140,6 +1140,73 @@ time {
   color: var(--text-secondary);
 }
 
+/* ---- Card "O que você vai encontrar neste artigo" (spoiler/resumo) ----
+   Fica logo abaixo do título/excerpt, antes até da imagem de capa — é a
+   primeira coisa que o leitor vê depois do H1, pensado pra ajudar a
+   decidir rápido se aquele artigo específico é útil ou não. */
+.takeaways-card {
+  margin: 20px 0 28px;
+  padding: 20px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.takeaways-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.takeaways-card-icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: var(--surface-2);
+  color: var(--accent);
+}
+
+.takeaways-card-icon svg { width: 16px; height: 16px; }
+
+.takeaways-card-title {
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.takeaways-card-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 9px;
+}
+
+.takeaways-card-item {
+  position: relative;
+  padding-left: 22px;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.takeaways-card-item::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--success);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
 .article-divider {
   border: none;
   border-top: 1px solid var(--border);

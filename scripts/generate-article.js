@@ -485,11 +485,19 @@ async function saveArticle(result, topic, category, forceFile, seedPoolExhausted
   let existingFrontmatter;
   if (forceFile) {
     const oldRaw = fs.readFileSync(path.join(postsDir, forceFile), "utf8");
+    const takeawaysMatch = oldRaw.match(/^takeaways:\s*\n((?:[ \t]+-\s*.*\n?)+)/m);
+    const takeaways = takeawaysMatch
+      ? [...takeawaysMatch[1].matchAll(/-\s*"?(.*?)"?\s*$/gm)]
+          .map((m) => m[1].trim())
+          .filter(Boolean)
+      : [];
+
     existingFrontmatter = {
       date: oldRaw.match(/^date:\s*"([^"]*)"/m)?.[1],
       category: oldRaw.match(/^category:\s*"([^"]*)"/m)?.[1],
       curiosity: oldRaw.match(/^curiosity:\s*"([^"]*)"/m)?.[1],
       coverImage: oldRaw.match(/^coverImage:\s*"([^"]*)"/m)?.[1],
+      takeaways,
     };
   }
 
@@ -497,6 +505,11 @@ async function saveArticle(result, topic, category, forceFile, seedPoolExhausted
   // artigo, e nunca em runtime. Se falhar, buildArticleFile cai de volta
   // pra curiosidade anterior (regeneração) ou simplesmente omite o campo.
   const curiosity = await ag.generateCuriosity(result.body);
+
+  // "Spoiler" do artigo (o que o leitor vai encontrar/aprender) — mesma
+  // filosofia: gerado 1x aqui, com fallback pros tópicos anteriores em
+  // caso de falha na regeneração.
+  const takeaways = await ag.generateTakeaways(result.body);
 
   // Imagem de capa via Pollinations.ai (FLUX, gratuito, sem chave).
   // Gera 1 imagem/artigo e salva em public/images/<slug>.jpg.
@@ -514,6 +527,7 @@ async function saveArticle(result, topic, category, forceFile, seedPoolExhausted
     existingFrontmatter,
     curiosity,
     coverImage: coverImage || existingFrontmatter?.coverImage || null,
+    takeaways,
   });
 
   fs.writeFileSync(path.join(postsDir, article.file), article.content);

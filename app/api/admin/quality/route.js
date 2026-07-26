@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { checkAdminAuth } from "../../../../lib/admin-auth";
 import fs from "fs";
 import path from "path";
-import { generateValidatedArticle, generateCuriosity, buildArticleFile } from "../../../../lib/article-generator";
+import { generateValidatedArticle, generateCuriosity, generateTakeaways, buildArticleFile } from "../../../../lib/article-generator";
 import { commitFile, deleteFile, getFile, triggerVercelDeploy } from "../../../../lib/github-commit";
 import config from "../../../../site.config.js";
 
@@ -109,10 +109,18 @@ export async function POST(request) {
       return NextResponse.json({ error: "Arquivo não encontrado no repositório" }, { status: 404 });
     }
 
+    const takeawaysMatch = existing.content.match(/^takeaways:\s*\n((?:[ \t]+-\s*.*\n?)+)/m);
+    const existingTakeaways = takeawaysMatch
+      ? [...takeawaysMatch[1].matchAll(/-\s*"?(.*?)"?\s*$/gm)]
+          .map((m) => m[1].trim())
+          .filter(Boolean)
+      : [];
+
     const existingFrontmatter = {
       date: existing.content.match(/^date:\s*"([^"]*)"/m)?.[1],
       category: existing.content.match(/^category:\s*"([^"]*)"/m)?.[1],
       curiosity: existing.content.match(/^curiosity:\s*"([^"]*)"/m)?.[1],
+      takeaways: existingTakeaways,
     };
 
     // Assinaturas de conteúdo existentes, para checar similaridade (igual ao script CLI).
@@ -132,6 +140,10 @@ export async function POST(request) {
     // curiosidade anterior (em existingFrontmatter.curiosity).
     const curiosity = await generateCuriosity(result.body);
 
+    // "Spoiler" do artigo (o que o leitor vai encontrar) — mesma lógica
+    // de fallback: se falhar, buildArticleFile preserva os tópicos antigos.
+    const takeaways = await generateTakeaways(result.body);
+
     const article = buildArticleFile({
       title: result.title,
       body: result.body,
@@ -140,6 +152,7 @@ export async function POST(request) {
       forceFile: safeFile,
       existingFrontmatter,
       curiosity,
+      takeaways,
     });
 
     // 1) Commita o post regenerado
