@@ -125,9 +125,16 @@ jobs:
             git fetch origin main
 
             if ! git rebase origin/main; then
-              echo "Conflito real no rebase (provavel edicao simultanea do mesmo arquivo de estado, ex: .content-signatures.json). Abortando sem forcar."
-              git rebase --abort
-              exit 1
+              echo "Conflito no rebase — verificando se é só nos arquivos de estado (auto-resolvível)..."
+
+              if node scripts/resolve-state-conflicts.js; then
+                echo "Conflito resolvido automaticamente — continuando o rebase."
+                GIT_EDITOR=true git rebase --continue
+              else
+                echo "Conflito real de conteúdo (não é só arquivo de estado). Abortando sem forçar."
+                git rebase --abort
+                exit 1
+              fi
             fi
 
             sleep 5
