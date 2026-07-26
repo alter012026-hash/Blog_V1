@@ -1,12 +1,9 @@
 ---
-title: "Concurso INSS: os 10 Mil Vagas Pedidos Podem Não Sair Até 2027"
+title: "Concurso INSS: As 10 Mil Vagas Pedidas Podem Não Sair Até 2027"
 date: "2026-07-26"
 category: "Editais"
 excerpt: "O INSS pediu ao governo milhares de vagas para reforçar o quadro de servidores. Mas o próprio Ministério da Previdência já avisou: não vai ser rápido. Entenda o que aconteceu e por que isso muda (ou não) o seu planejamento de estudos."
-curiosity: "Pelo Decreto nº 9.739/2019, órgãos federais têm até 6 meses para publicar o edital depois de autorizado o concurso — então mesmo que o INSS seja liberado ainda em 2026, o edital só deve sair em 2027."
----
-
-## Introdução
+---## Introdução
 
 Se você estuda para o concurso do INSS, provavelmente já viu a notícia circulando: o instituto pediu ao governo federal milhares de vagas novas. O problema é que boa parte do que circula por aí mistura etapas diferentes desse processo — e isso gera expectativa fora do lugar. Neste artigo, você entende exatamente o que já aconteceu, o que o governo confirmou oficialmente, e o que isso muda de verdade no seu planejamento.
 
