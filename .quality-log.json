@@ -1055,5 +1055,12 @@
     "similarTo": "concurso-ata-ministerio-da-fazenda-2026",
     "status": "ok",
     "issues": []
+  },
+  {
+    "timestamp": "2026-07-27T13:43:02.888Z",
+    "topic": "Concurso R: o que mudou nesta semana e o que esperar do edital",
+    "category": "Técnicas de Estudo",
+    "status": "erro",
+    "error": "Todos os provedores falharam — Cerebras: CEREBRAS_API_KEY ausente | Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 429 | OpenRouter: OpenRouter HTTP 404 | Gemini: Gemini falhou em todos os modelos (gemini-3.5-flash: HTTP 503 | gemini-2.5-flash: HTTP 404 | gemini-2.5-flash-lite: HTTP 404)"
   }
 ]
