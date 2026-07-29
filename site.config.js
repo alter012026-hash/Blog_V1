@@ -139,7 +139,7 @@ const siteConfig = {
     { label: "Editais", href: "/blog?categoria=Editais" },
     { label: "🎯 Simulado", href: "/simulado" },
     { label: "Técnicas de Estudo", href: "/blog?categoria=Técnicas+de+Estudo" },
-    { label: "Materiais Gratuitos", href: "/blog?categoria=Materiais+Gratuitos" },
+    { label: "📁 Materiais Gratuitos", href: "/materiais" },
     { label: "Carreiras Públicas", href: "/blog?categoria=Carreiras+Públicas" },
     { label: "Sobre", href: "/sobre" },
     { label: "Metodologia", href: "/metodologia" },

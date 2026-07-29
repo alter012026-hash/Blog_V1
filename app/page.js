@@ -116,6 +116,44 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Banner Materiais Gratuitos */}
+        <section className="section section--light reveal">
+          <div className="container">
+            <Link href="/materiais" style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              background: "linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 100%)",
+              borderRadius: "var(--radius-xl)", padding: "36px 40px",
+              textDecoration: "none", color: "#fff", gap: 24, flexWrap: "wrap",
+              boxShadow: "var(--shadow-lg)", position: "relative", overflow: "hidden"
+            }}>
+              <div style={{
+                position: "absolute", top: -40, right: -40, width: 200, height: 200,
+                background: "rgba(255,255,255,0.06)", borderRadius: "50%", pointerEvents: "none"
+              }} />
+              <div>
+                <p style={{ fontSize: "0.8rem", fontWeight: 700, opacity: 0.8, marginBottom: 6, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                  ✦ 100% gratuito · sem cadastro
+                </p>
+                <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(1.3rem,3vw,1.8rem)", fontWeight: 800, marginBottom: 8, lineHeight: 1.2 }}>
+                  📁 Videoaulas e apostilas grátis
+                </h2>
+                <p style={{ opacity: 0.9, maxWidth: 480, lineHeight: 1.6, fontSize: "0.95rem" }}>
+                  Acesse nossa pasta com videoaulas, PDFs e resumos para concursos —
+                  tudo gratuito, sem precisar criar conta.
+                </p>
+              </div>
+              <div style={{
+                background: "rgba(255,255,255,0.16)", borderRadius: "var(--radius)",
+                padding: "14px 28px", fontWeight: 700, fontSize: "1rem",
+                whiteSpace: "nowrap", backdropFilter: "blur(4px)",
+                border: "1px solid rgba(255,255,255,0.28)", flexShrink: 0
+              }}>
+                Baixar materiais →
+              </div>
+            </Link>
+          </div>
+        </section>
+
         {/* Posts recentes */}
         <section className="section section--light">
           <div className="container">
