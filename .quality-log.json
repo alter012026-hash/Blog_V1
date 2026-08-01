@@ -1090,5 +1090,19 @@
     "category": "Direito Administrativo",
     "status": "erro",
     "error": "Todos os provedores falharam — Cerebras: CEREBRAS_API_KEY ausente | Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 429 | OpenRouter: OpenRouter HTTP 404 | Gemini: Gemini falhou em todos os modelos (gemini-3.5-flash: HTTP 503 | gemini-2.5-flash: HTTP 404 | gemini-2.5-flash-lite: HTTP 404)"
+  },
+  {
+    "timestamp": "2026-08-01T12:07:42.611Z",
+    "file": "2026-08-01-concurso-r-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital.md",
+    "slug": "concurso-r-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "title": "Concurso R: O que Mudou Nesta Semana e o que Esperar do Edital",
+    "category": "Informática para Concursos",
+    "provider": "Groq",
+    "wordCount": 1020,
+    "fillerCount": 2,
+    "similarity": 24,
+    "similarTo": "guia-completo-para-entender-e-cumprir-os-prazos-de-inscricao-nos-editais-de-conc",
+    "status": "ok",
+    "issues": []
   }
 ]
