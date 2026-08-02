@@ -1104,5 +1104,21 @@
     "similarTo": "guia-completo-para-entender-e-cumprir-os-prazos-de-inscricao-nos-editais-de-conc",
     "status": "ok",
     "issues": []
+  },
+  {
+    "timestamp": "2026-08-02T12:05:27.700Z",
+    "file": "2026-08-02-concurso-prefeitura-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital.md",
+    "slug": "concurso-prefeitura-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "title": "Concurso Prefeitura: O que Mudou Nesta Semana e o que Esperar do Edital",
+    "category": "Questões Comentadas",
+    "provider": "Groq",
+    "wordCount": 584,
+    "fillerCount": 0,
+    "similarity": 22,
+    "similarTo": "concurso-iss-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "ressalvas",
+    "issues": [
+      "abaixo do mínimo de palavras (584/1200)"
+    ]
   }
 ]
