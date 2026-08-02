@@ -1,8 +1,8 @@
 ---
-title: "Como Montar Cronograma de Estudos para Concurso Público (Guia Atualizado)"
+title: "Cronograma de Estudos para Concurso Público 2026 [Guia]"
 date: "2026-06-25"
 category: "Cronograma de Estudos"
-excerpt: "A aprovação em concurso público depende mais da organização do que da quantidade de horas estudadas. Um cronograma bem estruturado transforma metas vagas..."
+excerpt: "Monte seu cronograma de estudos para concurso público em 2026: passo a passo prático, ferramentas gratuitas e dicas para manter o foco até a aprovação."
 ---
 
 ## Introdução

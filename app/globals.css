@@ -1625,6 +1625,206 @@ time {
   box-shadow: 0 2px 8px rgba(27,58,107,0.25);
 }
 
+/* ── Cards de categoria (home) ──────────────────────────────────
+   Cada card usa --cat-color/--cat-border/--cat-bg (definidas inline
+   por categoria em CategoryCards.jsx) para o código e a régua de
+   destaque, mantendo o resto neutro — mesmo princípio do restante do
+   design system: regra fina + acento pontual, não pílula/gradiente. */
+.category-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.category-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 22px 24px 20px;
+  text-decoration: none;
+  overflow: hidden;
+  transition: transform 0.35s var(--ease-spring), box-shadow 0.35s var(--ease-spring), border-color 0.35s var(--ease-out);
+}
+
+.category-card::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  background: var(--cat-color);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s var(--ease-spring);
+}
+
+.category-card:hover,
+.category-card:focus-visible {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--cat-border);
+}
+
+.category-card:hover::after,
+.category-card:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.category-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.category-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.category-card-code {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 3px 9px;
+  border-radius: var(--radius-sm);
+  background: var(--cat-bg);
+  color: var(--cat-color);
+  border: 1px solid var(--cat-border);
+}
+
+.category-card-count {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.category-card-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.25;
+  margin-bottom: 8px;
+}
+
+.category-card-desc {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  flex-grow: 1;
+  margin-bottom: 18px;
+}
+
+.category-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--cat-color);
+}
+
+.category-card-arrow {
+  display: inline-block;
+  transition: transform 0.25s var(--ease-out);
+}
+
+.category-card:hover .category-card-arrow,
+.category-card:focus-visible .category-card-arrow {
+  transform: translateX(4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .category-card,
+  .category-card::after,
+  .category-card-arrow {
+    transition: none !important;
+  }
+  .category-card:hover,
+  .category-card:focus-visible {
+    transform: none;
+  }
+}
+
+@media (max-width: 768px) {
+  /* No mobile, 2 colunas espremia título/descrição em ~150px — trocado por
+     um carrossel de swipe horizontal (mesma técnica de .categories-filter
+     já usada no site), com o próximo card "espiando" na borda pra deixar
+     claro que dá pra arrastar, e cada card com largura legível de verdade. */
+  .category-cards-wrap {
+    position: relative;
+  }
+
+  .category-scroll-hint {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .category-cards-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 12px;
+    padding-bottom: 4px;
+    /* estoura o padding do .container só nesta faixa, pra o próximo card
+       espiar perto da borda real da tela, sem afetar o resto da seção */
+    margin: 0 -24px;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .category-cards-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .category-card {
+    flex: 0 0 78%;
+    max-width: 300px;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    padding: 18px 16px 16px;
+  }
+
+  .category-card-title {
+    font-size: 1rem;
+  }
+
+  .category-card-desc {
+    font-size: 0.82rem;
+  }
+
+  /* degradê sutil na borda direita — reforça visualmente que há mais
+     cards fora da tela, sobre a cor real da seção (--surface-2 aqui). */
+  .category-cards-wrap::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 4px;
+    width: 36px;
+    background: linear-gradient(to right, transparent, var(--surface-2));
+    pointer-events: none;
+  }
+}
+
+@media (min-width: 769px) {
+  .category-scroll-hint {
+    display: none;
+  }
+}
+
 /* ── Footer ──────────────────────────────────────────────────── */
 .footer {
   background: var(--text);

@@ -1,8 +1,8 @@
 ---
-title: "Diferenças Entre Cargos de Nível Médio e Superior no Setor Público (Dicas Práticas)"
+title: "Nível Médio ou Superior no Setor Público? Veja a Diferença"
 date: "2026-06-26"
 category: "Carreiras Públicas"
-excerpt: "A decisão entre investir em um concurso de nível médio ou superior determina o ritmo da preparação, o perfil das provas e o tipo de carreira no serviço..."
+excerpt: "Cargo de nível médio ou superior: qual escolher em concurso público? Compare salários, atribuições e chance de aprovação antes de decidir."
 ---
 
 ## Introdução

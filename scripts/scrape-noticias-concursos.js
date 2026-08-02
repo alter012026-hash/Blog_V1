@@ -16,9 +16,21 @@
 const fs = require("fs");
 const path = require("path");
 const { fetchAllConcursoNews } = require("../lib/news-scraper.js");
+const { fetchArticleText } = require("../lib/article-extractor.js");
 
 const pendingPath = path.resolve(__dirname, "../.pending-news-topics.json");
 const usedLinksPath = path.resolve(__dirname, "../.used-news-links.json");
+
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+// Teto de matérias com busca de texto completo por execução do cron — cada
+// fetch é uma requisição de página inteira (não um RSS leve), então isso
+// evita que o workflow diário fique lento demais ou pareça scraping em
+// massa. As notícias que não entram no teto ainda viram artigo normalmente,
+// só que a partir do snippet (comportamento antigo), não do texto completo.
+const MAX_FULLTEXT_FETCHES = 15;
 
 function loadJson(file, fallback) {
   try {
@@ -42,8 +54,20 @@ async function main() {
   console.log(`   ${news.length} notícias encontradas após filtro de ruído/duplicidade.`);
 
   let added = 0;
+  let fullTextFetches = 0;
   for (const item of news) {
     if (usedLinks.has(item.link) || pendingLinks.has(item.link)) continue;
+
+    let fullText = "";
+    if (fullTextFetches < MAX_FULLTEXT_FETCHES) {
+      fullTextFetches++;
+      fullText = await fetchArticleText(item.link);
+      // intervalo entre downloads de página completa — mais educado com os
+      // veículos de origem do que disparar tudo em paralelo, e reduz a
+      // chance de bloqueio temporário (mesmo racional do sleep entre
+      // queries do RSS em lib/news-scraper.js)
+      await sleep(1500 + Math.floor(Math.random() * 1000));
+    }
 
     pending.push({
       title: item.title,
@@ -51,10 +75,15 @@ async function main() {
       source: item.source || "",
       pubDate: item.pubDate || "",
       snippet: item.description || "",
+      fullText,
       addedAt: new Date().toISOString(),
     });
     pendingLinks.add(item.link);
     added++;
+  }
+
+  if (fullTextFetches > 0) {
+    console.log(`   📄 Texto completo extraído para ${fullTextFetches} notícia(s) nova(s).`);
   }
 
   // Mantém a fila com um teto razoável — se acumular demais (ex.: o pipeline

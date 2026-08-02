@@ -1,8 +1,8 @@
 ---
-title: "Carreira de Agente Penitenciário: Rotina e Requisitos"
+title: "Agente Penitenciário: Rotina, Requisitos e Salário 2026"
 date: "2026-06-28"
 category: "Carreiras Públicas"
-excerpt: "A função de agente penitenciário está entre as mais desafiadoras do serviço público brasileiro. O profissional atua na segurança de unidades prisionais..."
+excerpt: "Quer ser agente penitenciário? Veja os requisitos, como é a rotina de trabalho e o salário atualizado para se preparar com segurança para o concurso."
 curiosity: "A carreira de agente penitenciário exige um regime de trabalho peculiar, com turnos que podem variar entre 12×36 e 24×48 horas, demandando grande flexibilidade e adaptação dos profissionais."
 coverImage: "/images/carreira-de-agente-penitenciario-rotina-e-requisitos.jpg"
 ---

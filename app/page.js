@@ -2,10 +2,11 @@ import Link from "next/link";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import PostCard from "../components/PostCard";
+import CategoryCards from "../components/CategoryCards";
 import ScrollReveal from "../components/ScrollReveal";
 import WelcomeBanner from "../components/WelcomeBanner";
 import NewsletterInline from "../components/NewsletterInline";
-import { getAllPosts, getAllCategories } from "../lib/posts";
+import { getAllPosts, getCategoryStats } from "../lib/posts";
 import { getSearchIndex } from "../lib/search-index";
 import config from "../site.config";
 
@@ -15,7 +16,7 @@ export default function HomePage() {
   const allPosts = getAllPosts();
   const featuredPost = allPosts[0];
   const latestPosts = allPosts.slice(1, 7);
-  const categories = getAllCategories();
+  const categoryStats = getCategoryStats();
   const searchIndex = getSearchIndex();
 
   return (
@@ -44,7 +45,7 @@ export default function HomePage() {
 
         {/* Boas-vindas */}
         <section className="cd-section">
-          <WelcomeBanner postCount={allPosts.length} categoryCount={categories.length} />
+          <WelcomeBanner postCount={allPosts.length} categoryCount={categoryStats.length} />
         </section>
 
         {/* Destaque */}
@@ -61,20 +62,14 @@ export default function HomePage() {
         )}
 
         {/* Categorias */}
-        {categories.length > 0 && (
+        {categoryStats.length > 0 && (
           <section className="section section--alt reveal">
             <div className="container">
               <div className="section-header">
                 <p className="section-label">Navegue por tema</p>
                 <h2 className="section-title">Categorias</h2>
               </div>
-              <div className="categories-filter">
-                {categories.map(cat => (
-                  <Link key={cat} href={`/blog?categoria=${encodeURIComponent(cat)}`} className="cat-btn">
-                    {cat}
-                  </Link>
-                ))}
-              </div>
+              <CategoryCards categories={categoryStats} />
             </div>
           </section>
         )}
