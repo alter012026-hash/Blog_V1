@@ -1120,5 +1120,21 @@
     "issues": [
       "abaixo do mínimo de palavras (584/1200)"
     ]
+  },
+  {
+    "timestamp": "2026-08-03T13:44:16.660Z",
+    "file": "2026-08-03-concurso-portal-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital.md",
+    "slug": "concurso-portal-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "title": "Concurso Portal: O que Mudou Nesta Semana e o que Esperar do Edital",
+    "category": "Informática para Concursos",
+    "provider": "Groq",
+    "wordCount": 742,
+    "fillerCount": 2,
+    "similarity": 23,
+    "similarTo": "concurso-r-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "ressalvas",
+    "issues": [
+      "abaixo do mínimo de palavras (742/1200)"
+    ]
   }
 ]
