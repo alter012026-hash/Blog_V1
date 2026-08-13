@@ -1258,5 +1258,21 @@
     "similarTo": "panorama-dos-concursos-em-agosto-de-2026-oportunidades-de-ate-r-32-mil-edital-un",
     "status": "ok",
     "issues": []
+  },
+  {
+    "timestamp": "2026-08-13T11:49:06.374Z",
+    "file": "2026-08-13-concurso-pc-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital.md",
+    "slug": "concurso-pc-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "title": "Concurso PC: O que Mudou Nesta Semana e o que Esperar do Edital",
+    "category": "Informática para Concursos",
+    "provider": "Groq",
+    "wordCount": 819,
+    "fillerCount": 0,
+    "similarity": 25,
+    "similarTo": "concurso-r-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "ressalvas",
+    "issues": [
+      "abaixo do mínimo de palavras (819/1200)"
+    ]
   }
 ]
