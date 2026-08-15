@@ -1290,5 +1290,19 @@
     "issues": [
       "abaixo do mínimo de palavras (797/1200)"
     ]
+  },
+  {
+    "timestamp": "2026-08-15T11:21:22.368Z",
+    "file": "2026-08-15-concurso-estrategia-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital.md",
+    "slug": "concurso-estrategia-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "title": "Concurso Estratégia: O que Mudou Nesta Semana e o que Esperar do Edital",
+    "category": "Cronograma de Estudos",
+    "provider": "Gemini",
+    "wordCount": 1135,
+    "fillerCount": 1,
+    "similarity": 21,
+    "similarTo": "concurso-prefeitura-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "ok",
+    "issues": []
   }
 ]
