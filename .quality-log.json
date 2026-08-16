@@ -1304,5 +1304,21 @@
     "similarTo": "concurso-prefeitura-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
     "status": "ok",
     "issues": []
+  },
+  {
+    "timestamp": "2026-08-16T11:21:44.484Z",
+    "file": "2026-08-16-concurso-r-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital.md",
+    "slug": "concurso-r-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "title": "Concurso R: O que Mudou Nesta Semana e o que Esperar do Edital",
+    "category": "Questões Comentadas",
+    "provider": "Groq",
+    "wordCount": 637,
+    "fillerCount": 0,
+    "similarity": 24,
+    "similarTo": "concurso-portal-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "ressalvas",
+    "issues": [
+      "abaixo do mínimo de palavras (637/1200)"
+    ]
   }
 ]
