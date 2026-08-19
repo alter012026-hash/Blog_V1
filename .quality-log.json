@@ -1348,5 +1348,21 @@
     "similarTo": "concurso-blog-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
     "status": "ok",
     "issues": []
+  },
+  {
+    "timestamp": "2026-08-19T11:28:21.221Z",
+    "file": "2026-08-19-concurso-cebraspe-dpe-rn-banca-definida-para-defensor-com-inicial-de-r-323-mil-a.md",
+    "slug": "concurso-cebraspe-dpe-rn-banca-definida-para-defensor-com-inicial-de-r-323-mil-a",
+    "title": "Concurso CEBRASPE Dpe Rn: Banca Definida para Defensor com Inicial de R$ 32,3 Mil – Análise Completa de Preparação",
+    "category": "Concursos de Tribunais",
+    "provider": "Gemini",
+    "wordCount": 447,
+    "fillerCount": 0,
+    "similarity": 11,
+    "similarTo": "concurso-iss-manaus-e-o-cenario-fiscal-analise-completa-do-edital-publicado-e-es",
+    "status": "ressalvas",
+    "issues": [
+      "abaixo do mínimo de palavras (447/1200)"
+    ]
   }
 ]
