@@ -1364,5 +1364,21 @@
     "issues": [
       "abaixo do mínimo de palavras (447/1200)"
     ]
+  },
+  {
+    "timestamp": "2026-08-20T11:29:18.410Z",
+    "file": "2026-08-20-concurso-blog-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital.md",
+    "slug": "concurso-blog-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "title": "Concurso Blog: O que Mudou Nesta Semana e o que Esperar do Edital",
+    "category": "Redação e Discursiva",
+    "provider": "Gemini",
+    "wordCount": 850,
+    "fillerCount": 0,
+    "similarity": 21,
+    "similarTo": "concurso-blog-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "ressalvas",
+    "issues": [
+      "abaixo do mínimo de palavras (850/1200)"
+    ]
   }
 ]
