@@ -1410,5 +1410,21 @@
     "issues": [
       "abaixo do mínimo de palavras (591/1200)"
     ]
+  },
+  {
+    "timestamp": "2026-08-23T11:25:03.210Z",
+    "file": "2026-08-23-concurso-ba-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital-de-saude-da-pm-e-.md",
+    "slug": "concurso-ba-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital-de-saude-da-pm-e-",
+    "title": "Concurso Ba: O que Mudou Nesta Semana e o que Esperar do Edital de Saúde da PM e Cbm Ba",
+    "category": "Editais",
+    "provider": "Gemini",
+    "wordCount": 98,
+    "fillerCount": 0,
+    "similarity": 14,
+    "similarTo": "concurso-blog-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "ressalvas",
+    "issues": [
+      "abaixo do mínimo de palavras (98/1200)"
+    ]
   }
 ]
