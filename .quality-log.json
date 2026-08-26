@@ -1447,5 +1447,21 @@
     "category": "Questões Comentadas",
     "status": "erro",
     "error": "Todos os provedores falharam — Cerebras: CEREBRAS_API_KEY ausente | Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 404 | OpenRouter: OpenRouter HTTP 404 | Gemini: Gemini falhou em todos os modelos (gemini-3.5-flash: HTTP 503 | gemini-2.5-flash: HTTP 404 | gemini-2.5-flash-lite: HTTP 404)"
+  },
+  {
+    "timestamp": "2026-08-26T11:30:59.400Z",
+    "file": "2026-08-26-concurso-r-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital.md",
+    "slug": "concurso-r-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "title": "Concurso R: O que Mudou Nesta Semana e o que Esperar do Edital",
+    "category": "Técnicas de Estudo",
+    "provider": "Gemini",
+    "wordCount": 12,
+    "fillerCount": 0,
+    "similarity": 1,
+    "similarTo": "glossario-de-termos-comuns-em-editais-publicos-dicas-praticas",
+    "status": "ressalvas",
+    "issues": [
+      "abaixo do mínimo de palavras (12/1200)"
+    ]
   }
 ]
