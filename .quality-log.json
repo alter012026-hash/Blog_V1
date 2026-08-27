@@ -1463,5 +1463,21 @@
     "issues": [
       "abaixo do mínimo de palavras (12/1200)"
     ]
+  },
+  {
+    "timestamp": "2026-08-27T21:00:31.681Z",
+    "file": "2026-08-27-concurso-r-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital.md",
+    "slug": "concurso-r-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "title": "Concurso R: O que Mudou Nesta Semana e o que Esperar do Edital",
+    "category": "Concursos Abertos",
+    "provider": "Gemini",
+    "wordCount": 102,
+    "fillerCount": 0,
+    "similarity": 19,
+    "similarTo": "concurso-blog-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "ressalvas",
+    "issues": [
+      "abaixo do mínimo de palavras (102/1200)"
+    ]
   }
 ]
