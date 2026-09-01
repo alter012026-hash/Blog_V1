@@ -1532,5 +1532,21 @@
     "similarTo": "concurso-sp-o-que-mudou-nesta-semana-e-como-estruturar-sua-preparacao-de-reta-fi",
     "status": "ok",
     "issues": []
+  },
+  {
+    "timestamp": "2026-09-01T15:29:27.133Z",
+    "file": "2026-09-01-concurso-r-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital.md",
+    "slug": "concurso-r-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "title": "Concurso R: O que Mudou Nesta Semana e o que Esperar do Edital",
+    "category": "Redação e Discursiva",
+    "provider": "Gemini",
+    "wordCount": 287,
+    "fillerCount": 0,
+    "similarity": 17,
+    "similarTo": "concurso-prefeitura-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "ressalvas",
+    "issues": [
+      "abaixo do mínimo de palavras (287/1200)"
+    ]
   }
 ]
