@@ -1548,5 +1548,12 @@
     "issues": [
       "abaixo do mínimo de palavras (287/1200)"
     ]
+  },
+  {
+    "timestamp": "2026-09-02T15:02:33.067Z",
+    "topic": "Concurso R: o que mudou nesta semana e o que esperar do edital",
+    "category": "Redação e Discursiva",
+    "status": "erro",
+    "error": "Todos os provedores falharam — Cerebras: CEREBRAS_API_KEY ausente | Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 404 | OpenRouter: OpenRouter HTTP 404 | Gemini: Gemini falhou em todos os modelos (gemini-3.5-flash: HTTP 503 | gemini-2.5-flash: HTTP 404 | gemini-2.5-flash-lite: HTTP 404)"
   }
 ]
