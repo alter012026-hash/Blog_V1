@@ -1555,5 +1555,19 @@
     "category": "Redação e Discursiva",
     "status": "erro",
     "error": "Todos os provedores falharam — Cerebras: CEREBRAS_API_KEY ausente | Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 404 | OpenRouter: OpenRouter HTTP 404 | Gemini: Gemini falhou em todos os modelos (gemini-3.5-flash: HTTP 503 | gemini-2.5-flash: HTTP 404 | gemini-2.5-flash-lite: HTTP 404)"
+  },
+  {
+    "timestamp": "2026-09-03T14:53:54.654Z",
+    "file": "2026-09-03-concurso-par-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital.md",
+    "slug": "concurso-par-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "title": "Concurso Par: O que Mudou Nesta Semana e o que Esperar do Edital",
+    "category": "Concursos de Tribunais",
+    "provider": "Groq",
+    "wordCount": 2199,
+    "fillerCount": 0,
+    "similarity": 14,
+    "similarTo": "concurso-acidade-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "ok",
+    "issues": []
   }
 ]
