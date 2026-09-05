@@ -1583,5 +1583,19 @@
     "similarTo": "concursos-da-area-de-saude-com-inscricoes-abertas",
     "status": "ok",
     "issues": []
+  },
+  {
+    "timestamp": "2026-09-05T13:46:14.597Z",
+    "file": "2026-09-05-concurso-prefeitura-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital.md",
+    "slug": "concurso-prefeitura-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "title": "Concurso Prefeitura: O que Mudou Nesta Semana e o que Esperar do Edital",
+    "category": "Técnicas de Estudo",
+    "provider": "Groq",
+    "wordCount": 2017,
+    "fillerCount": 0,
+    "similarity": 16,
+    "similarTo": "concurso-par-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "ok",
+    "issues": []
   }
 ]
