@@ -1597,5 +1597,19 @@
     "similarTo": "concurso-par-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
     "status": "ok",
     "issues": []
+  },
+  {
+    "timestamp": "2026-09-06T14:00:15.796Z",
+    "file": "2026-09-06-concurso-eptc-porto-alegre-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital.md",
+    "slug": "concurso-eptc-porto-alegre-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "title": "Concurso Eptc Porto Alegre: O que Mudou Nesta Semana e o que Esperar do Edital",
+    "category": "Cronograma de Estudos",
+    "provider": "Groq",
+    "wordCount": 2244,
+    "fillerCount": 0,
+    "similarity": 17,
+    "similarTo": "concurso-par-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "ok",
+    "issues": []
   }
 ]
