@@ -1625,5 +1625,19 @@
     "similarTo": "concurso-prefeitura-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
     "status": "ok",
     "issues": []
+  },
+  {
+    "timestamp": "2026-09-08T14:59:38.850Z",
+    "file": "2026-09-08-concurso-sedes-df-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital.md",
+    "slug": "concurso-sedes-df-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "title": "Concurso Sedes Df: O que Mudou Nesta Semana e o que Esperar do Edital",
+    "category": "Carreiras Públicas",
+    "provider": "Groq",
+    "wordCount": 1665,
+    "fillerCount": 1,
+    "similarity": 17,
+    "similarTo": "concurso-par-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "ok",
+    "issues": []
   }
 ]
