@@ -1639,5 +1639,19 @@
     "similarTo": "concurso-par-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
     "status": "ok",
     "issues": []
+  },
+  {
+    "timestamp": "2026-09-09T15:07:35.865Z",
+    "file": "2026-09-09-concurso-camara-dos-deputados-2026-o-que-mudou-esta-semana-e-o-que-esperar-do-ed.md",
+    "slug": "concurso-camara-dos-deputados-2026-o-que-mudou-esta-semana-e-o-que-esperar-do-ed",
+    "title": "Concurso Câmara dos Deputados 2026: O que Mudou Esta Semana e o que Esperar do Edital",
+    "category": "Técnicas de Estudo",
+    "provider": "Groq",
+    "wordCount": 1575,
+    "fillerCount": 0,
+    "similarity": 21,
+    "similarTo": "concurso-eptc-porto-alegre-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "ok",
+    "issues": []
   }
 ]
