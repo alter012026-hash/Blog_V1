@@ -1709,5 +1709,19 @@
     "similarTo": "concurso-blog-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
     "status": "ok",
     "issues": []
+  },
+  {
+    "timestamp": "2026-09-14T16:51:44.294Z",
+    "file": "2026-09-14-concurso-policia-penal-2026-o-que-mudou-nesta-semana-e-o-que-esperar-do-proximo-.md",
+    "slug": "concurso-policia-penal-2026-o-que-mudou-nesta-semana-e-o-que-esperar-do-proximo-",
+    "title": "Concurso Polícia Penal 2026: O que Mudou Nesta Semana e o que Esperar do Próximo Edital",
+    "category": "Editais",
+    "provider": "Groq",
+    "wordCount": 1479,
+    "fillerCount": 0,
+    "similarity": 18,
+    "similarTo": "concurso-par-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "ok",
+    "issues": []
   }
 ]
