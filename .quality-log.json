@@ -1737,5 +1737,19 @@
     "similarTo": "concurso-r-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
     "status": "ok",
     "issues": []
+  },
+  {
+    "timestamp": "2026-09-16T15:27:16.549Z",
+    "file": "2026-09-16-concurso-gabarito-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital.md",
+    "slug": "concurso-gabarito-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "title": "Concurso Gabarito: O que Mudou Nesta Semana e o que Esperar do Edital",
+    "category": "Editais",
+    "provider": "Groq",
+    "wordCount": 1785,
+    "fillerCount": 0,
+    "similarity": 15,
+    "similarTo": "concurso-r-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "ok",
+    "issues": []
   }
 ]
