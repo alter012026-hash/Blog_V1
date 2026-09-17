@@ -1751,5 +1751,19 @@
     "similarTo": "concurso-r-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
     "status": "ok",
     "issues": []
+  },
+  {
+    "timestamp": "2026-09-17T15:31:21.160Z",
+    "file": "2026-09-17-concurso-blog-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital.md",
+    "slug": "concurso-blog-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "title": "Concurso Blog: O que Mudou Nesta Semana e o que Esperar do Edital",
+    "category": "Concursos de Tribunais",
+    "provider": "Groq",
+    "wordCount": 1888,
+    "fillerCount": 1,
+    "similarity": 16,
+    "similarTo": "concurso-jc-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "ok",
+    "issues": []
   }
 ]
