@@ -1891,5 +1891,19 @@
     "similarTo": "concurso-camara-dos-deputados-2026-o-que-mudou-esta-semana-e-o-que-esperar-do-ed",
     "status": "ok",
     "issues": []
+  },
+  {
+    "timestamp": "2026-09-27T15:36:11.422Z",
+    "file": "2026-09-27-concurso-para-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital.md",
+    "slug": "concurso-para-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "title": "Concurso Pará: O que Mudou Nesta Semana e o que Esperar do Edital",
+    "category": "Cronograma de Estudos",
+    "provider": "Groq",
+    "wordCount": 2494,
+    "fillerCount": 0,
+    "similarity": 22,
+    "similarTo": "concurso-magistrar-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "ok",
+    "issues": []
   }
 ]
