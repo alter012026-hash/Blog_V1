@@ -1975,5 +1975,19 @@
     "similarTo": "concurso-blog-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
     "status": "ok",
     "issues": []
+  },
+  {
+    "timestamp": "2026-10-03T15:08:15.608Z",
+    "file": "2026-10-03-concurso-cgu-2026-cebraspe-contratado-edital-a-vista-e-novas-oportunidades-na-se.md",
+    "slug": "concurso-cgu-2026-cebraspe-contratado-edital-a-vista-e-novas-oportunidades-na-se",
+    "title": "Concurso Cgu 2026: CEBRASPE Contratado, Edital À Vista e Novas Oportunidades na Semana 01/10",
+    "category": "Carreiras Públicas",
+    "provider": "Groq",
+    "wordCount": 1808,
+    "fillerCount": 0,
+    "similarity": 23,
+    "similarTo": "concurso-blog-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "ok",
+    "issues": []
   }
 ]
