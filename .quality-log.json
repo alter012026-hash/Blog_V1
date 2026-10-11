@@ -2068,5 +2068,19 @@
     "category": "Editais",
     "status": "erro",
     "error": "Todos os provedores falharam — Cerebras: CEREBRAS_API_KEY ausente | Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 404 | OpenRouter: OpenRouter HTTP 404 | Gemini: Gemini falhou em todos os modelos (gemini-3.5-flash: HTTP 503 | gemini-2.5-flash: HTTP 404 | gemini-2.5-flash-lite: HTTP 404)"
+  },
+  {
+    "timestamp": "2026-10-11T16:37:02.003Z",
+    "file": "2026-10-11-concurso-r-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital.md",
+    "slug": "concurso-r-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "title": "Concurso R: O que Mudou Nesta Semana e o que Esperar do Edital",
+    "category": "Questões Comentadas",
+    "provider": "Groq",
+    "wordCount": 1846,
+    "fillerCount": 0,
+    "similarity": 18,
+    "similarTo": "concurso-prefeitura-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "ok",
+    "issues": []
   }
 ]
