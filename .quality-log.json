@@ -2082,5 +2082,19 @@
     "similarTo": "concurso-prefeitura-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
     "status": "ok",
     "issues": []
+  },
+  {
+    "timestamp": "2026-10-12T20:10:19.121Z",
+    "file": "2026-10-12-concurso-r-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital.md",
+    "slug": "concurso-r-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "title": "Concurso R: O que Mudou Nesta Semana e o que Esperar do Edital",
+    "category": "Redação e Discursiva",
+    "provider": "Groq",
+    "wordCount": 1915,
+    "fillerCount": 0,
+    "similarity": 22,
+    "similarTo": "concurso-estrategia-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "ok",
+    "issues": []
   }
 ]
