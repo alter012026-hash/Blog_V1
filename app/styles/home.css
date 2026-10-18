@@ -268,6 +268,8 @@
 }
 /* foto da capa (quando existir) em duotone da categoria — unifica ilustrações de qualidades diferentes */
 .cover-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 2; filter: grayscale(1) contrast(1.05); mix-blend-mode: multiply; opacity: 0.9; }
+.post-card--featured .cover-photo { filter: none; mix-blend-mode: normal; opacity: 1; }
+.post-card--featured .cover-marks { display: none; }
 
 /* ── Categorias: blocos de cor ──────────────────────────────────── */
 .category-scroll-hint { display: none; }
