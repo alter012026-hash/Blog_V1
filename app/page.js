@@ -10,14 +10,27 @@ import config from "../site.config";
 
 export const revalidate = 3600;
 
+const pinnedPostSlug = "lula-ou-flavio-quem-abre-mais-concursos-os-numeros-reais-de-2027";
+
 const Check = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
 );
 
 export default function HomePage() {
   const allPosts = getAllPosts();
-  const featuredPost = allPosts[0];
-  const latestPosts = allPosts.slice(1, 7);
+  const pinnedPost = getPostBySlug(pinnedPostSlug);
+  const currentTime = Date.now();
+  const weekAgo = currentTime - 7 * 24 * 60 * 60 * 1000;
+  const weeklyPosts = allPosts
+    .filter((post) => {
+      const publishedAt = post.date ? new Date(post.date).getTime() : NaN;
+      return post.slug !== pinnedPostSlug && publishedAt >= weekAgo && publishedAt <= currentTime;
+    })
+    .slice(0, 3);
+  const weeklyPostSlugs = new Set(weeklyPosts.map((post) => post.slug));
+  const latestPosts = allPosts
+    .filter((post) => post.slug !== pinnedPostSlug && !weeklyPostSlugs.has(post.slug))
+    .slice(0, 6);
   const categoryStats = getCategoryStats();
 
   const trending = (config.trending || [])
@@ -49,6 +62,22 @@ export default function HomePage() {
         </div>
       </section>
 
+      {pinnedPost && (
+        <section className="section">
+          <div className="container">
+            <div className="section-header">
+              <div>
+                <p className="section-label">Artigo principal</p>
+                <h2 className="section-title">Eleição e concursos de 2027</h2>
+              </div>
+            </div>
+            <div className="posts-grid">
+              <PostCard post={pinnedPost} featured />
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ── Mais procurados + destaque ───────────────────────── */}
       {trending.length > 0 && (
         <section className="section">
@@ -74,6 +103,23 @@ export default function HomePage() {
         </section>
       )}
 
+      {weeklyPosts.length > 0 && (
+        <section className="section section--alt">
+          <div className="container">
+            <div className="section-header">
+              <div>
+                <p className="section-label">Publicados nos últimos 7 dias</p>
+                <h2 className="section-title">Destaques da semana</h2>
+              </div>
+              <Link href="/blog" className="section-link">Ver todos</Link>
+            </div>
+            <div className="posts-grid">
+              {weeklyPosts.map((post) => <PostCard key={post.slug} post={post} />)}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ── Novos artigos ────────────────────────────────────── */}
       <section className="section">
         <div className="container">
@@ -82,7 +128,6 @@ export default function HomePage() {
             <Link href="/blog" className="section-link">Ver todos</Link>
           </div>
           <div className="posts-grid">
-            {featuredPost && <PostCard post={featuredPost} featured />}
             {latestPosts.map((post) => <PostCard key={post.slug} post={post} />)}
           </div>
         </div>
