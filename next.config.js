@@ -147,7 +147,7 @@ const nextConfig = {
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
       "connect-src 'self' https://vitals.vercel-insights.com https://pagead2.googlesyndication.com https://ep1.adtrafficquality.google",
-      "frame-src 'self' https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com",
+      "frame-src 'self' https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com https://ep2.adtrafficquality.google https://www.google.com",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
