@@ -2159,5 +2159,19 @@
     "category": "Carreiras Públicas",
     "status": "erro",
     "error": "Todos os provedores falharam — Cerebras: CEREBRAS_API_KEY ausente | Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 404 | OpenRouter: OpenRouter HTTP 404 | Gemini: Gemini falhou em todos os modelos (gemini-3.5-flash: HTTP 503 | gemini-2.5-flash: HTTP 404 | gemini-2.5-flash-lite: HTTP 404)"
+  },
+  {
+    "timestamp": "2026-10-18T14:22:56.059Z",
+    "file": "2026-10-18-concurso-estrategia-2026-panorama-das-vagas-salarios-e-o-que-esperar-dos-editais.md",
+    "slug": "concurso-estrategia-2026-panorama-das-vagas-salarios-e-o-que-esperar-dos-editais",
+    "title": "Concurso Estratégia 2026: Panorama das Vagas, Salários e o que Esperar dos Editais",
+    "category": "Concursos Abertos",
+    "provider": "Groq",
+    "wordCount": 1951,
+    "fillerCount": 0,
+    "similarity": 20,
+    "similarTo": "concurso-direcao-novidades-da-semana-e-o-que-esperar-dos-novos-editais",
+    "status": "ok",
+    "issues": []
   }
 ]
