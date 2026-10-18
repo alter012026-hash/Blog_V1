@@ -1,9 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
-import ScrollReveal from "../../components/ScrollReveal";
 
 const estados = [
   { uf: "sp", nome: "São Paulo" },
@@ -51,8 +48,6 @@ export default function ConcursosPage() {
 
   return (
     <>
-      <ScrollReveal />
-      <Header posts={[]} />
       <main className="section section--light">
       <div className="container">
 
@@ -93,7 +88,6 @@ export default function ConcursosPage() {
 
       </div>
       </main>
-      <Footer />
     </>
   );
 }

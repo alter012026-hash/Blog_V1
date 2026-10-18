@@ -101,6 +101,7 @@ export default function SearchPalette({ posts, open, onClose }) {
       className={`search-overlay ${open ? "is-open" : ""}`}
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
       aria-hidden={!open}
+      data-no-vt
     >
       <div className="search-panel" role="dialog" aria-modal="true" aria-label="Buscar artigos">
         <div className="search-input-row">
@@ -109,7 +110,9 @@ export default function SearchPalette({ posts, open, onClose }) {
             ref={inputRef}
             className="search-input"
             type="text"
-            placeholder="Buscar artigos sobre concursos…"
+            placeholder="Buscar: cronograma, INSS, edital…"
+            autoComplete="off"
+            enterKeyHint="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}

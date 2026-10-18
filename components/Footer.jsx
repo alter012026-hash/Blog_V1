@@ -1,6 +1,6 @@
-
 import Link from "next/link";
 import config from "../site.config";
+import Logo from "./Logo";
 import NewsletterBox from "./NewsletterBox";
 
 export default function Footer() {
@@ -10,24 +10,33 @@ export default function Footer() {
     <footer className="footer">
       <div className="container">
         <div className="footer-inner">
-
           <div className="footer-brand">
-            <Link href="/" className="footer-logo">
-              <span className="logo-icon">A</span>
-              <span className="logo-text">{config.name}</span>
-            </Link>
+            <Logo />
             <p className="footer-tagline">{config.tagline}</p>
           </div>
 
-          <nav className="footer-nav" aria-label="Links do rodapé">
-            {config.navigation.map(item => (
-              <Link key={item.href} href={item.href} className="footer-link">
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+          <div className="footer-cols">
+            <nav aria-label="Explorar">
+              <p className="footer-col-title">Explorar</p>
+              <div className="footer-nav">
+                {config.navigation.map((item) => (
+                  <Link key={item.href} href={item.href} className="footer-link">{item.label}</Link>
+                ))}
+              </div>
+            </nav>
+            <nav aria-label="Institucional">
+              <p className="footer-col-title">O Passeja</p>
+              <div className="footer-nav">
+                {config.footerNavigation.map((item) => (
+                  <Link key={item.href} href={item.href} className="footer-link">{item.label}</Link>
+                ))}
+              </div>
+            </nav>
+          </div>
 
-          <NewsletterBox />
+          <div className="footer-newsletter">
+            <NewsletterBox />
+          </div>
         </div>
 
         <div className="footer-bottom">
@@ -37,6 +46,7 @@ export default function Footer() {
           </p>
         </div>
       </div>
+      <span className="footer-wordmark" aria-hidden="true">Passeja</span>
     </footer>
   );
 }

@@ -4,31 +4,21 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
 /**
- * Envolve {children} do layout raiz e anima a entrada do conteúdo a cada
- * troca de rota (estilo "site da Apple": fade + leve slide-up, curto e
- * suave, sem travar a interação).
- *
- * Estratégia: como o App Router não desmonta o RootLayout ao navegar,
- * detectamos a mudança via usePathname() e trocamos a `key` do wrapper —
- * isso remonta só a div de conteúdo, disparando a animação CSS via
- * @keyframes (não precisa de framer-motion nem de libs extras).
- *
- * A primeira renderização (carregamento inicial da página, já vinda do
- * servidor) NUNCA anima — evita flash/CLS e mantém o LCP intacto. Só as
- * navegações internas subsequentes recebem a transição.
+ * Fallback de transição para navegadores SEM View Transitions API:
+ * remonta o wrapper a cada rota e aplica um fade+slide curto (CSS
+ * .page-transition). Onde a API existe, não faz nada (a animação é feita
+ * por components/ViewTransitions.jsx) — evita animação dupla e remontagem.
+ * O carregamento inicial nunca anima (protege LCP e evita flash).
  */
 export default function PageTransition({ children }) {
   const pathname = usePathname();
-  const isFirstRender = useRef(true);
+  const first = useRef(true);
   const [displayKey, setDisplayKey] = useState(pathname);
   const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      setDisplayKey(pathname);
-      return;
-    }
+    if (first.current) { first.current = false; return; }
+    if (typeof document.startViewTransition === "function") return;
     setAnimate(true);
     setDisplayKey(pathname);
   }, [pathname]);

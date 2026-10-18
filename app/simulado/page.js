@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
 
 import { BANCAS, getMaterias, getQuestions } from "../../lib/quiz-bank";
 
@@ -275,7 +273,6 @@ export default function SimuladoPage() {
 
   return (
     <>
-      <Header posts={[]} />
       <main style={{ minHeight: "100vh", background: "var(--bg)", paddingBottom: "80px" }}>
 
         {/* ═══ TELA 0: CONFIGURAÇÃO ═══ */}
@@ -886,7 +883,6 @@ export default function SimuladoPage() {
           </div>
         )}
       </main>
-      <Footer />
 
       <style>{`
         @keyframes popIn {

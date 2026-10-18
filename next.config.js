@@ -146,7 +146,7 @@ const nextConfig = {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https://vitals.vercel-insights.com",
+      "connect-src 'self' https://vitals.vercel-insights.com https://pagead2.googlesyndication.com https://ep1.adtrafficquality.google",
       "frame-src 'self' https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com",
       "object-src 'none'",
       "base-uri 'self'",

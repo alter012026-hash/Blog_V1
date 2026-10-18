@@ -1,0 +1,351 @@
+/* ================================================================
+   PASSEJA — Design system v4 "Cartão-resposta"
+   ----------------------------------------------------------------
+   Conceito: o objeto mais icônico de quem faz concurso é o cartão-
+   resposta — a grade de bolinhas A·B·C·D·E preenchida a caneta. Todo
+   o site fala essa língua: a bolinha preenchida é o marcador de
+   escolha (menu ativo, filtro, tópicos, logo), e a capa de cada
+   artigo é um cartão-resposta na cor da sua categoria.
+
+   Paleta
+     Tinta        #12163A   texto e superfícies escuras
+     Caneta       #2430E6   azul-caneta: ação e identidade
+     Marca-texto  #FFD43B   o amarelo do marca-texto: destaque/seleção
+     Gabarito     #0B7A47   verde de "certo"
+     Coral        #C93525   avisos e erros
+     Papel        #F4F6FF   fundo (azulado frio, nunca creme)
+
+   Tipografia
+     Bricolage Grotesque  títulos e interface (eixos de largura/óptico)
+     Literata             leitura longa (desenhada para telas pequenas)
+
+   Tokens mantêm os nomes antigos (--primary, --surface, --border…) para
+   que páginas com estilo inline (simulado, admin) herdem a nova
+   identidade sem edição.
+   ================================================================ */
+
+:root {
+  /* ---- marca ---- */
+  --ink:            #12163A;
+  --on-ink:         #F4F6FF;
+  --primary:        #2430E6;   /* sempre combina com texto branco */
+  --primary-light:  #4D5AFF;
+  --primary-dark:   #1A22B8;
+  --on-primary:     #FFFFFF;
+  --link:           #2430E6;   /* cor de link/ênfase sobre o fundo da página */
+  --hl:             #FFD43B;   /* marca-texto */
+  --hl-soft:        #FFF1B0;
+  --on-hl:          #12163A;
+  --accent:         #C93525;
+  --accent-light:   #E8412F;
+  --accent-dark:    #A32A1C;
+  --gold:           #B58900;
+  --success:        #0B7A47;
+  --success-soft:   #DDF5E8;
+  --focus:          #4D5AFF;
+
+  /* ---- superfícies ---- */
+  --bg:             #F4F6FF;
+  --surface:        #FFFFFF;
+  --surface-2:      #E9EDFF;
+  --surface-3:      #DCE2FF;
+  --text:           #12163A;
+  --text-secondary: #454B73;
+  --text-muted:     #5F6590;
+  --border:         #D3D9F4;
+  --border-soft:    #E3E7FA;
+  --glass-border:   rgba(18, 22, 58, 0.10);
+  --header-bg:      rgba(244, 246, 255, 0.82);
+  --hero-bg:        #2430E6;
+  --hero-fg:        #FFFFFF;
+  --hero-ring:      #FFFFFF;
+  --footer-bg:      #12163A;
+
+  /* ---- sombras (usadas com parcimônia: a estrutura vem de bordas) ---- */
+  --shadow-sm:      0 1px 2px rgba(18, 22, 58, 0.08);
+  --shadow-md:      0 10px 26px -10px rgba(18, 22, 58, 0.22);
+  --shadow-lg:      0 22px 44px -16px rgba(18, 22, 58, 0.30);
+  --shadow-xl:      0 34px 70px -20px rgba(18, 22, 58, 0.38);
+
+  /* ---- tipografia (variáveis injetadas por next/font em layout.js) ---- */
+  --font-display:   var(--f-display), "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-body:      var(--f-display), "Helvetica Neue", Arial, sans-serif;
+  --font-read:      var(--f-read), Georgia, "Times New Roman", serif;
+  --font-mono:      var(--f-display), "Helvetica Neue", Arial, sans-serif;
+
+  /* ---- escala e forma ---- */
+  --max-width:      1180px;
+  --content-width:  720px;
+  --gutter:         20px;
+  --radius-sm:      10px;
+  --radius:         14px;
+  --radius-lg:      20px;
+  --radius-xl:      28px;
+  --radius-full:    999px;
+
+  --header-h:       60px;
+  --dock-h:         0px;
+
+  /* ---- movimento ---- */
+  --ease-out:       cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-io:        cubic-bezier(0.65, 0, 0.35, 1);
+  --t-fast:         160ms;
+  --t-base:         280ms;
+  --t-slow:         480ms;
+
+  /* grade de anéis do cartão-resposta (máscara) — ver lib/cover.js */
+  --rings: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 320 180%22 fill=%22none%22 stroke=%22%23000%22 stroke-width=%221.6%22%3E%3Ccircle cx=%2224%22 cy=%2222%22 r=%227%22/%3E%3Ccircle cx=%2242%22 cy=%2222%22 r=%227%22/%3E%3Ccircle cx=%2260%22 cy=%2222%22 r=%227%22/%3E%3Ccircle cx=%2278%22 cy=%2222%22 r=%227%22/%3E%3Ccircle cx=%2296%22 cy=%2222%22 r=%227%22/%3E%3Ccircle cx=%2224%22 cy=%2248%22 r=%227%22/%3E%3Ccircle cx=%2242%22 cy=%2248%22 r=%227%22/%3E%3Ccircle cx=%2260%22 cy=%2248%22 r=%227%22/%3E%3Ccircle cx=%2278%22 cy=%2248%22 r=%227%22/%3E%3Ccircle cx=%2296%22 cy=%2248%22 r=%227%22/%3E%3Ccircle cx=%2224%22 cy=%2274%22 r=%227%22/%3E%3Ccircle cx=%2242%22 cy=%2274%22 r=%227%22/%3E%3Ccircle cx=%2260%22 cy=%2274%22 r=%227%22/%3E%3Ccircle cx=%2278%22 cy=%2274%22 r=%227%22/%3E%3Ccircle cx=%2296%22 cy=%2274%22 r=%227%22/%3E%3Ccircle cx=%2224%22 cy=%22100%22 r=%227%22/%3E%3Ccircle cx=%2242%22 cy=%22100%22 r=%227%22/%3E%3Ccircle cx=%2260%22 cy=%22100%22 r=%227%22/%3E%3Ccircle cx=%2278%22 cy=%22100%22 r=%227%22/%3E%3Ccircle cx=%2296%22 cy=%22100%22 r=%227%22/%3E%3Ccircle cx=%2224%22 cy=%22126%22 r=%227%22/%3E%3Ccircle cx=%2242%22 cy=%22126%22 r=%227%22/%3E%3Ccircle cx=%2260%22 cy=%22126%22 r=%227%22/%3E%3Ccircle cx=%2278%22 cy=%22126%22 r=%227%22/%3E%3Ccircle cx=%2296%22 cy=%22126%22 r=%227%22/%3E%3Ccircle cx=%2224%22 cy=%22152%22 r=%227%22/%3E%3Ccircle cx=%2242%22 cy=%22152%22 r=%227%22/%3E%3Ccircle cx=%2260%22 cy=%22152%22 r=%227%22/%3E%3Ccircle cx=%2278%22 cy=%22152%22 r=%227%22/%3E%3Ccircle cx=%2296%22 cy=%22152%22 r=%227%22/%3E%3Ccircle cx=%22124%22 cy=%2222%22 r=%227%22/%3E%3Ccircle cx=%22142%22 cy=%2222%22 r=%227%22/%3E%3Ccircle cx=%22160%22 cy=%2222%22 r=%227%22/%3E%3Ccircle cx=%22178%22 cy=%2222%22 r=%227%22/%3E%3Ccircle cx=%22196%22 cy=%2222%22 r=%227%22/%3E%3Ccircle cx=%22124%22 cy=%2248%22 r=%227%22/%3E%3Ccircle cx=%22142%22 cy=%2248%22 r=%227%22/%3E%3Ccircle cx=%22160%22 cy=%2248%22 r=%227%22/%3E%3Ccircle cx=%22178%22 cy=%2248%22 r=%227%22/%3E%3Ccircle cx=%22196%22 cy=%2248%22 r=%227%22/%3E%3Ccircle cx=%22124%22 cy=%2274%22 r=%227%22/%3E%3Ccircle cx=%22142%22 cy=%2274%22 r=%227%22/%3E%3Ccircle cx=%22160%22 cy=%2274%22 r=%227%22/%3E%3Ccircle cx=%22178%22 cy=%2274%22 r=%227%22/%3E%3Ccircle cx=%22196%22 cy=%2274%22 r=%227%22/%3E%3Ccircle cx=%22124%22 cy=%22100%22 r=%227%22/%3E%3Ccircle cx=%22142%22 cy=%22100%22 r=%227%22/%3E%3Ccircle cx=%22160%22 cy=%22100%22 r=%227%22/%3E%3Ccircle cx=%22178%22 cy=%22100%22 r=%227%22/%3E%3Ccircle cx=%22196%22 cy=%22100%22 r=%227%22/%3E%3Ccircle cx=%22124%22 cy=%22126%22 r=%227%22/%3E%3Ccircle cx=%22142%22 cy=%22126%22 r=%227%22/%3E%3Ccircle cx=%22160%22 cy=%22126%22 r=%227%22/%3E%3Ccircle cx=%22178%22 cy=%22126%22 r=%227%22/%3E%3Ccircle cx=%22196%22 cy=%22126%22 r=%227%22/%3E%3Ccircle cx=%22124%22 cy=%22152%22 r=%227%22/%3E%3Ccircle cx=%22142%22 cy=%22152%22 r=%227%22/%3E%3Ccircle cx=%22160%22 cy=%22152%22 r=%227%22/%3E%3Ccircle cx=%22178%22 cy=%22152%22 r=%227%22/%3E%3Ccircle cx=%22196%22 cy=%22152%22 r=%227%22/%3E%3Ccircle cx=%22224%22 cy=%2222%22 r=%227%22/%3E%3Ccircle cx=%22242%22 cy=%2222%22 r=%227%22/%3E%3Ccircle cx=%22260%22 cy=%2222%22 r=%227%22/%3E%3Ccircle cx=%22278%22 cy=%2222%22 r=%227%22/%3E%3Ccircle cx=%22296%22 cy=%2222%22 r=%227%22/%3E%3Ccircle cx=%22224%22 cy=%2248%22 r=%227%22/%3E%3Ccircle cx=%22242%22 cy=%2248%22 r=%227%22/%3E%3Ccircle cx=%22260%22 cy=%2248%22 r=%227%22/%3E%3Ccircle cx=%22278%22 cy=%2248%22 r=%227%22/%3E%3Ccircle cx=%22296%22 cy=%2248%22 r=%227%22/%3E%3Ccircle cx=%22224%22 cy=%2274%22 r=%227%22/%3E%3Ccircle cx=%22242%22 cy=%2274%22 r=%227%22/%3E%3Ccircle cx=%22260%22 cy=%2274%22 r=%227%22/%3E%3Ccircle cx=%22278%22 cy=%2274%22 r=%227%22/%3E%3Ccircle cx=%22296%22 cy=%2274%22 r=%227%22/%3E%3Ccircle cx=%22224%22 cy=%22100%22 r=%227%22/%3E%3Ccircle cx=%22242%22 cy=%22100%22 r=%227%22/%3E%3Ccircle cx=%22260%22 cy=%22100%22 r=%227%22/%3E%3Ccircle cx=%22278%22 cy=%22100%22 r=%227%22/%3E%3Ccircle cx=%22296%22 cy=%22100%22 r=%227%22/%3E%3Ccircle cx=%22224%22 cy=%22126%22 r=%227%22/%3E%3Ccircle cx=%22242%22 cy=%22126%22 r=%227%22/%3E%3Ccircle cx=%22260%22 cy=%22126%22 r=%227%22/%3E%3Ccircle cx=%22278%22 cy=%22126%22 r=%227%22/%3E%3Ccircle cx=%22296%22 cy=%22126%22 r=%227%22/%3E%3Ccircle cx=%22224%22 cy=%22152%22 r=%227%22/%3E%3Ccircle cx=%22242%22 cy=%22152%22 r=%227%22/%3E%3Ccircle cx=%22260%22 cy=%22152%22 r=%227%22/%3E%3Ccircle cx=%22278%22 cy=%22152%22 r=%227%22/%3E%3Ccircle cx=%22296%22 cy=%22152%22 r=%227%22/%3E%3C/svg%3E");
+}
+
+[data-theme="dark"] {
+  --ink:            #EEF0FF;
+  --on-ink:         #0A0D24;
+  --primary:        #4D5AFF;
+  --primary-light:  #7A85FF;
+  --primary-dark:   #2F3BD6;
+  --link:           #8E97FF;
+  --hl:             #FFD43B;
+  --hl-soft:        #4A4012;
+  --accent:         #FF7A68;
+  --accent-light:   #FF9484;
+  --accent-dark:    #E5584A;
+  --success:        #4CD08C;
+  --success-soft:   #0F3322;
+  --focus:          #FFD43B;
+
+  --bg:             #0A0D24;
+  --surface:        #121639;
+  --surface-2:      #1A1F4B;
+  --surface-3:      #232A60;
+  --text:           #EEF0FF;
+  --text-secondary: #B4B9E0;
+  --text-muted:     #8C92C4;
+  --border:         #2B3270;
+  --border-soft:    #1F2559;
+  --glass-border:   rgba(238, 240, 255, 0.12);
+  --header-bg:      rgba(10, 13, 36, 0.80);
+  --hero-bg:        #151B72;
+  --footer-bg:      #070920;
+
+  --shadow-sm:      0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md:      0 10px 26px -10px rgba(0, 0, 0, 0.6);
+  --shadow-lg:      0 22px 44px -16px rgba(0, 0, 0, 0.7);
+  --shadow-xl:      0 34px 70px -20px rgba(0, 0, 0, 0.8);
+}
+
+@media (min-width: 720px)  { :root { --gutter: 32px; --header-h: 68px; } }
+@media (max-width: 859px)  { :root { --dock-h: 68px; } }
+
+/* ── Cor por categoria: tudo derivado de --h (matiz) ───────────── */
+.cat {
+  --cat:       hsl(var(--h, 222) 85% 48%);
+  --cat-text:  hsl(var(--h, 222) 75% 27%);
+  --cat-soft:  hsl(var(--h, 222) 100% 95%);
+  --cat-mid:   hsl(var(--h, 222) 95% 88%);
+  --cat-deep:  hsl(var(--h, 222) 70% 20%);
+}
+[data-theme="dark"] .cat {
+  --cat:       hsl(var(--h, 222) 90% 66%);
+  --cat-text:  hsl(var(--h, 222) 95% 80%);
+  --cat-soft:  hsl(var(--h, 222) 45% 15%);
+  --cat-mid:   hsl(var(--h, 222) 45% 24%);
+  --cat-deep:  hsl(var(--h, 222) 60% 14%);
+}
+
+/* ── Reset e base ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--header-h) + 16px);
+  color-scheme: light;
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+html[data-theme="dark"] { color-scheme: dark; }
+
+body {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+  overscroll-behavior-x: none;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 100vh;
+  padding-bottom: calc(var(--dock-h) + env(safe-area-inset-bottom, 0px));
+  transition: background var(--t-base) var(--ease-out), color var(--t-base) var(--ease-out);
+}
+
+img, svg, video { max-width: 100%; display: block; }
+a { color: inherit; }
+button { font: inherit; color: inherit; cursor: pointer; background: none; border: none; }
+input, textarea, select { font: inherit; color: inherit; }
+ul, ol { list-style: none; }
+hr { border: none; }
+
+/* A seleção de texto é o marca-texto */
+::selection { background: var(--hl); color: var(--on-hl); }
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* números alinhados em datas, contadores e tempos */
+time, .tabular, .post-card-date, .post-card-reading, .article-meta-item {
+  font-variant-numeric: tabular-nums;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* ── Botões ────────────────────────────────────────────────────── */
+.btn, .hero-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  text-decoration: none;
+  white-space: nowrap;
+  border: 2px solid transparent;
+  background: var(--primary);
+  color: var(--on-primary);
+  transition: transform var(--t-fast) var(--ease-out), background var(--t-fast), color var(--t-fast), border-color var(--t-fast), box-shadow var(--t-base) var(--ease-out);
+}
+.btn:hover, .hero-cta:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.btn:active, .hero-cta:active { transform: translateY(0) scale(0.98); box-shadow: none; }
+
+.btn--hl { background: var(--hl); color: var(--on-hl); }
+.btn--hl:hover { background: #FFE070; }
+.btn--ghost { background: transparent; color: inherit; border-color: currentColor; }
+.btn--ghost:hover { background: rgba(255, 255, 255, 0.12); }
+.btn--outline { background: transparent; color: var(--text); border-color: var(--border); }
+.btn--outline:hover { background: var(--surface); border-color: var(--primary); color: var(--link); }
+.btn--sm { min-height: 40px; padding: 0 18px; font-size: 0.92rem; }
+
+/* ── Chip de categoria (também é o "marcador" do cartão) ───────── */
+.chip, .post-card-category, .article-cat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 26px;
+  padding: 0 11px 0 9px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--cat-text, var(--text));
+  background: var(--cat-mid, var(--surface-2));
+  white-space: nowrap;
+}
+.chip::before, .post-card-category::before, .article-cat-badge::before {
+  content: "";
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--cat, var(--primary));
+  flex: none;
+}
+
+/* ── Capa "cartão-resposta" ────────────────────────────────────────
+   Anéis vazios = máscara (uma só imagem, colorida pela categoria).
+   Bolhas preenchidas = <circle> no SVG sobreposto (posição por slug). */
+.cover {
+  position: relative;
+  overflow: hidden;
+  background: var(--cat-soft);
+  isolation: isolate;
+}
+.cover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--cat);
+  opacity: 0.42;
+  -webkit-mask: var(--rings) center / cover no-repeat;
+          mask: var(--rings) center / cover no-repeat;
+  z-index: 0;
+}
+.cover-marks {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+.cover-marks circle { fill: var(--cat); }
+.cover--deep { background: var(--cat-deep); }
+.cover--deep::before { background: #fff; opacity: 0.22; }
+.cover--deep .cover-marks circle { fill: var(--hl); }
+
+/* ── Seções e cabeçalhos de seção ─────────────────────────────── */
+.section { padding: 56px 0; }
+.section--light { background: transparent; }
+.section--alt { background: var(--surface-2); }
+
+.section-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.65rem, 1.2rem + 1.7vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  font-stretch: 92%;
+  color: var(--text);
+  text-wrap: balance;
+}
+.section-label {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.section-header > .section-label { flex: 0 0 100%; margin: 0 0 -10px; }
+.section-link {
+  flex: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--link);
+  text-decoration: none;
+  padding: 6px 0;
+  border-bottom: 2px solid transparent;
+  transition: border-color var(--t-fast);
+}
+.section-link:hover { border-bottom-color: currentColor; }
+
+@media (min-width: 860px) { .section { padding: 80px 0; } }
+
+/* Revelação ao rolar: desativada de propósito. Elementos ficam visíveis
+   desde o primeiro paint (melhor LCP/CLS no celular); o movimento do site
+   fica concentrado no hero e nas transições entre páginas. */
+.reveal, .reveal-stagger, .stagger-in { opacity: 1; transform: none; }

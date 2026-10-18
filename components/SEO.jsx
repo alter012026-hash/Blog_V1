@@ -1,6 +1,9 @@
 import Head from "next/head";
 import config from "../../site.config";
 
+const isVercelProduction =
+  process.env.VERCEL === "1" && process.env.VERCEL_ENV === "production";
+
 export default function SEO({
   title,
   description,
@@ -113,7 +116,7 @@ export default function SEO({
       )}
 
       {/* AdSense */}
-      {config.adsense.enabled && config.adsense.publisherId !== "ca-pub-XXXXXXXXXXXXXXXX" && (
+      {isVercelProduction && config.adsense.enabled && config.adsense.publisherId !== "ca-pub-XXXXXXXXXXXXXXXX" && (
         <script
           async
           src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${config.adsense.publisherId}`}

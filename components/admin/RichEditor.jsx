@@ -60,7 +60,7 @@ export default function RichEditor({ html, onChangeHtml, onUploadImage, placehol
 
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({ heading: { levels: [2, 3, 4] } }),
+      StarterKit.configure({ heading: { levels: [2, 3, 4] }, link: false, underline: false }),
       Underline,
       Link.configure({ openOnClick: false, autolink: true }),
       Image.configure({ HTMLAttributes: { style: "max-width:100%;border-radius:10px;" } }),

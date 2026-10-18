@@ -4,7 +4,7 @@ import { commitFile, getFile, deleteFile, triggerVercelDeploy } from "../../../.
 import { slugify } from "../../../../lib/article-generator";
 import fs from "fs";
 import path from "path";
-import matter from "gray-matter";
+import matter from "../../../../lib/frontmatter";
 
 const postsDirectory = path.join(process.cwd(), "posts");
 

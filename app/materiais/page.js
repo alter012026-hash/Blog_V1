@@ -1,8 +1,4 @@
 import Link from "next/link";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
-import ScrollReveal from "../../components/ScrollReveal";
-import { getSearchIndex } from "../../lib/search-index";
 import config from "../../site.config";
 
 const DRIVE_URL =
@@ -62,38 +58,24 @@ const passos = [
 ];
 
 export default function MateriaisPage() {
-  const searchIndex = getSearchIndex();
 
   return (
     <>
-      <ScrollReveal />
-      <Header posts={searchIndex} />
 
       <main>
         {/* HERO */}
-        <section className="hero">
-          <div className="hero-seal" aria-hidden="true">
-            <span className="hero-seal-text">Material<br />Gratuito</span>
-          </div>
+        <section className="hero hero--page">
           <div className="container">
-            <p className="hero-eyebrow">100% gratuito · sem cadastro</p>
-            <h1>
-              Videoaulas e apostilas<br />
-              para <em>estudar sem gastar nada</em>
-            </h1>
+            <h1>Videoaulas e apostilas para estudar sem gastar nada</h1>
             <p className="hero-desc">
-              Reunimos videoaulas, apostilas em PDF, resumos e materiais de apoio
-              para concursos públicos em um só lugar. É só acessar a pasta e
-              baixar o que você precisar — sem cadastro, sem custo.
+              Videoaulas, apostilas em PDF, resumos e materiais de apoio para concursos
+              públicos em um só lugar. Sem cadastro, sem custo.
             </p>
-            <a
-              href={DRIVE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hero-cta"
-            >
-              Acessar materiais no Google Drive →
-            </a>
+            <div className="hero-actions">
+              <a href={DRIVE_URL} target="_blank" rel="noopener noreferrer" className="btn btn--hl">
+                Acessar materiais no Google Drive
+              </a>
+            </div>
           </div>
         </section>
 
@@ -225,8 +207,6 @@ export default function MateriaisPage() {
           </div>
         </section>
       </main>
-
-      <Footer />
     </>
   );
 }

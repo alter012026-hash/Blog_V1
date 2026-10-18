@@ -133,18 +133,78 @@ const siteConfig = {
   },
 
   // --- MENU ---
+  // Navegação principal: só o que o leitor usa para chegar a um conteúdo.
+  // (Sobre / Metodologia / Privacidade / Contato foram para o rodapé: no
+  // Search Console 60% das impressões vêm do celular, e 11 itens no menu
+  // empurravam o conteúdo para baixo.)
   navigation: [
-    { label: "Início", href: "/" },
-    { label: "Concursos Abertos", href: "/blog?categoria=Concursos+Abertos" },
     { label: "Editais", href: "/blog?categoria=Editais" },
-    { label: "🎯 Simulado", href: "/simulado" },
-    { label: "Técnicas de Estudo", href: "/blog?categoria=Técnicas+de+Estudo" },
-    { label: "📁 Materiais Gratuitos", href: "/materiais" },
-    { label: "Carreiras Públicas", href: "/blog?categoria=Carreiras+Públicas" },
+    { label: "Concursos abertos", href: "/blog?categoria=Concursos+Abertos" },
+    { label: "Como estudar", href: "/blog?categoria=Técnicas+de+Estudo" },
+    { label: "Carreiras", href: "/blog?categoria=Carreiras+Públicas" },
+    { label: "Simulado", href: "/simulado" },
+    { label: "Materiais grátis", href: "/materiais" },
+  ],
+
+  // Links institucionais (rodapé) — importantes para E-E-A-T / AdSense.
+  footerNavigation: [
     { label: "Sobre", href: "/sobre" },
     { label: "Metodologia", href: "/metodologia" },
     { label: "Privacidade", href: "/privacidade" },
     { label: "Contato", href: "/contato" },
+  ],
+
+  // --- HOME: "Por onde começar?" ---
+  // Cada item responde a uma busca real do Google Search Console
+  // (cronograma/plano de estudos, plano de carreira INSS, avaliação de
+  // títulos, cursos gratuitos, editais da semana). Troque os slugs quando
+  // quiser: itens cujo artigo não existir mais são ignorados no build.
+  quickStart: {
+    title: "Por onde você quer começar?",
+    items: [
+      {
+        label: "Montar meu cronograma de estudos",
+        hint: "Passo a passo para organizar a rotina",
+        href: "/blog/como-montar-cronograma-de-estudos-para-concurso-publico-guia-atualizado",
+      },
+      {
+        label: "Entender a carreira no INSS",
+        hint: "Cargos, salários e plano de carreira",
+        href: "/blog/carreira-no-inss-como-funciona-guia-atualizado",
+      },
+      {
+        label: "Passar na prova de títulos",
+        hint: "Como pontuar na avaliação de currículo",
+        href: "/blog/como-passar-na-prova-de-titulos-e-avaliacao-de-curriculo-em-concursos-publicos",
+      },
+      {
+        label: "Ver o que mudou nos editais",
+        hint: "Atualização semanal dos concursos",
+        href: "/blog?categoria=Editais",
+      },
+      {
+        label: "Treinar com simulado",
+        hint: "Questões por banca e matéria",
+        href: "/simulado",
+      },
+      {
+        label: "Baixar materiais gratuitos",
+        hint: "Videoaulas, apostilas e resumos",
+        href: "/materiais",
+      },
+    ],
+  },
+
+  // --- HOME: "Mais procurados" ---
+  // Artigos com mais impressões no Google (Search Console, últimos 6
+  // meses). Linkar daqui reforça os artigos que já aparecem nas buscas.
+  trending: [
+    "diferencas-entre-cargos-de-nivel-medio-e-superior-no-setor-publico-dicas-pratica",
+    "carreira-de-agente-penitenciario-rotina-e-requisitos",
+    "como-montar-cronograma-de-estudos-para-concurso-publico-guia-atualizado",
+    "carreira-no-inss-como-funciona-guia-atualizado",
+    "concurso-sedes-df-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "concurso-eptc-porto-alegre-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
   ],
 };
 

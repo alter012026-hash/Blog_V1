@@ -1,18 +1,19 @@
 import { notFound } from "next/navigation";
-import Header from "../../../components/Header";
-import Footer from "../../../components/Footer";
 import PostCard from "../../../components/PostCard";
 import AffiliateBox from "../../../components/AffiliateBox";
 import CuriosityCard from "../../../components/CuriosityCard";
 import TakeawaysCard from "../../../components/TakeawaysCard";
 import ReadProgressEnhanced from "../../../components/ReadProgressEnhanced";
-import ScrollReveal from "../../../components/ScrollReveal";
 import NewsletterInline from "../../../components/NewsletterInline";
 import NewsletterPopup from "../../../components/NewsletterPopup";
 import ArticleQA from "../../../components/ArticleQA";
 import ArticleByline from "../../../components/ArticleByline";
+import ArticleToc from "../../../components/ArticleToc";
+import ShareBar from "../../../components/ShareBar";
+import PostCover from "../../../components/PostCover";
+import Link from "next/link";
+import { getCategoryMeta } from "../../../lib/category-meta";
 import { getAllSlugs, getPostBySlug, getPostContentHtml, getRelatedPosts, getAllPosts } from "../../../lib/posts";
-import { getSearchIndex } from "../../../lib/search-index";
 import { matchAffiliate, getAffiliatePair, getPinnedAffiliates } from "../../../lib/affiliate-matcher";
 import { extractFAQs, generateFAQSchema } from "../../../lib/faq-extractor";
 import config from "../../../site.config";
@@ -99,28 +100,59 @@ function splitContentAtMidpoint(html) {
 }
 
 // ---------------------------------------------------------------------------
+// Âncoras nos <h2> + índice do artigo
+// ---------------------------------------------------------------------------
+function slugifyHeading(text) {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60) || "secao";
+}
+
+function addHeadingIds(html) {
+  const used = new Map();
+  const toc = [];
+  const out = html.replace(/<h2>([\s\S]*?)<\/h2>/g, (_, inner) => {
+    const text = inner.replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").trim();
+    let id = slugifyHeading(text);
+    const n = used.get(id) || 0;
+    used.set(id, n + 1);
+    if (n > 0) id = `${id}-${n + 1}`;
+    toc.push({ id, text });
+    return `<h2 id="${id}">${inner}</h2>`;
+  });
+  return { html: out, toc };
+}
+
+// ---------------------------------------------------------------------------
 // Página do post
 // ---------------------------------------------------------------------------
 export default async function PostPage({ params }) {
   const post = getPostBySlug(params.slug);
   if (!post) notFound();
 
-  const contentHtml   = await getPostContentHtml(post.content);
+  const rawHtml       = await getPostContentHtml(post.content);
+  const { html: contentHtml, toc } = addHeadingIds(rawHtml);
   const relatedPosts  = getRelatedPosts(params.slug, post.category);
   const affiliatePair    = getAffiliatePair(post.content, config.affiliates, params.slug);
   const matchedAffiliate = affiliatePair[0] || null;
   const secondAffiliate  = affiliatePair[1] || null;
   const pinnedAffiliates = getPinnedAffiliates(config.affiliates);
-  const searchIndex   = getSearchIndex();
 
   // Divide conteúdo para inserir afiliado no meio
   const { before: contentBefore, after: contentAfter } = splitContentAtMidpoint(contentHtml);
 
-  const formattedDate = new Date(post.date + "T12:00:00").toLocaleDateString("pt-BR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  // post.date vem como ISO completo (2026-06-27T00:00:00.000Z); extrai só
+  // YYYY-MM-DD. (Antes: new Date(post.date + "T12:00:00") → "Invalid Date".)
+  const dm = String(post.date || "").match(/(\d{4})-(\d{2})-(\d{2})/);
+  const formattedDate = dm
+    ? new Date(Date.UTC(+dm[1], +dm[2] - 1, +dm[3])).toLocaleDateString("pt-BR", {
+        day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
+      })
+    : "";
 
   const siteUrl  = config.url;
   const pageUrl  = `${siteUrl}/blog/${params.slug}`;
@@ -197,49 +229,52 @@ export default async function PostPage({ params }) {
       )}
 
       <ReadProgressEnhanced />
-      <ScrollReveal />
-      <Header posts={searchIndex} />
 
       <main>
-        <article>
-          <div className="article-layout">
+        <article className="article-shell cat" style={{ "--h": getCategoryMeta(post.category).hue }}>
+          <div className="container article-grid">
+            <div className="article-main">
 
-            {/* Header do artigo */}
-            <header className="article-header">
-              <div className="article-category-bar">
-                <span className="article-cat-badge">{post.category}</span>
-                <span className="article-meta-item">
-                  <time dateTime={post.date}>{formattedDate}</time>
-                </span>
-                <span className="article-meta-item">{post.readingTime} de leitura</span>
-                <span className="article-meta-item">{post.wordCount.toLocaleString("pt-BR")} palavras</span>
-              </div>
+              {/* Cabeçalho do artigo */}
+              <header className="article-header">
+                <nav className="breadcrumb" aria-label="Você está em">
+                  <Link href="/">Início</Link><span aria-hidden="true">/</span>
+                  <Link href="/blog">Artigos</Link><span aria-hidden="true">/</span>
+                  <Link href={`/blog?categoria=${encodeURIComponent(post.category)}`}>{post.category}</Link>
+                </nav>
 
-              <h1 className="article-title">{post.title}</h1>
-              <p className="article-excerpt">{post.excerpt}</p>
-              <ArticleByline />
-            </header>
+                <div className="article-art" aria-hidden="true">
+                  <PostCover slug={params.slug} category={post.category} />
+                </div>
 
-            {/* 🔎 Spoiler do artigo — o que o leitor vai encontrar/aprender,
-                pra ajudar a decidir em segundos se vale a pena continuar lendo */}
-            <TakeawaysCard takeaways={post.takeaways} />
+                <div className="article-category-bar">
+                  <span className="article-cat-badge">{post.category}</span>
+                  <span className="article-meta-item">
+                    <time dateTime={post.date}>{formattedDate}</time>
+                  </span>
+                  <span className="article-meta-item">{post.readingTime} de leitura</span>
+                </div>
 
-            {/* 🖼️ Imagem de capa gerada por IA (Pollinations/FLUX) — relacionada ao tema do post */}
-            {post.coverImage && (
-              <div className="article-cover-image" style={{ margin: "1.5rem 0", borderRadius: "0.75rem", overflow: "visible" }}>
-                <img
-                  src={post.coverImage}
-                  alt={post.title}
-                  style={{ width: "100%", height: "auto", display: "block", maxWidth: "100%", objectFit: "contain", borderRadius: "inherit" }}
-                  loading="eager"
-                />
-              </div>
-            )}
+                <h1 className="article-title">{post.title}</h1>
+                <p className="article-excerpt">{post.excerpt}</p>
+                <ArticleByline />
+                <ShareBar url={pageUrl} title={post.title} />
+              </header>
 
-            {/* 💡 Curiosidade — card educativo gerado junto com o artigo */}
-            <CuriosityCard curiosity={post.curiosity} />
+              <ArticleToc items={toc} variant="mobile" />
 
-            <hr className="article-divider" />
+              {/* Spoiler do artigo — o que o leitor vai encontrar */}
+              <TakeawaysCard takeaways={post.takeaways} />
+
+              {/* Imagem de capa gerada por IA */}
+              {post.coverImage && (
+                <div className="article-cover-image">
+                  <img src={post.coverImage} alt={post.title} width="1059" height="556" loading="eager" decoding="async" />
+                </div>
+              )}
+
+              {/* Curiosidade */}
+              <CuriosityCard curiosity={post.curiosity} />
 
             {/* Primeira metade do conteúdo */}
             <div
@@ -283,24 +318,31 @@ export default async function PostPage({ params }) {
             {/* 🤖 Tire sua dúvida — Q&A via IA com contexto do artigo */}
             <ArticleQA slug={params.slug} />
 
-            {/* Posts relacionados */}
-            {relatedPosts.length > 0 && (
-              <aside className="related-posts reveal">
-                <h3>Artigos relacionados</h3>
-                <div className="posts-grid reveal-stagger">
-                  {relatedPosts.map(p => (
+              <ShareBar url={pageUrl} title={post.title} />
+            </div>
+
+            <aside className="article-aside">
+              <ArticleToc items={toc} variant="desktop" />
+            </aside>
+          </div>
+
+          {/* Posts relacionados */}
+          {relatedPosts.length > 0 && (
+            <div className="container related-wrap">
+              <aside className="related-posts">
+                <h3>Continue estudando</h3>
+                <div className="posts-grid">
+                  {relatedPosts.map((p) => (
                     <PostCard key={p.slug} post={p} />
                   ))}
                 </div>
               </aside>
-            )}
-
-          </div>
+            </div>
+          )}
         </article>
       </main>
 
       <NewsletterPopup />
-      <Footer />
     </>
   );
 }

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { checkAdminAuth } from "../../../../lib/admin-auth";
 import fs from "fs";
 import path from "path";
-import matter from "gray-matter";
+import matter from "../../../../lib/frontmatter";
 
 const postsDir = path.join(process.cwd(), "posts");
 

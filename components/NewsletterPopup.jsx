@@ -97,12 +97,12 @@ export default function NewsletterPopup() {
       {/* Popup */}
       <div
         style={{
-          position: "fixed", bottom: 32, right: 32,
+          position: "fixed", bottom: "calc(var(--dock-h, 0px) + 16px)", right: 16,
           width: "min(420px, calc(100vw - 32px))",
-          background: "linear-gradient(145deg, #0D1E3A 0%, #0A1628 100%)",
-          border: "1px solid rgba(59,130,246,0.35)",
-          borderRadius: 16, padding: "28px 28px 24px",
-          boxShadow: "0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(59,130,246,0.1), 0 0 40px rgba(59,130,246,0.08)",
+          background: "#12163A",
+          border: "2px solid #FFD43B",
+          borderRadius: 24, padding: "28px 28px 24px",
+          boxShadow: "0 24px 64px rgba(0,0,0,0.5)",
           zIndex: 9999,
           animation: dismissed ? "nlSlideOut .3s forwards" : "nlSlideIn .4s cubic-bezier(.22,1,.36,1) forwards",
         }}
@@ -125,7 +125,7 @@ export default function NewsletterPopup() {
           <span style={{
             display: "inline-flex", alignItems: "center", justifyContent: "center",
             width: 44, height: 44, borderRadius: 12,
-            background: "rgba(59,130,246,0.15)", border: "1px solid rgba(59,130,246,0.3)",
+            background: "rgba(255,212,59,0.16)", border: "1px solid rgba(255,212,59,0.4)",
             fontSize: 22, animation: "nlPulse 2s ease-in-out infinite",
           }}>📬</span>
         </div>
@@ -149,8 +149,8 @@ export default function NewsletterPopup() {
                 onChange={e => setEmail(e.target.value)}
                 disabled={status === "loading"}
                 style={{
-                  padding: "11px 14px", borderRadius: 9, border: "1px solid rgba(255,255,255,0.15)",
-                  background: "rgba(255,255,255,0.07)", color: "#fff", fontSize: "0.88rem",
+                  padding: "13px 18px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.2)",
+                  background: "rgba(255,255,255,0.07)", color: "#fff", fontSize: "1rem",
                   outline: "none", width: "100%",
                 }}
               />
@@ -158,14 +158,14 @@ export default function NewsletterPopup() {
                 type="submit"
                 disabled={status === "loading"}
                 style={{
-                  padding: "12px", borderRadius: 9, border: "none",
+                  padding: "14px", borderRadius: 999, border: "none",
                   background: status === "loading"
-                    ? "rgba(59,130,246,0.5)"
-                    : "linear-gradient(90deg,#3B82F6,#2563EB)",
-                  color: "#fff", fontSize: "0.9rem", fontWeight: 700,
+                    ? "rgba(255,212,59,0.5)"
+                    : "#FFD43B",
+                  color: "#12163A", fontSize: "0.95rem", fontWeight: 800,
                   cursor: status === "loading" ? "not-allowed" : "pointer",
                   transition: "opacity .15s",
-                  boxShadow: "0 4px 16px rgba(59,130,246,0.35)",
+
                 }}
               >
                 {status === "loading" ? "Enviando…" : "Quero receber! →"}
@@ -194,7 +194,7 @@ export default function NewsletterPopup() {
         @keyframes nlFadeOut { from { opacity:1 } to { opacity:0 } }
         @keyframes nlSlideIn { from { opacity:0; transform:translateY(20px) scale(.97) } to { opacity:1; transform:translateY(0) scale(1) } }
         @keyframes nlSlideOut{ from { opacity:1; transform:translateY(0) } to { opacity:0; transform:translateY(20px) } }
-        @keyframes nlPulse   { 0%,100% { box-shadow:0 0 0 0 rgba(59,130,246,0.4) } 50% { box-shadow:0 0 0 10px rgba(59,130,246,0) } }
+        @keyframes nlPulse   { 0%,100% { box-shadow:0 0 0 0 rgba(255,212,59,0.4) } 50% { box-shadow:0 0 0 10px rgba(59,130,246,0) } }
       `}</style>
     </>
   );

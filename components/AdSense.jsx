@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import config from "../../site.config";
 
 export default function AdSense({ slot, format = "auto", style = {} }) {
+  if (process.env.NODE_ENV !== "production") return null;
+
   // Só renderiza se AdSense estiver configurado e ativado
   if (!config.adsense.enabled) return null;
   if (config.adsense.publisherId === "ca-pub-XXXXXXXXXXXXXXXX") return null;

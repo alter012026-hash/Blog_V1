@@ -1,33 +1,24 @@
 import Link from "next/link";
 import { getCategoryMeta } from "../lib/category-meta";
 
-/**
- * Grade de categorias da home — substitui a lista de pílulas simples
- * (ainda usada em /blog para filtro) por cards no espírito "diário
- * oficial" do design system: código de matéria em mono (como um índice
- * de classificação de gazeta), título em serifa, contagem real de posts,
- * e uma régua de destaque que se estende no hover em vez de sombra/
- * gradiente genérico. Entrada animada via .reveal-stagger (mesmo
- * mecanismo de components/ScrollReveal.jsx usado no resto do site).
- */
+/** Blocos de cor por tema. Celular: carrossel com snap; desktop: grade. */
 export default function CategoryCards({ categories }) {
   if (!categories || categories.length === 0) return null;
 
   return (
     <div className="category-cards-wrap">
-      <p className="category-scroll-hint">Arraste para o lado →</p>
-      <div className="category-cards-grid reveal-stagger">
+      <div className="category-cards-grid">
         {categories.map((cat) => {
           const meta = getCategoryMeta(cat.name);
           return (
             <Link
               key={cat.name}
               href={`/blog?categoria=${encodeURIComponent(cat.name)}`}
-              className="category-card"
-              style={{ "--cat-color": meta.color, "--cat-border": meta.border, "--cat-bg": meta.bg }}
+              className="category-card cat"
+              style={{ "--h": meta.hue }}
             >
               <div className="category-card-top">
-                <span className="category-card-code">{meta.code}</span>
+                <span className="category-card-code" aria-hidden="true">{meta.code}</span>
                 <span className="category-card-count">
                   {cat.count} {cat.count === 1 ? "artigo" : "artigos"}
                 </span>

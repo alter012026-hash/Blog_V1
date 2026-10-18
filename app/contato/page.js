@@ -1,8 +1,4 @@
 import Link from "next/link";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
-import ScrollReveal from "../../components/ScrollReveal";
-import { getSearchIndex } from "../../lib/search-index";
 import config from "../../site.config";
 
 export const metadata = {
@@ -11,12 +7,9 @@ export const metadata = {
 };
 
 export default function ContatoPage() {
-  const searchIndex = getSearchIndex();
 
   return (
     <>
-      <ScrollReveal />
-      <Header posts={searchIndex} />
       <main className="section section--light">
       <div className="container article-layout">
 
@@ -79,7 +72,6 @@ export default function ContatoPage() {
 
       </div>
       </main>
-      <Footer />
     </>
   );
 }

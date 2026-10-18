@@ -1,193 +1,153 @@
 import Link from "next/link";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 import PostCard from "../components/PostCard";
 import CategoryCards from "../components/CategoryCards";
-import ScrollReveal from "../components/ScrollReveal";
-import WelcomeBanner from "../components/WelcomeBanner";
+import QuickStart from "../components/QuickStart";
+import HeroSheet from "../components/HeroSheet";
 import NewsletterInline from "../components/NewsletterInline";
-import { getAllPosts, getCategoryStats } from "../lib/posts";
-import { getSearchIndex } from "../lib/search-index";
+import { getAllPosts, getCategoryStats, getPostBySlug } from "../lib/posts";
+import { getCategoryMeta } from "../lib/category-meta";
 import config from "../site.config";
 
-export const revalidate = 3600; // revalida a cada hora
+export const revalidate = 3600;
+
+const Check = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+);
 
 export default function HomePage() {
   const allPosts = getAllPosts();
   const featuredPost = allPosts[0];
   const latestPosts = allPosts.slice(1, 7);
   const categoryStats = getCategoryStats();
-  const searchIndex = getSearchIndex();
+
+  const trending = (config.trending || [])
+    .map((slug) => getPostBySlug(slug))
+    .filter(Boolean)
+    .slice(0, 6);
 
   return (
-    <>
-      <Header posts={searchIndex} />
-      <ScrollReveal />
-
-      <main>
-        {/* Hero */}
-        <section className="hero">
-          <div className="hero-seal" aria-hidden="true">
-            <span className="hero-seal-text">Guia do<br />Concurseiro</span>
-          </div>
-          <div className="container">
-            <p className="hero-eyebrow">{config.niche}</p>
-            <h1>
-              Tudo sobre concursos<br />
-              para quem quer <em>ser aprovado</em>
-            </h1>
-            <p className="hero-desc">{config.description}</p>
-            <Link href="/blog" className="hero-cta">
-              Explorar artigos →
-            </Link>
-          </div>
-        </section>
-
-        {/* Boas-vindas */}
-        <section className="cd-section">
-          <WelcomeBanner postCount={allPosts.length} categoryCount={categoryStats.length} />
-        </section>
-
-        {/* Destaque */}
-        {featuredPost && (
-          <section className="section section--light reveal">
-            <div className="container">
-              <div className="section-header">
-                <p className="section-label">Artigo em destaque</p>
-                <h2 className="section-title">Última publicação</h2>
-              </div>
-              <PostCard post={featuredPost} featured />
+    <main>
+      {/* ── Hero ─────────────────────────────────────────────── */}
+      <section className="hero">
+        <HeroSheet />
+        <div className="container hero-grid">
+          <div className="hero-copy">
+            <h1>Guia direto para passar em concurso público</h1>
+            <p className="hero-desc">
+              Editais que mudaram, cronogramas prontos, materiais gratuitos e simulado.
+              Tudo em português claro, para ler no celular entre um estudo e outro.
+            </p>
+            <div className="hero-actions">
+              <Link href="/blog?categoria=Editais" className="btn btn--hl">Ver editais da semana</Link>
+              <Link href="/simulado" className="btn btn--ghost">Fazer um simulado</Link>
             </div>
-          </section>
-        )}
+            <p className="hero-facts">
+              {allPosts.length} artigos em {categoryStats.length} temas, atualizados com frequência.
+            </p>
+          </div>
+          <QuickStart />
+        </div>
+      </section>
 
-        {/* Categorias */}
-        {categoryStats.length > 0 && (
-          <section className="section section--alt reveal">
-            <div className="container">
-              <div className="section-header">
-                <p className="section-label">Navegue por tema</p>
-                <h2 className="section-title">Categorias</h2>
-              </div>
-              <CategoryCards categories={categoryStats} />
-            </div>
-          </section>
-        )}
-
-        {/* Banner Simulado */}
-        <section className="section section--alt reveal">
+      {/* ── Mais procurados + destaque ───────────────────────── */}
+      {trending.length > 0 && (
+        <section className="section">
           <div className="container">
-            <Link href="/simulado" style={{
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-              background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%)",
-              borderRadius: "var(--radius-xl)", padding: "36px 40px",
-              textDecoration: "none", color: "#fff", gap: 24, flexWrap: "wrap",
-              boxShadow: "var(--shadow-lg)", position: "relative", overflow: "hidden"
-            }}>
-              <div style={{
-                position: "absolute", top: -40, right: -40, width: 200, height: 200,
-                background: "rgba(255,255,255,0.05)", borderRadius: "50%", pointerEvents: "none"
-              }} />
+            <div className="section-header">
               <div>
-                <p style={{ fontSize: "0.8rem", fontWeight: 700, opacity: 0.75, marginBottom: 6, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                  ✦ Novo recurso
-                </p>
-                <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(1.3rem,3vw,1.8rem)", fontWeight: 800, marginBottom: 8, lineHeight: 1.2 }}>
-                  🎯 Simulado Gamificado
-                </h2>
-                <p style={{ opacity: 0.88, maxWidth: 480, lineHeight: 1.6, fontSize: "0.95rem" }}>
-                  Teste seus conhecimentos com questões reais de concursos. Escolha a banca, a matéria e receba feedback instantâneo com XP e rankings.
-                </p>
+                <p className="section-label">O que os candidatos estão buscando no Google</p>
+                <h2 className="section-title">Mais procurados</h2>
               </div>
-              <div style={{
-                background: "rgba(255,255,255,0.15)", borderRadius: "var(--radius)",
-                padding: "14px 28px", fontWeight: 700, fontSize: "1rem",
-                whiteSpace: "nowrap", backdropFilter: "blur(4px)",
-                border: "1px solid rgba(255,255,255,0.25)", flexShrink: 0
-              }}>
-                Iniciar simulado →
-              </div>
-            </Link>
-          </div>
-        </section>
-
-        {/* Banner Materiais Gratuitos */}
-        <section className="section section--light reveal">
-          <div className="container">
-            <Link href="/materiais" style={{
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-              background: "linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 100%)",
-              borderRadius: "var(--radius-xl)", padding: "36px 40px",
-              textDecoration: "none", color: "#fff", gap: 24, flexWrap: "wrap",
-              boxShadow: "var(--shadow-lg)", position: "relative", overflow: "hidden"
-            }}>
-              <div style={{
-                position: "absolute", top: -40, right: -40, width: 200, height: 200,
-                background: "rgba(255,255,255,0.06)", borderRadius: "50%", pointerEvents: "none"
-              }} />
-              <div>
-                <p style={{ fontSize: "0.8rem", fontWeight: 700, opacity: 0.8, marginBottom: 6, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                  ✦ 100% gratuito · sem cadastro
-                </p>
-                <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(1.3rem,3vw,1.8rem)", fontWeight: 800, marginBottom: 8, lineHeight: 1.2 }}>
-                  📁 Videoaulas e apostilas grátis
-                </h2>
-                <p style={{ opacity: 0.9, maxWidth: 480, lineHeight: 1.6, fontSize: "0.95rem" }}>
-                  Acesse nossa pasta com videoaulas, PDFs e resumos para concursos —
-                  tudo gratuito, sem precisar criar conta.
-                </p>
-              </div>
-              <div style={{
-                background: "rgba(255,255,255,0.16)", borderRadius: "var(--radius)",
-                padding: "14px 28px", fontWeight: 700, fontSize: "1rem",
-                whiteSpace: "nowrap", backdropFilter: "blur(4px)",
-                border: "1px solid rgba(255,255,255,0.28)", flexShrink: 0
-              }}>
-                Baixar materiais →
-              </div>
-            </Link>
-          </div>
-        </section>
-
-        {/* Posts recentes */}
-        <section className="section section--light">
-          <div className="container">
-            <div className="section-header reveal">
-              <p className="section-label">Conteúdo recente</p>
-              <h2 className="section-title">Artigos publicados</h2>
             </div>
-
-            {latestPosts.length > 0 ? (
-              <div className="posts-grid reveal-stagger">
-                {latestPosts.map(post => (
-                  <PostCard key={post.slug} post={post} />
-                ))}
-              </div>
-            ) : (
-              <p style={{ color: "var(--text-muted)", textAlign: "center", padding: "48px 0" }}>
-                Os artigos serão publicados em breve. Execute o script de geração para começar.
-              </p>
-            )}
-
-            {allPosts.length > 7 && (
-              <div style={{ textAlign: "center", marginTop: "40px" }}>
-                <Link href="/blog" className="hero-cta">
-                  Ver todos os artigos →
-                </Link>
-              </div>
-            )}
+            <ol className="rank-list">
+              {trending.map((p, i) => (
+                <li key={p.slug} className="rank-item cat" style={{ "--h": getCategoryMeta(p.category).hue }} data-vt-card>
+                  <span className="rank-pos" aria-hidden="true">{i + 1}</span>
+                  <div className="rank-body">
+                    <span className="chip">{p.category}</span>
+                    <h3 className="rank-title"><Link href={`/blog/${p.slug}`}>{p.title}</Link></h3>
+                  </div>
+                </li>
+              ))}
+            </ol>
           </div>
         </section>
-        {/* 📬 Newsletter — após os artigos recentes, momento de maior engajamento */}
-        <section className="section section--alt reveal">
+      )}
+
+      {/* ── Novos artigos ────────────────────────────────────── */}
+      <section className="section">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-title">Novos artigos</h2>
+            <Link href="/blog" className="section-link">Ver todos</Link>
+          </div>
+          <div className="posts-grid">
+            {featuredPost && <PostCard post={featuredPost} featured />}
+            {latestPosts.map((post) => <PostCard key={post.slug} post={post} />)}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Temas ────────────────────────────────────────────── */}
+      {categoryStats.length > 0 && (
+        <section className="section section--alt">
           <div className="container">
-            <NewsletterInline variant="home" />
+            <div className="section-header">
+              <h2 className="section-title">Explore por tema</h2>
+            </div>
+            <CategoryCards categories={categoryStats} />
           </div>
         </section>
+      )}
 
-      </main>
+      {/* ── Ferramentas ──────────────────────────────────────── */}
+      <section className="section">
+        <div className="container tools-grid">
+          <Link href="/simulado" className="tool tool--exam">
+            <div className="tool-choices" aria-hidden="true">
+              <i>A</i><i>B</i><i className="is-marked">C</i><i>D</i><i>E</i>
+            </div>
+            <h2 className="tool-title">Simulado com feedback na hora</h2>
+            <p className="tool-text">Escolha a banca e a matéria, responda questões e veja o gabarito comentado, com XP e sequência de acertos.</p>
+            <span className="tool-cta">Iniciar simulado <span aria-hidden="true">→</span></span>
+          </Link>
+          <Link href="/materiais" className="tool tool--files">
+            <div className="tool-files" aria-hidden="true"><b>Videoaulas</b><b>PDF</b><b>Resumos</b></div>
+            <h2 className="tool-title">Materiais gratuitos, sem cadastro</h2>
+            <p className="tool-text">Videoaulas, apostilas e resumos reunidos em uma pasta pública. Baixe o que precisar.</p>
+            <span className="tool-cta">Ver materiais <span aria-hidden="true">→</span></span>
+          </Link>
+        </div>
+      </section>
 
-      <Footer />
-    </>
+      {/* ── Como produzimos ──────────────────────────────────── */}
+      <section className="section section--alt">
+        <div className="container trust">
+          <div className="trust-intro">
+            <h2 className="section-title">Conteúdo com fonte e revisão</h2>
+            <p>{config.methodology.summary}</p>
+            <p><Link className="section-link" href="/metodologia">Entenda como produzimos</Link></p>
+          </div>
+          <div className="trust-list">
+            {[
+              ["Fontes oficiais", "Editais, Diário Oficial e legislação são a base de cada texto."],
+              ["Apoio de IA, com revisão", "A IA acelera a redação; a checagem e a curadoria são editoriais."],
+              ["Atualização contínua", "Páginas de editais mudam: acompanhe o que mudou na semana."],
+            ].map(([t, d]) => (
+              <div key={t} className="trust-item">
+                <span className="trust-check"><Check /></span>
+                <div><h3>{t}</h3><p>{d}</p></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="container">
+          <NewsletterInline variant="home" />
+        </div>
+      </section>
+    </main>
   );
 }
