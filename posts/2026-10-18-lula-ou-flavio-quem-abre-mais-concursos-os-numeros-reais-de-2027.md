@@ -57,10 +57,6 @@ O levantamento mais citado é o do Qconcursos/Folha Dirigida, feito a partir dos
 
 Promessa é uma coisa; o que aconteceu nos mandatos anteriores é outra. Os dados abaixo vêm do Painel Estatístico de Pessoal do governo, reproduzidos pela imprensa.
 
-![Gráfico: servidores civis ativos do Executivo federal, de 634 mil em 2017 a 579 mil em janeiro de 2026](/images/lula-ou-flavio-quem-abre-mais-concursos-os-numeros-reais-de-2027-servidores.png)
-
-*Fonte: Painel Estatístico de Pessoal (MGI), conforme Gazeta do Povo e Sintrajufe. Eixo começa em zero.*
-
 - O quadro de servidores civis ativos ficou em torno de **631 mil no início de 2019** e caiu para cerca de **565 mil em dezembro de 2022**, uma redução de aproximadamente 10%.
 - Segundo a Condsef, com base em dados do Tesouro, o gasto com pessoal passou de **4,3% para 3,4% do PIB** no período, o menor nível da série histórica.
 - Desde 2023 o número voltou a subir: **572 mil em dezembro de 2023** e **579 mil em janeiro de 2026**, de acordo com o Painel.
@@ -72,7 +68,7 @@ Promessa é uma coisa; o que aconteceu nos mandatos anteriores é outra. Os dado
 
 O projeto de orçamento (PLOA) de 2027 foi enviado ao Congresso em 31 de agosto. Ele prevê **53.530 vagas** para criação e provimento de cargos na União, contra **89.058** no projeto de 2026, uma queda de cerca de 40%.
 
-![Gráfico: PLOA 2026 com 89.058 vagas e PLOA 2027 com 53.530, queda de 40%](/images/lula-ou-flavio-quem-abre-mais-concursos-os-numeros-reais-de-2027-orcamento.png)
+![Gráfico compara as vagas previstas no PLOA 2026 e no PLOA 2027](/images/ploa-previsao-vagas-concursos.png)
 
 *Fonte: Anexo V do PLOA 2027 (MGI), conforme Estratégia Concursos e Diário do Pará.*
 
