@@ -36,7 +36,8 @@ export default function PostCard({ post, featured = false, headingLevel = 3 }) {
         <PostCover
           slug={post.slug}
           category={post.category}
-                    deep={featured}
+          photo={featured ? post.coverImage : null}
+          deep={featured}
         />
       </div>
 
