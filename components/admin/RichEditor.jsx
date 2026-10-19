@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
@@ -24,6 +24,7 @@ function ToolButton({ onClick, active, disabled, title, children }) {
     <button
       type="button"
       title={title}
+      aria-label={title}
       disabled={disabled}
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
@@ -57,6 +58,7 @@ function Divider() {
  */
 export default function RichEditor({ html, onChangeHtml, onUploadImage, placeholder, minHeight = 360 }) {
   const isInternalUpdate = useRef(false);
+  const [imageAlt, setImageAlt] = useState("");
 
   const editor = useEditor({
     extensions: [
@@ -77,6 +79,9 @@ export default function RichEditor({ html, onChangeHtml, onUploadImage, placehol
     onUpdate: ({ editor }) => {
       isInternalUpdate.current = true;
       onChangeHtml(editor.getHTML());
+    },
+    onSelectionUpdate: ({ editor }) => {
+      setImageAlt(editor.getAttributes("image").alt || "");
     },
   });
 
@@ -135,7 +140,7 @@ export default function RichEditor({ html, onChangeHtml, onUploadImage, placehol
           borderBottom: `1px solid ${C.border}`,
           background: C.bgSoft,
           position: "sticky",
-          top: 0,
+          top: 56,
           zIndex: 1,
         }}
       >
@@ -165,12 +170,41 @@ export default function RichEditor({ html, onChangeHtml, onUploadImage, placehol
         <ToolButton title="Link" active={editor.isActive("link")} onClick={setLink}>🔗</ToolButton>
         <label
           title="Inserir imagem no texto"
+          aria-label="Inserir imagem no texto"
           style={{ cursor: "pointer", padding: "6px 9px", borderRadius: 8, color: C.textMuted, fontSize: 13 }}
         >
           🖼️
           <input type="file" accept="image/*" onChange={handleImagePick} style={{ display: "none" }} />
         </label>
       </div>
+
+      {editor.isActive("image") && (
+        <div style={{ padding: "10px 14px", borderBottom: `1px solid ${C.border}`, background: C.bgSoft }}>
+          <label htmlFor="editor-image-alt" style={{ display: "block", color: C.textMuted, fontSize: 12, marginBottom: 6 }}>
+            Texto alternativo da imagem
+          </label>
+          <input
+            id="editor-image-alt"
+            value={imageAlt}
+            onChange={(event) => {
+              const alt = event.target.value;
+              setImageAlt(alt);
+              editor.commands.updateAttributes("image", { alt });
+            }}
+            placeholder="Descreva a imagem para leitores de tela e mecanismos de busca"
+            style={{
+              width: "100%",
+              maxWidth: 560,
+              padding: "8px 10px",
+              border: `1px solid ${C.border}`,
+              borderRadius: 8,
+              background: C.bg,
+              color: C.text,
+              fontSize: 13,
+            }}
+          />
+        </div>
+      )}
 
       <div style={{ minHeight, maxHeight: 620, overflowY: "auto", padding: "18px 22px" }}>
         <EditorContent editor={editor} />

@@ -1591,7 +1591,7 @@ function ManualComposerTab({ toast, mode = "manual" }) {
 
     try {
       const payload = {
-        draftId: draftEditingId,
+        id: draftEditingId,
         ...form,
         updatedAt: new Date().toISOString(),
       };
@@ -1744,6 +1744,9 @@ function ManualComposerTab({ toast, mode = "manual" }) {
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
               />
+              <div style={{ color: C.textFaint, fontSize: 11, marginTop: 5, textAlign: "right" }}>
+                {form.title.length} caracteres · recomendado: até 60
+              </div>
             </div>
             <div>
               <label style={s.label}>Slug / URL</label>
@@ -1772,6 +1775,9 @@ function ManualComposerTab({ toast, mode = "manual" }) {
                 value={form.excerpt}
                 onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
               />
+              <div style={{ color: C.textFaint, fontSize: 11, marginTop: 5, textAlign: "right" }}>
+                {form.excerpt.length} caracteres · recomendado: até 160
+              </div>
             </div>
           </div>
 
@@ -1802,6 +1808,14 @@ function ManualComposerTab({ toast, mode = "manual" }) {
                   <span style={{ color: C.textFaint, fontSize: 12 }}>Capa pronta: {form.coverImage.slice(0, 48)}…</span>
                 )}
               </div>
+              {form.coverImage && (
+                <img
+                  src={form.coverImage}
+                  alt="Pré-visualização da imagem de capa"
+                  loading="lazy"
+                  style={{ display: "block", width: "100%", maxHeight: 220, objectFit: "cover", borderRadius: 10, marginTop: 10, border: `1px solid ${C.border}` }}
+                />
+              )}
             </div>
             <div>
               <label style={s.label}>IA do editor</label>
@@ -2114,21 +2128,15 @@ function NewsletterTab({ toast }) {
 
 /* ─── TABS config ─── */
 const TABS = [
-  { id: "metrics", label: "Métricas", icon: "📊", shortLabel: "Métricas" },
-  { id: "quality", label: "Qualidade", icon: "🎯", shortLabel: "Qualidade" },
-  { id: "editor", label: "Editor", icon: "📝", shortLabel: "Editor" },
-  { id: "feedbacks", label: "Feedbacks", icon: "💬", shortLabel: "Feedbacks" },
-  { id: "newsletter", label: "Newsletter", icon: "📬", shortLabel: "Newsletter" },
-  { id: "affiliates", label: "Afiliados", icon: "🔗", shortLabel: "Afiliados" },
-  { id: "config", label: "Configurações", icon: "⚙️", shortLabel: "Config" },
-  { id: "ideas",   label: "💡 Ideias",    icon: "💡", shortLabel: "Ideias" },
+  { id: "newsletter", label: "Inscritos da newsletter", icon: "📬", shortLabel: "Inscritos" },
+  { id: "editor", label: "Artigos", icon: "📝", shortLabel: "Artigos" },
 ];
 
 /* ─── PÁGINA PRINCIPAL ─── */
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [checking, setChecking] = useState(true);
-  const [tab, setTab] = useState("metrics");
+  const [tab, setTab] = useState("newsletter");
   const [toastState, setToastState] = useState({ msg: "", type: "ok" });
 
   function showToast(msg, type = "ok") {
@@ -2239,14 +2247,8 @@ export default function AdminPage() {
           <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 24, marginTop: 0, color: C.text, display: "flex", alignItems: "center", gap: 8 }}>
             <span>{activeTab?.icon}</span> {activeTab?.label}
           </h1>
-          {tab === "metrics" && <MetricsTab toast={showToast} />}
-          {tab === "quality" && <QualityTab toast={showToast} />}
           {tab === "editor" && <ManualComposerTab toast={showToast} mode="manual" />}
-          {tab === "feedbacks" && <FeedbacksTab toast={showToast} />}
           {tab === "newsletter" && <NewsletterTab toast={showToast} />}
-          {tab === "affiliates" && <AffiliatesTab toast={showToast} />}
-          {tab === "config" && <ConfigTab toast={showToast} />}
-          {tab === "ideas"    && <IdeasTab    toast={showToast} />}
         </main>
       </div>
 
