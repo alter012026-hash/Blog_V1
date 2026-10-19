@@ -1,5 +1,5 @@
 ---
-title: "Concurso Blog: O que Mudou Esta Semana e o que Esperar dos Editais"
+title: "Concursos da semana: Câmara, DPE-SP e TJ-PB em destaque"
 date: "2026-10-09"
 category: "Redação e Discursiva"
 excerpt: "A última quinta‑feira (08/10) foi um marco para quem acompanha o universo dos concursos públicos. Em apenas dois dias, o Gran Cursos Online divulgou cinco..."

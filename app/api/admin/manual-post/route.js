@@ -5,8 +5,10 @@ import { slugify } from "../../../../lib/article-generator";
 import fs from "fs";
 import path from "path";
 import matter from "../../../../lib/frontmatter";
+import titleQuality from "../../../../lib/article-title.cjs";
 
 const postsDirectory = path.join(process.cwd(), "posts");
+const { getEditorialTitleIssue } = titleQuality;
 
 function escapeForYaml(value = "") {
   return String(value)
@@ -135,6 +137,10 @@ export async function POST(request) {
 
     if (!title || !String(title).trim()) {
       return NextResponse.json({ error: "Informe um título para o post." }, { status: 400 });
+    }
+    const titleIssue = getEditorialTitleIssue(title);
+    if (titleIssue) {
+      return NextResponse.json({ error: titleIssue }, { status: 400 });
     }
     if (!body || !String(body).trim()) {
       return NextResponse.json({ error: "Escreva o conteúdo do post manual." }, { status: 400 });

@@ -1,5 +1,5 @@
 ---
-title: "Concurso R: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "CGU e DPE-SP: vagas, salários e situação dos editais"
 date: "2026-10-11"
 category: "Questões Comentadas"
 excerpt: "Na última sexta‑feira (09/10/2026) dois editais de grande relevância foram publicados quase simultaneamente: o da Controladoria‑Geral da União (CGU), com..."

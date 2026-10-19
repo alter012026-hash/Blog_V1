@@ -3,6 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import RichEditor from "../../components/admin/RichEditor";
 import { markdownToHtml, htmlToMarkdown } from "../../lib/markdown-html";
+import titleQuality from "../../lib/article-title.cjs";
+
+const { getEditorialTitleIssue } = titleQuality;
 
 /* ─── Design tokens ─── */
 const C = {
@@ -1557,6 +1560,11 @@ function ManualComposerTab({ toast, mode = "manual" }) {
       toast("Informe um título para o post manual.", "error");
       return;
     }
+    const titleIssue = getEditorialTitleIssue(form.title);
+    if (titleIssue) {
+      toast(titleIssue, "error");
+      return;
+    }
     if (!form.body.trim()) {
       toast("Escreva o conteúdo do post antes de publicar.", "error");
       return;
@@ -1747,6 +1755,11 @@ function ManualComposerTab({ toast, mode = "manual" }) {
               <div style={{ color: C.textFaint, fontSize: 11, marginTop: 5, textAlign: "right" }}>
                 {form.title.length} caracteres · recomendado: até 60
               </div>
+              {getEditorialTitleIssue(form.title) && (
+                <div role="alert" style={{ color: C.accent, fontSize: 12, lineHeight: 1.5, marginTop: 6 }}>
+                  {getEditorialTitleIssue(form.title)}
+                </div>
+              )}
             </div>
             <div>
               <label style={s.label}>Slug / URL</label>

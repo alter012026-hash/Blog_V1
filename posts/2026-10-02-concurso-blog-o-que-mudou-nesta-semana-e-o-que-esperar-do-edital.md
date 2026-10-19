@@ -1,5 +1,5 @@
 ---
-title: "Concurso Blog: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "PMPE, Bombeiros PE e CRECI-ES: editais e vagas em foco"
 date: "2026-10-02"
 category: "Técnicas de Estudo"
 excerpt: "A última semana de setembro trouxe uma avalanche de publicações de editais que mudaram o cenário dos concursos no Brasil. Em apenas três dias, o portal..."

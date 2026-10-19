@@ -1,5 +1,5 @@
 ---
-title: "Concurso R: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Detran-SP e CGU: inscrições, prazos e salários"
 date: "2026-10-12"
 category: "Redação e Discursiva"
 excerpt: "Nas últimas 72 horas, o cenário de concursos públicos recebeu duas novidades que movimentaram candidatos de todo o país: a abertura das inscrições para o..."

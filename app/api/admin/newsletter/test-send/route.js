@@ -38,7 +38,7 @@ export async function POST(request) {
       return NextResponse.json({ ok: false, error: "Nenhum post encontrado." }, { status: 400 });
     }
 
-    const { buildDailyEmailHtml } = require("../../../../../lib/newsletter-service");
+    const { buildDailyEmailHtml, buildNewsletterSubject } = require("../../../../../lib/newsletter-service");
     const apiKey = process.env.RESEND_API_KEY?.trim();
     if (!apiKey) {
       return NextResponse.json(
@@ -68,7 +68,7 @@ export async function POST(request) {
       body: JSON.stringify({
         from,
         to: [testEmail],
-        subject: `[TESTE] 📬 Novo no blog: ${latestPost.title}`,
+        subject: buildNewsletterSubject([latestPost], { test: true }),
         html,
       }),
     });

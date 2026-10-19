@@ -1,5 +1,5 @@
 ---
-title: "Concurso R: Mudanças Recentes e o que Esperar do Edital"
+title: "Quatro editais em outubro: vagas, salários e prazos"
 date: "2026-10-07"
 category: "Editais"
 excerpt: "Nos últimos dias, quatro editais diferentes foram publicados, todos anunciando vagas bem remuneradas e prazos que se sobrepõem. Embora cada órgão tenha..."

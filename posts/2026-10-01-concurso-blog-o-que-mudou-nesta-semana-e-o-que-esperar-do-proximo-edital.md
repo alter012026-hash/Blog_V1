@@ -1,5 +1,5 @@
 ---
-title: "Concurso Blog: O que Mudou Nesta Semana e o que Esperar do Próximo Edital"
+title: "CGU define banca e UPE lança edital: destaques da semana"
 date: "2026-10-01"
 category: "Cronograma de Estudos"
 excerpt: "A última semana de setembro trouxe um volume incomum de movimentação nos sites de concursos. Em um curto intervalo – de 28 / 09 a 01 / 10 – surgiram três..."
