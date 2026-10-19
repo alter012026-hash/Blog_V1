@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const colors = {
   background: "#080E1A",
@@ -13,7 +13,7 @@ const colors = {
   red: "#EF4444",
 };
 
-export default function EditorialReviewPanel({ toast }) {
+export default function EditorialReviewPanel({ toast, onPendingCountChange }) {
   const [drafts, setDrafts] = useState([]);
   const [sources, setSources] = useState({});
   const [checks, setChecks] = useState({});
@@ -21,23 +21,25 @@ export default function EditorialReviewPanel({ toast }) {
   const [busyId, setBusyId] = useState("");
   const [error, setError] = useState("");
 
-  async function load() {
+  const load = useCallback(async () => {
     setError("");
     try {
       const response = await fetch("/api/admin/editorial-review");
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Falha ao carregar a fila editorial.");
-      setDrafts(data.drafts || []);
-      setSources(Object.fromEntries((data.drafts || []).map((draft) => [
+      const queue = Array.isArray(data.drafts) ? data.drafts : [];
+      setDrafts(queue);
+      onPendingCountChange?.(queue.length);
+      setSources(Object.fromEntries(queue.map((draft) => [
         draft.id,
         (draft.sourceUrls || []).join("\n"),
       ])));
     } catch (loadError) {
       setError(loadError.message);
     }
-  }
+  }, [onPendingCountChange]);
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [load]);
 
   function updateCheck(id, field, checked) {
     setChecks((current) => ({

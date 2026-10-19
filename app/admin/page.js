@@ -133,6 +133,19 @@ const globalCSS = `
     }
     .mobile-nav-icon { font-size: 18px; }
     .mobile-nav-label { font-size: 10px; font-weight: 600; }
+    .mobile-nav-badge {
+      position: absolute;
+      top: 2px;
+      right: calc(50% - 24px);
+      min-width: 16px;
+      padding: 1px 4px;
+      border-radius: 999px;
+      background: ${C.accent};
+      color: ${C.bg};
+      font-size: 9px;
+      font-weight: 800;
+      line-height: 14px;
+    }
   }
 
   @media (max-width: 480px) {
@@ -1234,7 +1247,6 @@ function QualityTab({ toast }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-      <EditorialReviewPanel toast={toast} />
       <div className="stat-grid">
         <StatCard label="Posts OK" value={data.okCount} sub="qualidade aprovada" color={C.green} icon="✅" />
         <StatCard label="Conteúdo Raso" value={data.shallowCount} sub="precisam revisão" color={C.accent} icon="⚠️" />
@@ -2325,6 +2337,7 @@ function NewsletterTab({ toast }) {
 
 /* ─── TABS config ─── */
 const TABS = [
+  { id: "editorial", label: "Aprovações editoriais", icon: "✅", shortLabel: "Revisar" },
   { id: "newsletter", label: "Inscritos da newsletter", icon: "📬", shortLabel: "Inscritos" },
   { id: "editor", label: "Artigos", icon: "📝", shortLabel: "Artigos" },
 ];
@@ -2334,6 +2347,7 @@ export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [checking, setChecking] = useState(true);
   const [tab, setTab] = useState("newsletter");
+  const [pendingEditorialCount, setPendingEditorialCount] = useState(null);
   const [toastState, setToastState] = useState({ msg: "", type: "ok" });
 
   function showToast(msg, type = "ok") {
@@ -2346,6 +2360,21 @@ export default function AdminPage() {
       .then((r) => { if (r.ok) setAuthed(true); setChecking(false); })
       .catch(() => setChecking(false));
   }, []);
+
+  useEffect(() => {
+    if (!authed) return undefined;
+    let active = true;
+    fetch("/api/admin/editorial-review", { cache: "no-store" })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Falha ao carregar a fila editorial.");
+        if (active) setPendingEditorialCount(data.drafts.length);
+      })
+      .catch((error) => {
+        console.error("[admin] Não foi possível carregar a contagem da fila editorial.", error);
+      });
+    return () => { active = false; };
+  }, [authed]);
 
   async function handleLogout() {
     await fetch("/api/admin/auth", { method: "DELETE" });
@@ -2433,7 +2462,25 @@ export default function AdminPage() {
                   gap: 8,
                 }}
               >
-                <span>{t.icon}</span> {t.label}
+                <span>{t.icon}</span>
+                <span style={{ flex: 1 }}>{t.label}</span>
+                {t.id === "editorial" && pendingEditorialCount !== null && (
+                  <span
+                    aria-label={`${pendingEditorialCount} artigos aguardando revisão`}
+                    style={{
+                      minWidth: 22,
+                      padding: "2px 6px",
+                      borderRadius: 999,
+                      background: pendingEditorialCount > 0 ? C.accentGlow : C.surfaceHover,
+                      color: pendingEditorialCount > 0 ? C.accent : C.textFaint,
+                      fontSize: 11,
+                      fontWeight: 800,
+                      textAlign: "center",
+                    }}
+                  >
+                    {pendingEditorialCount}
+                  </span>
+                )}
               </button>
             ))}
           </nav>
@@ -2444,6 +2491,12 @@ export default function AdminPage() {
           <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 24, marginTop: 0, color: C.text, display: "flex", alignItems: "center", gap: 8 }}>
             <span>{activeTab?.icon}</span> {activeTab?.label}
           </h1>
+          {tab === "editorial" && (
+            <EditorialReviewPanel
+              toast={showToast}
+              onPendingCountChange={setPendingEditorialCount}
+            />
+          )}
           {tab === "editor" && <ManualComposerTab toast={showToast} mode="manual" />}
           {tab === "newsletter" && <NewsletterTab toast={showToast} />}
         </main>
@@ -2458,10 +2511,16 @@ export default function AdminPage() {
             onClick={() => setTab(t.id)}
             style={{
               color: tab === t.id ? C.primary : C.textFaint,
+              position: "relative",
             }}
           >
             <span className="mobile-nav-icon">{t.icon}</span>
             <span className="mobile-nav-label">{t.shortLabel}</span>
+            {t.id === "editorial" && pendingEditorialCount > 0 && (
+              <span aria-label={`${pendingEditorialCount} pendentes`} className="mobile-nav-badge">
+                {pendingEditorialCount}
+              </span>
+            )}
           </button>
         ))}
       </nav>
