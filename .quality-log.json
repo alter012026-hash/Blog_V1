@@ -2187,5 +2187,19 @@
     "similarTo": "concurso-gabarito-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
     "status": "ok",
     "issues": []
+  },
+  {
+    "timestamp": "2026-10-19T22:29:51.196Z",
+    "file": "2026-10-19-concurso-provas-mudancas-da-semana-e-proximos-passos.md",
+    "slug": "concurso-provas-mudancas-da-semana-e-proximos-passos",
+    "title": "Concurso Provas: Mudanças da Semana e Próximos Passos",
+    "category": "Questões Comentadas",
+    "provider": "Groq",
+    "wordCount": 1443,
+    "fillerCount": 1,
+    "similarity": 20,
+    "similarTo": "concurso-resultado-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "NEEDS_REVIEW",
+    "issues": []
   }
 ]
