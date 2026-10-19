@@ -1,5 +1,5 @@
 ---
-title: "Lula ou Flávio: Qual será o futuro dos concursos públicos? Os números reais de 2027"
+title: "Lula e Flávio: Qual será o futuro dos concursos públicos? Os números reais de 2027"
 date: "2026-10-18"
 category: "Concursos Abertos"
 excerpt: "A data que mais importa para o seu edital talvez não seja 25 de outubro. Veja o que cada plano promete, o que o histórico mostra e por que o orçamento de 2027 prevê 40% menos vagas."
