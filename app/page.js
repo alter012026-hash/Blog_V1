@@ -4,8 +4,8 @@ import CategoryCards from "../components/CategoryCards";
 import QuickStart from "../components/QuickStart";
 import HeroSheet from "../components/HeroSheet";
 import NewsletterInline from "../components/NewsletterInline";
-import PopularSearches from "../components/PopularSearches";
 import { getAllPosts, getCategoryStats, getPostBySlug } from "../lib/posts";
+import { getCategoryMeta } from "../lib/category-meta";
 import config from "../site.config";
 
 export const revalidate = 3600;
@@ -32,6 +32,11 @@ export default function HomePage() {
     .filter((post) => post.slug !== pinnedPostSlug && !weeklyPostSlugs.has(post.slug))
     .slice(0, 6);
   const categoryStats = getCategoryStats();
+
+  const trending = (config.trending || [])
+    .map((slug) => getPostBySlug(slug))
+    .filter(Boolean)
+    .slice(0, 6);
 
   return (
     <main>
@@ -74,17 +79,29 @@ export default function HomePage() {
       )}
 
       {/* ── Mais procurados + destaque ───────────────────────── */}
-      <section className="section">
-        <div className="container">
-          <div className="section-header">
-            <div>
-              <p className="section-label">Consultas reais associadas a artigos do blog</p>
-              <h2 className="section-title">Buscas em alta</h2>
+      {trending.length > 0 && (
+        <section className="section">
+          <div className="container">
+            <div className="section-header">
+              <div>
+                <p className="section-label">O que os candidatos estão buscando no Google</p>
+                <h2 className="section-title">Mais procurados</h2>
+              </div>
             </div>
+            <ol className="rank-list">
+              {trending.map((p, i) => (
+                <li key={p.slug} className="rank-item cat" style={{ "--h": getCategoryMeta(p.category).hue }} data-vt-card>
+                  <span className="rank-pos" aria-hidden="true">{i + 1}</span>
+                  <div className="rank-body">
+                    <span className="chip">{p.category}</span>
+                    <h3 className="rank-title"><Link href={`/blog/${p.slug}`}>{p.title}</Link></h3>
+                  </div>
+                </li>
+              ))}
+            </ol>
           </div>
-          <PopularSearches />
-        </div>
-      </section>
+        </section>
+      )}
 
       {weeklyPosts.length > 0 && (
         <section className="section section--alt">

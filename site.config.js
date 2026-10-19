@@ -195,6 +195,17 @@ const siteConfig = {
     ],
   },
 
+  // --- HOME: "Mais procurados" ---
+  // Artigos com mais impressões no Google (Search Console, últimos 6
+  // meses). Linkar daqui reforça os artigos que já aparecem nas buscas.
+  trending: [
+    "diferencas-entre-cargos-de-nivel-medio-e-superior-no-setor-publico-dicas-pratica",
+    "carreira-de-agente-penitenciario-rotina-e-requisitos",
+    "como-montar-cronograma-de-estudos-para-concurso-publico-guia-atualizado",
+    "carreira-no-inss-como-funciona-guia-atualizado",
+    "concurso-sedes-df-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "concurso-eptc-porto-alegre-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+  ],
 };
 
 export default siteConfig;
