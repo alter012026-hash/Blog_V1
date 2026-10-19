@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { brazilStates } from "../lib/brazil-states";
 
 const TILE_WIDTH = 42;
@@ -14,9 +13,9 @@ export default function BrazilStateMap() {
         aria-label="Mapa interativo do Brasil. Escolha um estado para ver os concursos relacionados."
       >
         {brazilStates.map((state) => (
-          <Link
+          <a
             key={state.code}
-            href={`/blog?estado=${state.code}`}
+            href={`/blog?estado=${encodeURIComponent(state.code)}`}
             className="state-map-link"
             aria-label={`Ver concursos em ${state.name}`}
           >
@@ -38,7 +37,7 @@ export default function BrazilStateMap() {
               </text>
               <title>{`${state.name} — ver concursos relacionados`}</title>
             </g>
-          </Link>
+          </a>
         ))}
       </svg>
       <form action="/blog" method="get" className="state-map-picker">
