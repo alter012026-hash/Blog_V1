@@ -284,7 +284,7 @@ export default async function PostPage({ params }) {
 
             {/* ✅ Afiliado no meio do artigo (contextual, se houver match) */}
             {contentAfter && matchedAffiliate && (
-              <AffiliateBox affiliate={matchedAffiliate} />
+              <AffiliateBox affiliate={matchedAffiliate} slug={params.slug} />
             )}
 
             {/* 📬 Newsletter inline no meio do artigo — alta conversão */}
@@ -302,17 +302,17 @@ export default async function PostPage({ params }) {
 
             {/* Afiliado contextual no fim (só se NÃO foi inserido no meio) */}
             {!contentAfter && matchedAffiliate && (
-              <AffiliateBox affiliate={matchedAffiliate} />
+              <AffiliateBox affiliate={matchedAffiliate} slug={params.slug} />
             )}
 
             {/* Segundo afiliado — sempre no fim do artigo, diferente do primeiro */}
             {secondAffiliate && (
-              <AffiliateBox affiliate={secondAffiliate} />
+              <AffiliateBox affiliate={secondAffiliate} slug={params.slug} />
             )}
 
             {/* Afiliados fixos — sempre exibidos */}
             {pinnedAffiliates.map((aff) => (
-              <AffiliateBox key={aff.id} affiliate={aff} />
+              <AffiliateBox key={aff.id} affiliate={aff} slug={params.slug} />
             ))}
 
             {/* 🤖 Tire sua dúvida — Q&A via IA com contexto do artigo */}
@@ -333,7 +333,7 @@ export default async function PostPage({ params }) {
                 <h3>Continue estudando</h3>
                 <div className="posts-grid">
                   {relatedPosts.map((p) => (
-                    <PostCard key={p.slug} post={p} />
+                    <PostCard key={p.slug} post={p} related />
                   ))}
                 </div>
               </aside>

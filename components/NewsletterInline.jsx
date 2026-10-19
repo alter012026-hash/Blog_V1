@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { trackSiteEvent } from "../lib/analytics-events";
 
 /**
  * NewsletterInline — bloco de alta conversão inserido no meio dos artigos
@@ -11,20 +12,27 @@ export default function NewsletterInline({ variant = "article" }) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
+  const [consent, setConsent] = useState(false);
+  const [started, setStarted] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
     if (status === "loading") return;
+    if (!consent) return;
     setStatus("loading");
     try {
       const res = await fetch("/api/newsletter/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, consent: true, source: window.location.pathname }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.ok) throw new Error(data.error || "Tente novamente.");
       setStatus("ok");
+      trackSiteEvent("newsletter_signup_success", {
+        source: window.location.pathname,
+        consented_at: new Date().toISOString().slice(0, 10),
+      });
       setMessage("Inscrito com sucesso! O próximo artigo chega direto no seu e-mail. 🎉");
       setEmail("");
     } catch (err) {
@@ -76,6 +84,12 @@ export default function NewsletterInline({ variant = "article" }) {
             disabled={status === "loading"}
             className="nl-inline-input"
             aria-label="Seu e-mail"
+            onFocus={() => {
+              if (!started) {
+                setStarted(true);
+                trackSiteEvent("newsletter_signup_start", { source: window.location.pathname });
+              }
+            }}
           />
           <button
             type="submit"
@@ -84,6 +98,10 @@ export default function NewsletterInline({ variant = "article" }) {
           >
             {status === "loading" ? "Enviando…" : "Quero receber →"}
           </button>
+          <label className="nl-inline-consent" style={{ display: "flex", alignItems: "flex-start", gap: 7, fontSize: 12, lineHeight: 1.5, margin: "8px 0" }}>
+            <input type="checkbox" required checked={consent} onChange={(event) => setConsent(event.target.checked)} />
+            <span>Aceito receber a newsletter e posso cancelar a inscrição quando quiser. <a href="/privacidade">Privacidade</a>.</span>
+          </label>
         </form>
 
         {message && status === "error" && (

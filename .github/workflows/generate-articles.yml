@@ -82,13 +82,15 @@ jobs:
       - name: Check changes
         id: changes
         run: |
+          # Artigos gerados ficam em NEEDS_REVIEW; este workflow não publica
+          # diretamente em posts/. O admin promove um rascunho após revisão.
           # IMPORTANTE: .used-topics.json, .content-signatures.json e
           # .quality-log.json também precisam ser commitados — são a
           # "memória" que impede o pipeline de gerar posts quase-duplicados.
           # Antes só posts/ e public/images/ eram commitados, então esses
           # arquivos eram recriados vazios a cada execução do Actions e a
           # checagem de duplicidade nunca enxergava o histórico real.
-          git add posts/ public/images/ .used-topics.json .content-signatures.json .quality-log.json .pending-news-topics.json .used-news-links.json
+          git add .editorial-drafts.json public/images/ .used-topics.json .content-signatures.json .quality-log.json .pending-news-topics.json .used-news-links.json
 
           if git diff --cached --quiet; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
@@ -149,19 +151,6 @@ jobs:
           if [ -n "$VERCEL_DEPLOY_HOOK" ]; then
             curl -s -X POST "$VERCEL_DEPLOY_HOOK"
           fi
-
-      # ── Aguarda Vercel terminar o deploy antes de pingar ──
-      - name: Wait for deploy
-        if: steps.changes.outputs.has_changes == 'true'
-        run: sleep 60
-
-      # ── Notifica Google, Bing, Yandex e DuckDuckGo ──────
-      - name: Ping indexing (IndexNow + Google)
-        if: steps.changes.outputs.has_changes == 'true'
-        env:
-          INDEXNOW_KEY:              ${{ secrets.INDEXNOW_KEY }}
-          GOOGLE_SERVICE_ACCOUNT_B64: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_B64 }}
-        run: node scripts/ping-indexing.js --new
 
       - name: Summary
         if: always()

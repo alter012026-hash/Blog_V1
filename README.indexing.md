@@ -1,139 +1,51 @@
-# 🚀 Guia de Indexação Rápida no Google
+# Descoberta e indexação de URLs
 
-Este projeto usa **dois mecanismos** para acelerar a indexação:
+## Artigos editoriais
 
-| Mecanismo | O que faz | Dificuldade |
-|---|---|---|
-| **IndexNow** | Notifica Bing, Yandex e DuckDuckGo em segundos | ⭐ Fácil |
-| **Google Indexing API** | Pinga o Google diretamente sobre URLs novas | ⭐⭐ Médio |
-| **Sitemap ping** | Avisa o Google que o sitemap mudou | ⭐ Automático |
+Artigos comuns são descobertos pelo Google por meio do sitemap XML e dos links
+internos do site. Enviar essas URLs à Google Indexing API não é um mecanismo
+suportado para artigos editoriais: a API é destinada a páginas com `JobPosting`
+ou transmissões ao vivo (`BroadcastEvent` em `VideoObject`), conforme a
+[documentação oficial](https://developers.google.com/search/apis/indexing-api/v3/quickstart).
 
----
+Para artigos editoriais:
 
-## 1. IndexNow (Bing + Yandex + DuckDuckGo)
+1. Confira `https://passejaconcursos.com.br/sitemap.xml`.
+2. Envie o sitemap pelo Google Search Console e acompanhe os relatórios de
+   indexação e desempenho.
+3. Garanta que artigos importantes recebam links internos contextuais.
+4. Use a Inspeção de URL no Search Console para diagnosticar uma página
+   específica. Solicitar indexação não garante que ela será indexada.
 
-### Passo 1 — Gerar a chave
+Não configure `GOOGLE_SERVICE_ACCOUNT_B64` nem credenciais Google para
+notificar URLs editoriais pela Indexing API.
 
-1. Acesse: https://www.bing.com/indexnow/getstarted
-2. Clique em **Generate API Key**
-3. Copie a chave gerada (ex: `a1b2c3d4e5f6...`)
+## IndexNow (Bing e mecanismos compatíveis)
 
-### Passo 2 — Publicar o arquivo de verificação
+IndexNow pode notificar mecanismos participantes sobre URLs novas ou
+atualizadas. Configure uma chave e disponibilize o arquivo de verificação no
+site, conforme a [documentação do IndexNow](https://www.indexnow.org/documentation).
 
-Substitua o conteúdo de `public/indexnow-key.txt` pela sua chave:
+Defina `INDEXNOW_KEY` no ambiente. O workflow de publicação e o painel
+administrativo podem notificar URLs por IndexNow. A notificação não garante
+indexação.
 
-```
-a1b2c3d4e5f6...
-```
-
-Depois renomeie o arquivo para `public/<sua-chave>.txt`  
-Ex: `public/a1b2c3d4e5f6.txt`
-
-> O arquivo precisa estar acessível em:  
-> `https://seusite.com/42eae02bc7524825bc97e8d8c50654d1.txt`
-
-### Passo 3 — Adicionar ao .env.local
-
-```env
-INDEXNOW_KEY=a1b2c3d4e5f6...
-```
-
-### Passo 4 — Adicionar ao GitHub Secrets
-
-Em **Settings → Secrets → Actions**, crie:
-- `INDEXNOW_KEY` → sua chave
-
----
-
-## 2. Google Indexing API
-
-> ⚠️ A API do Google funciona oficialmente para "Job Postings" e "LiveStream",  
-> mas na prática acelera a indexação de qualquer URL.
-
-### Passo 1 — Criar um projeto no Google Cloud
-
-1. Acesse: https://console.cloud.google.com
-2. Crie um novo projeto (ex: "Aprovado Já Blog")
-3. Ative a **Web Search Indexing API**:
-   - Menu → APIs e Serviços → Biblioteca
-   - Busque "Web Search Indexing API" → Ativar
-
-### Passo 2 — Criar Service Account
-
-1. Menu → APIs e Serviços → Credenciais
-2. Clique em **Criar credenciais → Conta de serviço**
-3. Dê um nome (ex: `indexing-bot`)
-4. Clique em **Concluído**
-5. Clique na conta criada → aba **Chaves** → **Adicionar chave → JSON**
-6. Faça download do arquivo `.json`
-
-### Passo 3 — Adicionar ao Google Search Console
-
-1. Acesse: https://search.google.com/search-console
-2. Configurações → Usuários e permissões → **Adicionar usuário**
-3. Cole o e-mail da Service Account (ex: `indexing-bot@projeto.iam.gserviceaccount.com`)
-4. Permissão: **Proprietário**
-
-### Passo 4 — Converter o JSON para base64
-
-No terminal:
-```bash
-base64 -i seu-arquivo-service-account.json | tr -d '\n'
-```
-Copie o resultado.
-
-### Passo 5 — Adicionar ao GitHub Secrets
-
-Em **Settings → Secrets → Actions**, crie:
-- `GOOGLE_SERVICE_ACCOUNT_B64` → o base64 do passo anterior
-
----
-
-## 3. Uso manual (opcional)
+Execução manual:
 
 ```bash
-# Pinga todos os posts
 node scripts/ping-indexing.js
-
-# Pinga só posts publicados hoje
 node scripts/ping-indexing.js --new
-
-# Pinga uma URL específica
 node scripts/ping-indexing.js --url /blog/meu-artigo
 ```
 
----
+## Métricas do Search Console
 
-## 4. Como funciona automaticamente
+A aba Métricas do painel consulta cliques, impressões, CTR e posição por URL.
+Para habilitá-la, configure `GOOGLE_SERVICE_ACCOUNT_B64`, habilite a Search
+Console API e conceda à conta de serviço acesso de usuário restrito à
+propriedade. `SEARCH_CONSOLE_SITE_URL` pode especificar a propriedade exata;
+por padrão, usa `sc-domain:passejaconcursos.com.br`.
 
-O GitHub Actions já está configurado para:
-
-1. Gerar e publicar o artigo
-2. Fazer o deploy na Vercel
-3. **Aguardar 60 segundos** (tempo do deploy)
-4. **Pingar automaticamente** as URLs novas no Google + IndexNow
-
-Você não precisa fazer nada — cada novo artigo é notificado sozinho.
-
----
-
-## 5. Verificar se funcionou
-
-- **IndexNow**: acesse https://www.bing.com/webmaster → Relatório IndexNow
-- **Google**: Search Console → Inspeção de URL → cole a URL e clique em "Solicitar indexação"
-
----
-
-## Resumo das variáveis de ambiente
-
-```env
-# .env.local
-INDEXNOW_KEY=sua_chave_aqui
-GOOGLE_SERVICE_ACCOUNT_B64=base64_do_json_aqui
-```
-
-```
-# GitHub Secrets
-INDEXNOW_KEY
-GOOGLE_SERVICE_ACCOUNT_B64
-```
+Os dados podem ter atraso e não representam GA4, acessos diretos ou redes
+sociais. O painel compara períodos completos e serve para análise, não como
+garantia de indexação.

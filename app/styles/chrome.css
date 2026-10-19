@@ -461,7 +461,7 @@
 .newsletter-box { max-width: 420px; }
 .newsletter-title { font-size: 1.1rem; font-weight: 800; color: #fff; letter-spacing: -0.02em; line-height: 1.25; }
 .newsletter-subtitle { margin: 6px 0 14px; font-size: 0.9rem; color: #B4B9E0; }
-.newsletter-form { display: flex; gap: 8px; }
+.newsletter-form { display: flex; flex-wrap: wrap; gap: 8px; }
 .newsletter-input {
   flex: 1; min-width: 0;
   height: 48px;

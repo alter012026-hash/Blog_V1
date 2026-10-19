@@ -1,201 +1,142 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { trackSiteEvent } from "../lib/analytics-events";
 
-/**
- * NewsletterPopup — aparece após 30s OU quando o usuário leu 40% da página.
- * Fecha com ESC ou clicando fora. Não volta a aparecer na sessão (sessionStorage).
- * Pulsa suavemente para chamar atenção sem ser invasivo.
- */
 export default function NewsletterPopup() {
   const [visible, setVisible] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissing, setDismissing] = useState(false);
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState("idle"); // idle | loading | ok | error
+  const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
+  const [consent, setConsent] = useState(false);
+  const [started, setStarted] = useState(false);
 
   useEffect(() => {
-    // Não mostra se já foi fechado nesta sessão
-    if (sessionStorage.getItem("nl_popup_dismissed")) return;
+    if (sessionStorage.getItem("nl_popup_shown")) return;
 
+    let timeElapsed = false;
+    let enoughRead = false;
     let triggered = false;
 
-    function trigger() {
-      if (triggered) return;
+    function maybeShow() {
+      if (triggered || !timeElapsed || !enoughRead) return;
       triggered = true;
+      sessionStorage.setItem("nl_popup_shown", "1");
       setVisible(true);
     }
 
-    // Gatilho 1: 30 segundos na página
-    const timer = setTimeout(trigger, 30000);
+    const timer = setTimeout(() => {
+      timeElapsed = true;
+      maybeShow();
+    }, 60000);
 
-    // Gatilho 2: leu 40% da página
     function onScroll() {
       const doc = document.documentElement;
       const scrolled = doc.scrollTop || document.body.scrollTop;
       const total = (doc.scrollHeight || document.body.scrollHeight) - doc.clientHeight;
-      if (total > 0 && scrolled / total >= 0.4) trigger();
+      if (total > 0 && scrolled / total >= 0.65) {
+        enoughRead = true;
+        maybeShow();
+      }
     }
 
     window.addEventListener("scroll", onScroll, { passive: true });
-
-    // Fechar com ESC
-    function onKey(e) {
-      if (e.key === "Escape") dismiss();
-    }
-    window.addEventListener("keydown", onKey);
+    onScroll();
 
     return () => {
       clearTimeout(timer);
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("keydown", onKey);
     };
   }, []);
 
   function dismiss() {
-    sessionStorage.setItem("nl_popup_dismissed", "1");
-    setDismissed(true);
-    setTimeout(() => setVisible(false), 300);
+    setDismissing(true);
+    setTimeout(() => setVisible(false), 180);
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  async function handleSubmit(event) {
+    event.preventDefault();
     if (status === "loading") return;
+    if (!consent) return;
+
     setStatus("loading");
+    setMessage("");
     try {
-      const res = await fetch("/api/newsletter/subscribe", {
+      const response = await fetch("/api/newsletter/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, consent: true, source: window.location.pathname }),
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.ok) throw new Error(data.error || "Tente novamente.");
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error || "Não foi possível concluir sua inscrição.");
+      }
+
       setStatus("ok");
-      setMessage("Perfeito! Você vai receber o próximo artigo em primeira mão. 🎉");
+      trackSiteEvent("newsletter_signup_success", {
+        source: window.location.pathname,
+        consented_at: new Date().toISOString().slice(0, 10),
+      });
+      setMessage("Inscrição confirmada! Obrigado.");
       setEmail("");
-      setTimeout(dismiss, 3500);
-    } catch (err) {
+      setTimeout(dismiss, 4000);
+    } catch (error) {
       setStatus("error");
-      setMessage(err.message || "Algo deu errado. Tente novamente.");
+      setMessage(error.message || "Algo deu errado. Tente novamente.");
     }
   }
 
   if (!visible) return null;
 
   return (
-    <>
-      {/* Overlay */}
-      <div
+    <aside
+      className={`nl-float ${dismissing ? "nl-float--closing" : ""}`}
+      aria-label="Inscrição na newsletter"
+      aria-live="polite"
+    >
+      <button
+        className="nl-float-close"
+        type="button"
         onClick={dismiss}
-        style={{
-          position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)",
-          zIndex: 9998, backdropFilter: "blur(2px)",
-          animation: dismissed ? "nlFadeOut .3s forwards" : "nlFadeIn .3s forwards",
-        }}
-      />
-
-      {/* Popup */}
-      <div
-        style={{
-          position: "fixed", bottom: "calc(var(--dock-h, 0px) + 16px)", right: 16,
-          width: "min(420px, calc(100vw - 32px))",
-          background: "#12163A",
-          border: "2px solid #FFD43B",
-          borderRadius: 24, padding: "28px 28px 24px",
-          boxShadow: "0 24px 64px rgba(0,0,0,0.5)",
-          zIndex: 9999,
-          animation: dismissed ? "nlSlideOut .3s forwards" : "nlSlideIn .4s cubic-bezier(.22,1,.36,1) forwards",
-        }}
+        aria-label="Fechar convite da newsletter"
       >
-        {/* Botão fechar */}
-        <button
-          onClick={dismiss}
-          aria-label="Fechar"
-          style={{
-            position: "absolute", top: 14, right: 14,
-            background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)",
-            borderRadius: 6, color: "rgba(255,255,255,0.5)", cursor: "pointer",
-            width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 14, lineHeight: 1, transition: "background .15s",
-          }}
-        >✕</button>
+        ×
+      </button>
 
-        {/* Ícone pulsante */}
-        <div style={{ marginBottom: 14 }}>
-          <span style={{
-            display: "inline-flex", alignItems: "center", justifyContent: "center",
-            width: 44, height: 44, borderRadius: 12,
-            background: "rgba(255,212,59,0.16)", border: "1px solid rgba(255,212,59,0.4)",
-            fontSize: 22, animation: "nlPulse 2s ease-in-out infinite",
-          }}>📬</span>
-        </div>
-
-        {status !== "ok" ? (
-          <>
-            <p style={{ fontSize: "1.05rem", fontWeight: 800, color: "#F1F5F9", marginBottom: 6, lineHeight: 1.3 }}>
-              Ei! Quer receber os próximos artigos em primeira mão?
-            </p>
-            <p style={{ fontSize: "0.82rem", color: "#94A3B8", lineHeight: 1.55, marginBottom: 18 }}>
-              Todo dia um novo artigo sobre concursos públicos direto no seu e-mail.
-              Rápido, gratuito e sem spam — cancele quando quiser.
-            </p>
-
-            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <input
-                type="email"
-                required
-                placeholder="seu@email.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                disabled={status === "loading"}
-                style={{
-                  padding: "13px 18px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.2)",
-                  background: "rgba(255,255,255,0.07)", color: "#fff", fontSize: "1rem",
-                  outline: "none", width: "100%",
-                }}
-              />
-              <button
-                type="submit"
-                disabled={status === "loading"}
-                style={{
-                  padding: "14px", borderRadius: 999, border: "none",
-                  background: status === "loading"
-                    ? "rgba(255,212,59,0.5)"
-                    : "#FFD43B",
-                  color: "#12163A", fontSize: "0.95rem", fontWeight: 800,
-                  cursor: status === "loading" ? "not-allowed" : "pointer",
-                  transition: "opacity .15s",
-
-                }}
-              >
-                {status === "loading" ? "Enviando…" : "Quero receber! →"}
-              </button>
-            </form>
-
-            {message && status === "error" && (
-              <p style={{ fontSize: "0.78rem", color: "#FCA5A5", marginTop: 8 }}>{message}</p>
-            )}
-
-            <p style={{ fontSize: "0.72rem", color: "#4B607A", marginTop: 12, textAlign: "center" }}>
-              🔒 Seus dados ficam só aqui. Nada de spam, prometido.
-            </p>
-          </>
-        ) : (
-          <div style={{ textAlign: "center", padding: "8px 0" }}>
-            <div style={{ fontSize: 40, marginBottom: 12 }}>🎉</div>
-            <p style={{ color: "#6EE7B7", fontWeight: 700, fontSize: "1rem", marginBottom: 6 }}>Você está dentro!</p>
-            <p style={{ color: "#94A3B8", fontSize: "0.83rem" }}>{message}</p>
-          </div>
-        )}
-      </div>
-
-      <style>{`
-        @keyframes nlFadeIn  { from { opacity:0 } to { opacity:1 } }
-        @keyframes nlFadeOut { from { opacity:1 } to { opacity:0 } }
-        @keyframes nlSlideIn { from { opacity:0; transform:translateY(20px) scale(.97) } to { opacity:1; transform:translateY(0) scale(1) } }
-        @keyframes nlSlideOut{ from { opacity:1; transform:translateY(0) } to { opacity:0; transform:translateY(20px) } }
-        @keyframes nlPulse   { 0%,100% { box-shadow:0 0 0 0 rgba(255,212,59,0.4) } 50% { box-shadow:0 0 0 10px rgba(59,130,246,0) } }
-      `}</style>
-    </>
+      {status === "ok" ? (
+        <p className="nl-float-success">{message}</p>
+      ) : (
+        <>
+          <p className="nl-float-title">Receba os próximos artigos por e-mail</p>
+          <p className="nl-float-copy">Gratuito e sem spam. Cancele quando quiser.</p>
+          <form className="nl-float-form" onSubmit={handleSubmit}>
+            <input
+              type="email"
+              required
+              placeholder="Seu e-mail"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              disabled={status === "loading"}
+              aria-label="Seu e-mail"
+              onFocus={() => {
+                if (!started) {
+                  setStarted(true);
+                  trackSiteEvent("newsletter_signup_start", { source: window.location.pathname });
+                }
+              }}
+            />
+            <button type="submit" disabled={status === "loading"}>
+              {status === "loading" ? "Enviando…" : "Quero receber"}
+            </button>
+            <label style={{ display: "flex", alignItems: "flex-start", gap: 7, color: "#d1d5db", fontSize: 11, lineHeight: 1.5, flexBasis: "100%" }}>
+              <input type="checkbox" required checked={consent} onChange={(event) => setConsent(event.target.checked)} />
+              <span>Aceito receber a newsletter e posso cancelar quando quiser. <a href="/privacidade">Privacidade</a>.</span>
+            </label>
+          </form>
+          {status === "error" && <p className="nl-float-error">{message}</p>}
+        </>
+      )}
+    </aside>
   );
 }

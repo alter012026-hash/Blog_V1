@@ -7,7 +7,7 @@ export const metadata = {
 };
 
 export default function PrivacidadePage() {
-  const lastUpdated = "26 de julho de 2026";
+  const lastUpdated = "19 de outubro de 2026";
 
   return (
     <>
@@ -45,7 +45,9 @@ export default function PrivacidadePage() {
               <li>
                 <strong>Dados de navegação:</strong> páginas visitadas, tempo de permanência,
                 dispositivo e localização aproximada, coletados de forma agregada via Vercel
-                Analytics.
+                Analytics. Eventos de uso do simulado, busca, newsletter, afiliados e links de
+                fontes podem incluir identificadores não pessoais da página ou parceiro; não
+                enviamos e-mail, nome ou consulta digitada nesses eventos.
               </li>
               <li>
                 <strong>Cookies e identificadores de anúncios:</strong> usados pelo Google
@@ -56,6 +58,11 @@ export default function PrivacidadePage() {
                 <strong>E-mail:</strong> apenas se você se inscrever voluntariamente na nossa
                 newsletter ou solicitar o resultado de um simulado. Usamos esse e-mail somente
                 para o fim que você solicitou.
+              </li>
+              <li>
+                <strong>Consentimento da newsletter:</strong> a inscrição exige confirmação
+                explícita. Registramos a origem da página e a data do evento de confirmação de
+                forma agregada, sem incluir o e-mail nos eventos analíticos.
               </li>
             </ul>
             <p>

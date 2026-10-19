@@ -1,163 +1,48 @@
 import { NextResponse } from "next/server";
 import { checkAdminAuth } from "../../../../lib/admin-auth";
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
+import config from "../../../../site.config";
 
 const postsDir = path.join(process.cwd(), "posts");
 
-// JSON.parse é estrito: não aceita quebra de linha real, tab, ou outros
-// control characters dentro de uma string entre aspas — exige \\n escapado.
-// É comum colar a "private_key" do service account do Google com quebras
-// de linha literais em vez de \\n, o que produz "Bad control character in
-// string literal". Esta função escapa esses caracteres apenas quando estão
-// dentro de uma string JSON, sem alterar a formatação fora delas.
-function parseJsonTolerante(raw) {
-  let result = "";
-  let dentroDeString = false;
-  let escapando = false;
-
-  for (const char of raw) {
-    if (dentroDeString) {
-      if (escapando) {
-        result += char;
-        escapando = false;
-        continue;
-      }
-      if (char === "\\") {
-        result += char;
-        escapando = true;
-        continue;
-      }
-      if (char === '"') {
-        dentroDeString = false;
-        result += char;
-        continue;
-      }
-      if (char === "\n") { result += "\\n"; continue; }
-      if (char === "\r") { result += "\\r"; continue; }
-      if (char === "\t") { result += "\\t"; continue; }
-      result += char;
-      continue;
-    }
-
-    if (char === '"') dentroDeString = true;
-    result += char;
-  }
-
-  return JSON.parse(result);
-}
-
-function getUrls(mode, siteUrl) {
+function getUrls(mode) {
   if (!fs.existsSync(postsDir)) return [];
   const now = Date.now();
-  const oneDayMs = 86400000;
-
-  return fs
-    .readdirSync(postsDir)
-    .filter((f) => f.endsWith(".md"))
-    .filter((f) => {
+  return fs.readdirSync(postsDir)
+    .filter((file) => file.endsWith(".md"))
+    .filter((file) => {
       if (mode !== "new") return true;
-      const match = f.match(/^(\d{4}-\d{2}-\d{2})/);
-      if (!match) return false;
-      return now - new Date(match[1]).getTime() < oneDayMs;
+      const date = file.match(/^(\d{4}-\d{2}-\d{2})/)?.[1];
+      return date && now - new Date(date).getTime() < 24 * 60 * 60 * 1000;
     })
-    .map((f) => {
-      const slug = f.replace(/^\d{4}-\d{2}-\d{2}-/, "").replace(/\.md$/, "");
-      return `${siteUrl}/blog/${slug}`;
-    });
+    .map((file) => `${config.url.replace(/\/$/, "")}/blog/${file.replace(/^\d{4}-\d{2}-\d{2}-/, "").replace(/\.md$/, "")}`);
 }
 
-async function pingIndexNow(urls, siteUrl, key) {
-  if (!key) return "  ⚠️  INDEXNOW_KEY não definida — pulando IndexNow.\n";
-  let out = `📡 IndexNow — enviando ${urls.length} URL(s)...\n`;
-  const endpoints = ["https://api.indexnow.org/indexnow", "https://www.bing.com/indexnow"];
+async function notifyIndexNow(urls) {
+  const key = process.env.INDEXNOW_KEY;
+  if (!key) return "INDEXNOW_KEY não configurada; IndexNow não foi executado.";
+
   const body = JSON.stringify({
-    host: siteUrl.replace(/https?:\/\//, ""),
+    host: new URL(config.url).hostname,
     key,
-    keyLocation: `${siteUrl}/${key}.txt`,
+    keyLocation: `${config.url.replace(/\/$/, "")}/${key}.txt`,
     urlList: urls,
   });
-  for (const ep of endpoints) {
-    try {
-      const res = await fetch(ep, {
-        method: "POST",
-        headers: { "Content-Type": "application/json; charset=utf-8" },
-        body,
-      });
-      out += `  ${res.status < 300 ? "✅" : "⚠️ "} ${ep} → ${res.status}\n`;
-    } catch (e) {
-      out += `  ❌ ${ep} → ${e.message}\n`;
-    }
-  }
-  return out;
-}
+  const endpoints = ["https://api.indexnow.org/indexnow", "https://www.bing.com/indexnow"];
 
-async function pingGoogleIndexing(urls) {
-  const b64 = process.env.GOOGLE_SERVICE_ACCOUNT_B64;
-  const filePath = process.env.GOOGLE_SERVICE_ACCOUNT_PATH;
-  if (!b64 && !filePath) {
-    return "  ⚠️  Google Service Account não configurada.\n  → Configure GOOGLE_SERVICE_ACCOUNT_B64 no .env.local\n";
-  }
-
-  let out = `🔍 Google Indexing API — enviando ${urls.length} URL(s)...\n`;
-  try {
-    let sa;
-    if (b64) {
-      sa = parseJsonTolerante(Buffer.from(b64, "base64").toString("utf8"));
-    } else {
-      sa = parseJsonTolerante(fs.readFileSync(filePath, "utf8"));
-    }
-
-    const { client_email, private_key: rawKey } = sa;
-    const private_key = rawKey.replace(/\\n/g, "\n");
-
-    const crypto = require("crypto");
-    const now = Math.floor(Date.now() / 1000);
-    const claim = {
-      iss: client_email,
-      scope: "https://www.googleapis.com/auth/indexing",
-      aud: "https://oauth2.googleapis.com/token",
-      iat: now,
-      exp: now + 3600,
-    };
-    const header = Buffer.from(JSON.stringify({ alg: "RS256", typ: "JWT" })).toString("base64url");
-    const payload = Buffer.from(JSON.stringify(claim)).toString("base64url");
-    const sign = crypto.createSign("RSA-SHA256");
-    sign.update(`${header}.${payload}`);
-    const jwt = `${header}.${payload}.${sign.sign(private_key, "base64url")}`;
-
-    const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+  const results = await Promise.all(endpoints.map(async (endpoint) => {
+    const response = await fetch(endpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`,
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+      body,
     });
-    const tokenData = await tokenRes.json();
-    const token = tokenData.access_token;
-
-    if (!token) {
-      return out + `  ⚠️  Token não obtido: ${JSON.stringify(tokenData)}\n`;
+    if (response.status !== 200 && response.status !== 202) {
+      throw new Error(`${endpoint} respondeu HTTP ${response.status}.`);
     }
-
-    let ok = 0, errs = 0;
-    for (const url of urls) {
-      const res = await fetch("https://indexing.googleapis.com/v3/urlNotifications:publish", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ url, type: "URL_UPDATED" }),
-      });
-      if (res.status === 200) { ok++; out += `  ✅ ${url}\n`; }
-      else {
-        errs++;
-        const d = await res.json().catch(() => ({}));
-        out += `  ⚠️  ${url} → ${res.status}: ${d?.error?.message || ""}\n`;
-      }
-      await new Promise((r) => setTimeout(r, 400));
-    }
-    out += `  📊 ${ok} OK | ${errs} erros\n`;
-  } catch (e) {
-    out += `  ❌ Erro: ${e.message}\n`;
-  }
-  return out;
+    return `${endpoint}: HTTP ${response.status}`;
+  }));
+  return results.join("\n");
 }
 
 export async function POST(request) {
@@ -165,31 +50,23 @@ export async function POST(request) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  const { searchParams } = new URL(request.url);
-  const mode = searchParams.get("mode") || "new";
+  const mode = new URL(request.url).searchParams.get("mode") || "new";
+  const urls = getUrls(mode);
+  const sitemap = `${config.url.replace(/\/$/, "")}/sitemap.xml`;
 
-  // Lê site.config dinamicamente
-  const raw = fs.readFileSync(path.join(process.cwd(), "site.config.js"), "utf8");
-  const urlMatch = raw.match(/url\s*:\s*"([^"]*)"/);
-  const siteUrl = (urlMatch?.[1] || "").replace(/\/$/, "");
-
-  if (!siteUrl) {
-    return NextResponse.json({ output: "❌ URL não configurada em site.config.js" });
+  if (!urls.length) {
+    return NextResponse.json({
+      output: `Nenhum artigo publicado encontrado.\nGoogle: envie ou confira o sitemap no Search Console: ${sitemap}`,
+    });
   }
 
-  const urls = getUrls(mode, siteUrl);
-  let output = `🚀 Ping de Indexação\n   Site: ${siteUrl}\n   Modo: ${mode === "new" ? "posts das últimas 24h" : "todos os posts"} — ${urls.length} URL(s)\n\n`;
-
-  output += "  ℹ️  Sitemap ping descontinuado pelo Google (jun/2023).\n     → Use Google Search Console para submeter o sitemap.\n\n";
-
-  if (urls.length === 0) {
-    output += "⚠️  Nenhuma URL encontrada para enviar.\n";
-  } else {
-    output += await pingIndexNow(urls, siteUrl, process.env.INDEXNOW_KEY || "");
-    output += "\n";
-    output += await pingGoogleIndexing(urls);
+  try {
+    const indexNow = await notifyIndexNow(urls);
+    return NextResponse.json({
+      output: `URLs notificadas: ${urls.length}\n${indexNow}\nGoogle: artigos editoriais são descobertos pelo sitemap e links internos; a Google Indexing API não foi chamada.\nSitemap: ${sitemap}`,
+    });
+  } catch (error) {
+    console.error("[admin/indexing]", error);
+    return NextResponse.json({ error: error.message }, { status: 502 });
   }
-
-  output += "\n✅ Concluído!";
-  return NextResponse.json({ output });
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import RichEditor from "../../components/admin/RichEditor";
+import EditorialReviewPanel from "../../components/admin/EditorialReviewPanel";
 import { markdownToHtml, htmlToMarkdown } from "../../lib/markdown-html";
 import titleQuality from "../../lib/article-title.cjs";
 
@@ -529,6 +530,8 @@ function MetricsTab({ toast }) {
         </div>
       </div>
 
+      <SearchPerformancePanel />
+
       {/* Posts recentes */}
       <div style={s.card}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
@@ -569,6 +572,163 @@ function MetricsTab({ toast }) {
           </table>
         </div>
       </div>
+    </div>
+  );
+}
+
+function SearchPerformancePanel() {
+  const [data, setData] = useState(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [search, setSearch] = useState("");
+
+  async function load(isRefresh = false) {
+    if (isRefresh) setRefreshing(true);
+    setError("");
+    try {
+      const response = await fetch("/api/admin/search-performance", { cache: "no-store" });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Não foi possível carregar o desempenho da busca.");
+      setData(result);
+    } catch (loadError) {
+      setError(loadError.message || "Erro ao carregar o Search Console.");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }
+
+  useEffect(() => { load(); }, []);
+
+  const posts = data?.posts || [];
+  const filteredPosts = posts.filter((post) =>
+    post.title.toLocaleLowerCase("pt-BR").includes(search.toLocaleLowerCase("pt-BR"))
+  );
+  const maxClicks = Math.max(0, ...posts.map((post) => post.clicks));
+  const formatNumber = (value) => Number(value || 0).toLocaleString("pt-BR");
+  const formatDate = (date) => date
+    ? new Date(`${date}T00:00:00Z`).toLocaleDateString("pt-BR", { timeZone: "UTC" })
+    : "—";
+  const getTemperature = (clicks) => {
+    const share = maxClicks > 0 ? clicks / maxClicks : 0;
+    if (clicks === 0) return { label: "Sem cliques", color: C.textFaint, width: 0 };
+    if (share >= 0.65) return { label: "Quente", color: C.green, width: share * 100 };
+    if (share >= 0.25) return { label: "Morno", color: C.accent, width: share * 100 };
+    return { label: "Frio", color: C.primary, width: Math.max(share * 100, 4) };
+  };
+  const getChange = (post) => {
+    if (post.previousClicks === 0) {
+      return post.clicks > 0 ? { label: "Novo", color: C.green } : { label: "—", color: C.textFaint };
+    }
+    const percent = Math.round(((post.clicks - post.previousClicks) / post.previousClicks) * 100);
+    return {
+      label: `${percent > 0 ? "+" : ""}${percent}%`,
+      color: percent > 0 ? C.green : percent < 0 ? C.red : C.textMuted,
+    };
+  };
+
+  return (
+    <div style={s.card}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 8, flexWrap: "wrap" }}>
+        <div>
+          <div style={s.sectionTitle}>Termômetro de tráfego da Busca Google</div>
+          <p style={{ color: C.textMuted, fontSize: 12, lineHeight: 1.6, marginTop: 5 }}>
+            Cliques e impressões orgânicas por artigo. Não inclui redes sociais, acesso direto ou outras fontes.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => load(true)}
+          disabled={loading || refreshing}
+          style={{ ...s.btnGhost, padding: "6px 12px", fontSize: 12, flexShrink: 0 }}
+        >
+          {refreshing ? "⟳ Atualizando…" : "⟳ Atualizar"}
+        </button>
+      </div>
+
+      {loading ? (
+        <p style={{ color: C.textMuted, fontSize: 13, padding: "16px 0" }}>Carregando dados do Search Console…</p>
+      ) : error ? (
+        <div style={{ marginTop: 14, padding: 14, borderRadius: 10, background: C.accentGlow, color: C.textMuted, fontSize: 13, lineHeight: 1.7 }}>
+          <strong style={{ display: "block", color: C.accent, marginBottom: 4 }}>Conexão do Search Console pendente</strong>
+          {error}
+          <div style={{ marginTop: 8 }}>
+            Configure a conta de serviço no ambiente da Vercel, ative a Search Console API no Google Cloud e conceda acesso restrito à propriedade. Se ela for uma propriedade de domínio, configure também <code>SEARCH_CONSOLE_SITE_URL</code> com o formato <code>sc-domain:seudominio.com</code>.
+          </div>
+        </div>
+      ) : (
+        <>
+          <p style={{ color: C.textFaint, fontSize: 11, margin: "10px 0 14px" }}>
+            Período atual: {formatDate(data.currentPeriod.startDate)} a {formatDate(data.currentPeriod.endDate)} · comparação com os 28 dias anteriores. O Search Console pode atrasar alguns dias.
+          </p>
+
+          <label style={{ display: "block", marginBottom: 12 }}>
+            <span style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0, 0, 0, 0)", whiteSpace: "nowrap", border: 0 }}>
+              Filtrar artigos por título
+            </span>
+            <input
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Buscar um artigo…"
+              style={{ width: "100%", maxWidth: 380, padding: "9px 12px", borderRadius: 8, border: `1px solid ${C.border}`, background: C.bgElevated, color: C.text, fontSize: 13 }}
+            />
+          </label>
+
+          <div style={{ overflowX: "auto", maxHeight: 480, overflowY: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, minWidth: 650 }}>
+              <thead style={{ position: "sticky", top: 0, background: C.surface, zIndex: 1 }}>
+                <tr style={{ borderBottom: `1px solid ${C.border}` }}>
+                  {["Artigo", "Temperatura relativa", "Cliques", "Impressões", "CTR", "Posição", "Δ cliques"].map((heading) => (
+                    <th key={heading} style={{ textAlign: "left", color: C.textFaint, fontWeight: 700, padding: "9px 10px 9px 0", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em", whiteSpace: "nowrap" }}>
+                      {heading}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filteredPosts.map((post) => {
+                  const temperature = getTemperature(post.clicks);
+                  const change = getChange(post);
+                  return (
+                    <tr key={post.slug} style={{ borderBottom: `1px solid ${C.borderSoft}` }}>
+                      <td style={{ padding: "10px 12px 10px 0", maxWidth: 280 }}>
+                        <a href={post.path} target="_blank" rel="noreferrer" style={{ color: C.text, textDecoration: "none", display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {post.title}
+                        </a>
+                      </td>
+                      <td style={{ padding: "10px 14px 10px 0", minWidth: 130 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                          <span aria-hidden="true" style={{ width: 56, height: 7, background: C.border, borderRadius: 99, overflow: "hidden", flexShrink: 0 }}>
+                            <span style={{ display: "block", width: `${temperature.width}%`, height: "100%", background: temperature.color, borderRadius: 99 }} />
+                          </span>
+                          <span style={{ color: temperature.color, whiteSpace: "nowrap" }}>{temperature.label}</span>
+                        </div>
+                      </td>
+                      <td style={{ padding: "10px 10px 10px 0", color: C.text, fontVariantNumeric: "tabular-nums" }}>{formatNumber(post.clicks)}</td>
+                      <td style={{ padding: "10px 10px 10px 0", color: C.textMuted, fontVariantNumeric: "tabular-nums" }}>{formatNumber(post.impressions)}</td>
+                      <td style={{ padding: "10px 10px 10px 0", color: C.textMuted }}>{(post.ctr * 100).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%</td>
+                      <td style={{ padding: "10px 10px 10px 0", color: C.textMuted }}>{post.position === null ? "—" : post.position.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}</td>
+                      <td style={{ padding: "10px 0", color: change.color, fontWeight: 700 }}>{change.label}</td>
+                    </tr>
+                  );
+                })}
+                {filteredPosts.length === 0 && (
+                  <tr>
+                    <td colSpan={7} style={{ padding: 20, textAlign: "center", color: C.textFaint }}>
+                      {posts.length ? "Nenhum artigo corresponde à busca." : "Nenhum artigo encontrado."}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          <p style={{ marginTop: 10, color: C.textFaint, fontSize: 11 }}>
+            Frio, morno e quente são relativos aos cliques dos artigos deste site no período selecionado; não são notas do Google.
+          </p>
+        </>
+      )}
     </div>
   );
 }
@@ -876,10 +1036,10 @@ function IndexingTab({ toast }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div style={s.card}>
-        <div style={s.sectionTitle}>🚀 Indexação Google / Bing</div>
+        <div style={s.sectionTitle}>🚀 Descoberta de URLs</div>
         <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 20, lineHeight: 1.7 }}>
-          Notifica os buscadores sobre posts novos. Use <strong style={{ color: C.text }}>"Últimas 24h"</strong> após publicar conteúdo novo.
-          O Google Search Console é a forma mais confiável — acesse diretamente para resultados garantidos.
+          IndexNow notifica mecanismos compatíveis. O Google descobre artigos pelo sitemap e pelos links internos;
+          esta ferramenta não chama a Google Indexing API e nenhuma notificação garante indexação.
         </p>
         <div className="indexing-btn-row" style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <button style={s.btn} onClick={() => runPing("new")} disabled={running}>
@@ -940,6 +1100,67 @@ function IndexingTab({ toast }) {
 }
 
 /* ─── ABA: QUALIDADE ─── */
+function DuplicateCandidate({ pair, onResolved, toast }) {
+  const [reason, setReason] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  async function markFalsePositive() {
+    if (!reason.trim()) {
+      toast("Registre por que este par é um falso positivo.", "error");
+      return;
+    }
+    setSaving(true);
+    try {
+      const response = await fetch("/api/admin/duplicate-audit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: pair.id, decision: "false_positive", reason }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Falha ao salvar a decisão.");
+      toast("Par registrado como falso positivo.");
+      onResolved();
+    } catch (error) {
+      toast(error.message, "error");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 10, padding: "12px 14px" }}>
+      <div style={{ color: C.accent, fontSize: 12, fontWeight: 700, marginBottom: 8 }}>
+        Similaridade estimada: {pair.score}% · {pair.id}
+      </div>
+      <div style={{ display: "grid", gap: 8 }}>
+        {pair.articles.map((article) => (
+          <div key={article.file}>
+            <a href={`/blog/${article.slug}`} target="_blank" rel="noreferrer" style={{ color: C.text, fontSize: 13 }}>
+              {article.title}
+            </a>
+            <div style={{ color: C.textFaint, fontSize: 11 }}>{article.file} · {article.wordCount} palavras · {article.date}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ color: C.textMuted, fontSize: 11, marginTop: 8 }}>
+        {pair.reasons?.join(" · ") || "Sinais de conteúdo semelhante"}
+      </div>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
+        <input
+          aria-label="Motivo para marcar como falso positivo"
+          placeholder="Motivo da decisão (obrigatório)"
+          value={reason}
+          onChange={(event) => setReason(event.target.value)}
+          style={{ ...s.input, flex: "1 1 220px", padding: "8px 10px" }}
+        />
+        <button type="button" style={s.btnGhost} onClick={markFalsePositive} disabled={saving || !reason.trim()}>
+          {saving ? "Salvando…" : "Marcar falso positivo"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function QualityTab({ toast }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -1013,6 +1234,7 @@ function QualityTab({ toast }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      <EditorialReviewPanel toast={toast} />
       <div className="stat-grid">
         <StatCard label="Posts OK" value={data.okCount} sub="qualidade aprovada" color={C.green} icon="✅" />
         <StatCard label="Conteúdo Raso" value={data.shallowCount} sub="precisam revisão" color={C.accent} icon="⚠️" />
@@ -1020,63 +1242,34 @@ function QualityTab({ toast }) {
         <StatCard label="Erros de Geração" value={data.errorCount} sub="falharam ao gerar" color={C.purple} icon="❌" />
         {data.topicOverlap && (
           <StatCard
-            label="Mesmo Tema"
-            value={data.topicOverlap.affectedFileCount}
-            sub={`em ${data.topicOverlap.overlapGroupCount} grupos`}
+            label="Pares candidatos"
+            value={data.topicOverlap.candidateCount ?? data.topicOverlap.groups?.length ?? 0}
+            sub={`${data.topicOverlap.pendingCount ?? 0} aguardam revisão`}
             color={C.red}
             icon="🪞"
           />
         )}
       </div>
 
-      {/* Sobreposição temática (URLs concorrendo pelo mesmo tema) */}
-      {data.topicOverlap && data.topicOverlap.groups.length > 0 && (
+      {/* Pares candidatos à duplicidade: revisão humana, sem exclusão automática */}
+      {data.topicOverlap && (data.topicOverlap.pairs || []).length > 0 && (
         <div style={s.card}>
-          <div style={s.sectionTitle}>🪞 Mesmo Tema, URLs Diferentes</div>
+          <div style={s.sectionTitle}>🪞 Auditoria de duplicidade e sobreposição</div>
           <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 16, lineHeight: 1.6 }}>
-            Esses posts têm texto suficientemente diferente entre si (não aparecem como "duplicado" acima),
-            mas respondem à mesma busca — o Google divide o ranking entre eles em vez de concentrar força numa
-            única página. Sugestão: mantenha o marcado com ✅, copie manualmente qualquer ponto único dos outros
-            pra dentro dele, depois remova os marcados com ⚠️ e crie um redirect 301 da URL antiga pra mantida.
+            São candidatos a sobreposição temática, não duplicatas confirmadas. Compare conteúdo, Search Console,
+            backlinks e canonical antes de consolidar, redirecionar ou remover qualquer URL. Marcar falso positivo
+            apenas retira o par da fila; não altera nem desindexa artigos.
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-            {data.topicOverlap.groups.map((g) => (
-              <div key={g.topicKey} style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 10, padding: "12px 14px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ color: C.text, fontWeight: 600, fontSize: 13 }}>
-                      ✅ {g.suggestedKeep.title}
-                    </div>
-                    <div style={{ color: C.textFaint, fontSize: 11, marginTop: 2 }}>
-                      {g.suggestedKeep.file} · {(g.suggestedKeep.wordCount || 0).toLocaleString()} palavras
-                    </div>
-                  </div>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 10 }}>
-                  {g.suggestedMergeOrRedirect.map((m) => (
-                    <div key={m.file} style={{
-                      display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12,
-                      paddingLeft: 14, borderLeft: `2px solid ${C.border}`, flexWrap: "wrap",
-                    }}>
-                      <div style={{ minWidth: 0 }}>
-                        <div style={{ color: C.textMuted, fontSize: 13 }}>⚠️ {m.title}</div>
-                        <div style={{ color: C.textFaint, fontSize: 11, marginTop: 2 }}>
-                          {m.file} · {(m.wordCount || 0).toLocaleString()} palavras
-                        </div>
-                      </div>
-                      <button
-                        style={s.btnDanger}
-                        onClick={() => removeDuplicate({ file: m.file })}
-                        disabled={busyFile === m.file}
-                      >
-                        {busyFile === m.file ? "Removendo…" : "🗑️ Remover"}
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            {data.topicOverlap.pairs.filter((pair) => pair.decision === "pending").map((pair) => (
+              <DuplicateCandidate key={pair.id} pair={pair} onResolved={load} toast={toast} />
             ))}
           </div>
+          {data.topicOverlap.dismissedCount > 0 && (
+            <p style={{ color: C.textFaint, fontSize: 12, marginTop: 14 }}>
+              Falsos positivos liberados por revisor: {data.topicOverlap.dismissedCount}.
+            </p>
+          )}
         </div>
       )}
 
@@ -1084,7 +1277,7 @@ function QualityTab({ toast }) {
       <div style={s.card}>
         <div style={s.sectionTitle}>🔁 Posts Duplicados</div>
         <p style={{ fontSize: 13, color: C.textMuted, marginBottom: 16, lineHeight: 1.6 }}>
-          Mesmo tema publicado mais de uma vez. A cópia mais antiga é mantida — remova as extras pra evitar conteúdo duplicado no Google.
+          Candidatos identificados por regras automáticas. Confirme cada caso com dados de tráfego, canonical e backlinks antes de alterar URLs.
         </p>
         {data.duplicates.length === 0 && <span style={{ color: C.textFaint, fontSize: 13 }}>Nenhum duplicado encontrado. 🎉</span>}
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -1099,13 +1292,6 @@ function QualityTab({ toast }) {
                   {d.file} · duplica {d.duplicateOf}
                 </div>
               </div>
-              <button
-                style={s.btnDanger}
-                onClick={() => removeDuplicate(d)}
-                disabled={busyFile === d.file}
-              >
-                {busyFile === d.file ? "Removendo…" : "🗑️ Remover"}
-              </button>
             </div>
           ))}
         </div>
@@ -1366,11 +1552,9 @@ function IdeasTab({ toast }) {
                 <div style={{ color: C.text, fontWeight: 600 }}>{r.topic}</div>
                 <div style={{ color: C.textFaint, fontSize: 11, marginTop: 2 }}>{r.file} · {r.words} palavras · via {r.provider}</div>
               </div>
-              <a href={`/blog/${r.file.replace(/^\d{4}-\d{2}-\d{2}-/, "").replace(/\.md$/, "")}`}
-                target="_blank" rel="noreferrer"
-                style={{ color: C.primary, fontSize: 11, textDecoration: "none", flexShrink: 0 }}>
-                Ver →
-              </a>
+              <span style={{ color: C.textFaint, fontSize: 11, flexShrink: 0 }}>
+                Aguardando revisão editorial
+              </span>
             </div>
           ))}
           {results.errors?.map((e, i) => (

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { trackSiteEvent } from "../lib/analytics-events";
 
 const SearchIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -76,6 +77,10 @@ export default function SearchPalette({ posts, open, onClose }) {
   }, [open]);
 
   function goTo(slug) {
+    trackSiteEvent("internal_search", {
+      query_length: query.trim().length,
+      result_count: results.length,
+    });
     onClose();
     router.push(`/blog/${slug}`);
   }

@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
 import { checkAdminAuth } from "../../../../lib/admin-auth";
 import { generateValidatedArticle, buildArticleFile } from "../../../../lib/article-generator";
-import { commitFile, getFile, triggerVercelDeploy } from "../../../../lib/github-commit";
+import { commitFile, getFile } from "../../../../lib/github-commit";
 import config from "../../../../site.config.js";
 
 const SIGNATURES_REPO_PATH = ".content-signatures.json";
 const QUALITY_LOG_REPO_PATH = ".quality-log.json";
+const EDITORIAL_DRAFTS_REPO_PATH = ".editorial-drafts.json";
 
 /**
  * POST /api/admin/ideas
  *
- * Recebe um array de dúvidas (extraídas manualmente ou de URL) e gera
- * um artigo para cada uma, commitando direto no repositório.
+ * Recebe um array de dúvidas e envia os artigos gerados à fila de revisão.
  *
  * Body: { doubts: string[], category?: string }
  *
@@ -42,6 +42,8 @@ export async function POST(request) {
 
     const qualityLogFile = await getFile(QUALITY_LOG_REPO_PATH);
     const qualityLog = qualityLogFile ? JSON.parse(qualityLogFile.content || "[]") : [];
+    const draftsFile = await getFile(EDITORIAL_DRAFTS_REPO_PATH);
+    const editorialDrafts = draftsFile ? JSON.parse(draftsFile.content || "[]") : [];
 
     for (const rawDoubt of doubts.slice(0, 5)) { // máx 5 por vez
       const topic = rawDoubt.trim();
@@ -62,11 +64,27 @@ export async function POST(request) {
           category: chosenCategory,
         });
 
-        await commitFile(
-          `posts/${article.file}`,
-          article.content,
-          `💡 Artigo de dúvida: ${article.file}`
-        );
+        const sourceUrls = [...new Set(
+          [...article.content.matchAll(/\]\((https?:\/\/[^)\s]+)\)/g)].map((match) => match[1])
+        )];
+        editorialDrafts.unshift({
+          id: `${article.date}-${article.slug}`,
+          file: article.file,
+          targetFile: null,
+          title: article.normalizedTitle,
+          slug: article.slug,
+          category: article.category,
+          topic,
+          content: article.content,
+          sourceUrls,
+          validationIssues: result.issues,
+          status: "NEEDS_REVIEW",
+          generatedAt: new Date().toISOString(),
+          history: [
+            { status: "DRAFT_GENERATED", at: new Date().toISOString() },
+            { status: "NEEDS_REVIEW", at: new Date().toISOString() },
+          ],
+        });
 
         // Atualiza assinaturas e log de qualidade em memória nesta requisição,
         // pra que a 2ª/3ª dúvida do mesmo lote já seja comparada contra a 1ª
@@ -83,7 +101,7 @@ export async function POST(request) {
           fillerCount: result.fillerCount,
           similarity: Math.round(result.maxSim * 100),
           similarTo: result.mostSimilarSlug,
-          status: result.issues.length > 0 ? "ressalvas" : "ok",
+          status: "NEEDS_REVIEW",
           issues: result.issues,
         });
 
@@ -109,11 +127,15 @@ export async function POST(request) {
         "chore: atualizar assinaturas de conteúdo (dúvidas)"
       );
       await commitFile(
+        EDITORIAL_DRAFTS_REPO_PATH,
+        JSON.stringify(editorialDrafts.slice(0, 400), null, 2),
+        "editorial: adicionar artigos gerados à fila de revisão"
+      );
+      await commitFile(
         QUALITY_LOG_REPO_PATH,
         JSON.stringify(qualityLog.slice(-400), null, 2),
         "chore: atualizar log de qualidade (dúvidas)"
       );
-      await triggerVercelDeploy().catch(() => {});
     }
 
     return NextResponse.json({ generated, errors });

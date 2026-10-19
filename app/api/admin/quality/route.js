@@ -11,6 +11,7 @@ const topicOverlapPath = path.join(process.cwd(), ".topic-overlap.json");
 
 const QUALITY_LOG_REPO_PATH = ".quality-log.json";
 const SIGNATURES_REPO_PATH = ".content-signatures.json";
+const EDITORIAL_DRAFTS_REPO_PATH = ".editorial-drafts.json";
 
 // ── Leitura: usa o filesystem local (somente leitura) ──────────────────
 // Isso funciona bem mesmo na Vercel, porque o build inclui esses arquivos
@@ -155,11 +156,40 @@ export async function POST(request) {
       takeaways,
     });
 
-    // 1) Commita o post regenerado
+    // Regenerações também passam pela revisão editorial antes de substituir
+    // a versão publicada; a URL atual permanece intacta até a aprovação.
+    const editorialDraftsFile = await getFile(EDITORIAL_DRAFTS_REPO_PATH);
+    const editorialDrafts = editorialDraftsFile
+      ? JSON.parse(editorialDraftsFile.content || "[]")
+      : [];
+    const sourceUrls = [...new Set(
+      [...article.content.matchAll(/\]\((https?:\/\/[^)\s]+)\)/g)].map((match) => match[1])
+    )];
+    const draft = {
+      id: `update-${safeFile}`,
+      file: article.file,
+      targetFile: safeFile,
+      title: article.normalizedTitle,
+      slug: article.slug,
+      category: article.category,
+      topic,
+      content: article.content,
+      sourceUrls,
+      validationIssues: result.issues,
+      status: "NEEDS_REVIEW",
+      generatedAt: new Date().toISOString(),
+      history: [
+        { status: "DRAFT_GENERATED", at: new Date().toISOString() },
+        { status: "NEEDS_REVIEW", at: new Date().toISOString() },
+      ],
+    };
+    const existingDraftIndex = editorialDrafts.findIndex((item) => item.id === draft.id);
+    if (existingDraftIndex >= 0) editorialDrafts[existingDraftIndex] = draft;
+    else editorialDrafts.unshift(draft);
     await commitFile(
-      `posts/${article.file}`,
-      article.content,
-      `✍️ Regenerar artigo: ${article.file}`
+      EDITORIAL_DRAFTS_REPO_PATH,
+      JSON.stringify(editorialDrafts.slice(0, 400), null, 2),
+      `editorial: enviar regeneração para revisão (${article.file})`
     );
 
     // 2) Atualiza o log de qualidade (mesmo formato que o script CLI grava)
@@ -176,7 +206,7 @@ export async function POST(request) {
       fillerCount: result.fillerCount,
       similarity: Math.round(result.maxSim * 100),
       similarTo: result.mostSimilarSlug,
-      status: result.issues.length > 0 ? "ressalvas" : "ok",
+      status: "NEEDS_REVIEW",
       issues: result.issues,
     });
     await commitFile(
@@ -193,17 +223,13 @@ export async function POST(request) {
       `chore: atualizar assinaturas de conteúdo (${article.file})`
     );
 
-    // 4) Dispara o rebuild na Vercel (se VERCEL_DEPLOY_HOOK estiver configurado)
-    const deploy = await triggerVercelDeploy();
-
     return NextResponse.json({
       ok: true,
       file: article.file,
       provider: result.provider,
       wordCount: result.wordCount,
       issues: result.issues,
-      deployTriggered: deploy.triggered,
-      note: "Commit enviado ao GitHub. O site será atualizado no próximo deploy da Vercel (alguns minutos).",
+      note: "Regeneração enviada à fila editorial. A versão publicada só será substituída após revisão e aprovação.",
     });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });

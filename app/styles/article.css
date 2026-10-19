@@ -312,6 +312,7 @@
 .affiliate-box { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 20px; margin: 36px 0; padding: 20px; border-radius: var(--radius-lg); background: var(--surface); border: 1.5px dashed var(--border); }
 .affiliate-box-tag { flex: none; padding: 4px 10px; border-radius: var(--radius-full); background: var(--surface-2); font-size: 0.78rem; font-weight: 700; color: var(--text-muted); }
 .affiliate-box-text { flex: 1 1 240px; font-family: var(--font-display); font-weight: 700; line-height: 1.35; color: var(--text); letter-spacing: -0.01em; }
+.affiliate-box-disclosure { flex: 1 1 100%; color: var(--text-muted); font-size: 0.82rem; line-height: 1.45; }
 .affiliate-box-link { flex: none; display: inline-flex; align-items: center; height: 44px; padding: 0 20px; border-radius: var(--radius-full); background: var(--ink); color: var(--on-ink); font-weight: 800; font-size: 0.94rem; text-decoration: none; transition: transform var(--t-fast) var(--ease-out); }
 [data-theme="dark"] .affiliate-box-link { background: var(--hl); color: var(--on-hl); }
 .affiliate-box-link:hover { transform: translateY(-2px); }

@@ -29,7 +29,22 @@ export async function POST(request) {
     const body = await request.json().catch(() => ({}));
     const email = typeof body.email === "string" ? body.email.trim() : "";
     const firstName = sanitizeName(body.name);
+    const source = typeof body.source === "string" && body.source.startsWith("/")
+      ? body.source.slice(0, 120)
+      : "";
 
+    if (body.consent !== true) {
+      return NextResponse.json(
+        { ok: false, error: "Confirme o consentimento para receber a newsletter." },
+        { status: 400 }
+      );
+    }
+    if (!source) {
+      return NextResponse.json(
+        { ok: false, error: "Origem da inscrição inválida." },
+        { status: 400 }
+      );
+    }
     if (!isValidEmail(email)) {
       return NextResponse.json(
         { ok: false, error: "Informe um e-mail válido." },

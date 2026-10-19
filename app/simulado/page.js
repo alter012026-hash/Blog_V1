@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
 import { BANCAS, getMaterias, getQuestions } from "../../lib/quiz-bank";
+import { trackSiteEvent } from "../../lib/analytics-events";
 
 // ─── TELAS ────────────────────────────────────────────────────────────────────
 // 0 = config, 1 = email gate, 2 = quiz, 3 = resultado
@@ -72,6 +73,7 @@ export default function SimuladoPage() {
   }, [screen]);
 
   async function startQuiz() {
+    trackSiteEvent("quiz_start", { banca, materia, question_count: quantidade });
     setLoadingQuiz(true);
     setQuizError("");
     setQuestionSource(null);
@@ -170,6 +172,12 @@ export default function SimuladoPage() {
   }
 
   function finishQuiz() {
+    trackSiteEvent("quiz_complete", {
+      banca,
+      materia,
+      question_count: questions.length,
+      correct_count: answers.filter((answer) => answer.correct).length,
+    });
     setScreen(3);
   }
 

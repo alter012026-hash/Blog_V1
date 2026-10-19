@@ -9,15 +9,16 @@
  * (que usa o mesmo núcleo, mas persiste via GitHub API em vez de fs, porque
  * roda dentro de uma function serverless da Vercel).
  *
- * Este script é o "modo CLI": roda em VPS/local/GitHub Actions, escreve
- * direto em posts/*.md e faz commit/push pelo próprio workflow do GitHub Actions.
+ * Este script é o "modo CLI": roda em VPS/local/GitHub Actions e grava
+ * artigos na fila editorial; a publicação em posts/ exige aprovação no admin.
  *
  *  - Título sempre em Title Case (siglas tipo INSS preservadas)
  *  - Excerpt nunca corta no meio da palavra/frase
  *  - Não repete tópicos recentes nem gera conteúdo quase-idêntico a posts existentes
  *  - Valida qualidade (tamanho, frases genéricas, similaridade) e tenta de novo se reprovar
  *  - Loga cada geração em .quality-log.json (lido pelo painel admin)
- *  - Suporta --force-file <nome.md> pra regenerar o conteúdo de um post já publicado
+ *  - Suporta --force-file <nome.md> para gerar uma atualização em revisão,
+ *    sem substituir o artigo publicado antes da aprovação
  */
 
 require("dotenv").config({ path: ".env.local", override: false });
@@ -204,6 +205,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // ─── Paths ────────────────────────────────────────────────────────────
 const postsDir = path.resolve(__dirname, "../posts");
+const editorialDraftsPath = path.resolve(__dirname, "../.editorial-drafts.json");
 const usedTopicsLogPath = path.resolve(__dirname, "../.used-topics.json");
 const signaturesLogPath = path.resolve(__dirname, "../.content-signatures.json");
 const qualityLogPath = path.resolve(__dirname, "../.quality-log.json");
@@ -248,6 +250,38 @@ function saveSignature(slug, words) {
 
 function getExistingSignatures() {
   return loadJson(signaturesLogPath, []);
+}
+
+function saveEditorialDraft(article, result, topic) {
+  const drafts = loadJson(editorialDraftsPath, []);
+  const sourceUrls = [...new Set(
+    [...article.content.matchAll(/\]\((https?:\/\/[^)\s]+)\)/g)].map((match) => match[1])
+  )];
+  const existingIndex = drafts.findIndex((draft) => draft.file === article.file);
+  const previousHistory = existingIndex >= 0 ? drafts[existingIndex].history || [] : [];
+  const draft = {
+    id: `${article.date}-${article.slug}`,
+    file: article.file,
+    targetFile: fs.existsSync(path.join(postsDir, article.file)) ? article.file : null,
+    title: article.normalizedTitle,
+    slug: article.slug,
+    category: article.category,
+    topic,
+    content: article.content,
+    sourceUrls,
+    validationIssues: result.issues,
+    status: "NEEDS_REVIEW",
+    generatedAt: new Date().toISOString(),
+    history: [
+      ...previousHistory,
+      { status: "DRAFT_GENERATED", at: new Date().toISOString() },
+      { status: "NEEDS_REVIEW", at: new Date().toISOString() },
+    ],
+  };
+
+  if (existingIndex >= 0) drafts[existingIndex] = draft;
+  else drafts.unshift(draft);
+  fs.writeFileSync(editorialDraftsPath, `${JSON.stringify(drafts.slice(0, 400), null, 2)}\n`, "utf8");
 }
 
 // ─── Tópicos ──────────────────────────────────────────────────────────
@@ -530,7 +564,7 @@ async function saveArticle(result, topic, category, forceFile, seedPoolExhausted
     takeaways,
   });
 
-  fs.writeFileSync(path.join(postsDir, article.file), article.content);
+  saveEditorialDraft(article, result, topic);
   saveSignature(article.slug, result.signature);
 
   appendQualityLog({
@@ -543,7 +577,7 @@ async function saveArticle(result, topic, category, forceFile, seedPoolExhausted
     fillerCount: result.fillerCount,
     similarity: Math.round(result.maxSim * 100),
     similarTo: result.mostSimilarSlug,
-    status: seedPoolExhausted ? "pool-esgotado" : (result.issues.length > 0 ? "ressalvas" : "ok"),
+    status: "NEEDS_REVIEW",
     issues: seedPoolExhausted
       ? [...result.issues, "pool de seeds esgotado — tópico reaproveitado; adicione novos seeds em SEEDS"]
       : result.issues,
@@ -583,6 +617,13 @@ async function main() {
       console.log(`💾 Atualizado: ${file} (${result.wordCount} palavras, via ${result.provider})`);
     } catch (err) {
       console.error(`❌ Erro ao regenerar: ${err.message}`);
+      appendQualityLog({
+        file: forceFileArg,
+        topic: topicArg,
+        status: err.code === "VALIDATION_FAILED" ? "VALIDATION_FAILED" : "erro",
+        issues: err.issues || [],
+        error: err.message,
+      });
       process.exit(1);
     }
     return;
@@ -613,10 +654,16 @@ async function main() {
       used.push(topic);
       saveJson(usedTopicsLogPath, used, 300);
 
-      console.log(`💾 Salvo: ${file} (${result.wordCount} palavras, via ${result.provider})`);
+      console.log(`📝 Enviado para revisão editorial: ${file} (${result.wordCount} palavras, via ${result.provider})`);
     } catch (err) {
       console.error(`❌ Erro: ${err.message}`);
-      appendQualityLog({ topic, category, status: "erro", error: err.message });
+      appendQualityLog({
+        topic,
+        category,
+        status: err.code === "VALIDATION_FAILED" ? "VALIDATION_FAILED" : "erro",
+        issues: err.issues || [],
+        error: err.message,
+      });
     }
 
     if (i < count - 1) await sleep(2000);

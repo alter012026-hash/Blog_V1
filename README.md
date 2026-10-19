@@ -1,8 +1,8 @@
 # 📚 Passeja Concursos
 
-Blog automatizado em Next.js 14 sobre concursos públicos brasileiros, com
-geração diária de artigos por IA, simulado interativo, Q&A por artigo,
-newsletter automática e painel administrativo completo — tudo publicado em
+Blog em Next.js 15 sobre concursos públicos brasileiros, com geração assistida
+por IA, revisão editorial humana, simulado interativo, Q&A por artigo,
+newsletter e painel administrativo — tudo publicado em
 [passejaconcursos.com.br](https://passejaconcursos.com.br).
 
 > Este projeto começou como um template genérico de "blog de nicho" e foi
@@ -14,7 +14,7 @@ newsletter automática e painel administrativo completo — tudo publicado em
 
 ## Stack
 
-- **Next.js 14** (App Router), deploy na **Vercel**
+- **Next.js 15** (App Router), deploy na **Vercel**
 - **Markdown como CMS** — artigos ficam em `posts/`, sem banco de dados
   (o filesystem da Vercel é somente leitura em produção; escrita acontece
   via commit direto no GitHub, ver `lib/github-commit.js`)
@@ -31,7 +31,7 @@ newsletter automática e painel administrativo completo — tudo publicado em
 
 | Workflow | Quando roda | O que faz |
 |---|---|---|
-| `.github/workflows/generate-articles.yml` | 08:00 BRT, 1x/dia (+ manual) | Gera 1 artigo novo via IA, valida qualidade/duplicidade, commita em `posts/`, dispara deploy na Vercel e avisa os buscadores (IndexNow + Google Indexing API) |
+| `.github/workflows/generate-articles.yml` | 08:00 BRT, 1x/dia (+ manual) | Gera um rascunho, valida critérios automáticos e o grava na fila editorial; não publica diretamente |
 | `.github/workflows/send-newsletter.yml` | 11:00 BRT, 1x/dia (+ manual) | Verifica se saiu post novo nas últimas 48h; se sim, dispara e-mail para os inscritos via Resend Broadcast; se não, pula o dia silenciosamente |
 
 Ambos podem ser disparados manualmente na aba **Actions** do GitHub
@@ -43,10 +43,16 @@ A geração não é um prompt solto — passa por várias camadas em
 `lib/article-generator.js` + `lib/quality-engine.js`:
 
 - Deduplicação por **similaridade de Jaccard** contra `.content-signatures.json`
-  (impede publicar dois artigos quase-idênticos)
+  (bloqueia texto muito semelhante)
 - Controle de tópicos já usados (`.used-topics.json`)
 - Validação de qualidade (tamanho mínimo, estrutura, título não vazio/lowercase)
+- Conteúdo gerado fica em `.editorial-drafts.json` e só entra em `posts/`
+  após confirmação humana dos fatos e de ao menos uma fonte oficial HTTPS no admin.
+- Validações automáticas reprovadas bloqueiam o rascunho; erros são registrados
+  no log e não podem ser sobrepostos pela aprovação manual.
 - Log de execução em `.quality-log.json`, consultável na aba **Qualidade** do admin
+- Auditoria de duplicidade cria pares com score e motivo; a decisão de falso
+  positivo é registrada sem apagar conteúdo.
 - Card "Curiosidade" gerado por IA ao final de cada post (substituiu a
   integração anterior com banco de imagens de stock/Pexels)
 
@@ -59,7 +65,7 @@ Protegido por senha (`ADMIN_PASSWORD`). Abas disponíveis:
 | Aba | Para quê |
 |---|---|
 | 📊 **Métricas** | Vercel Analytics + Google Search Console num só lugar |
-| 🎯 **Qualidade** | Relatório de duplicidade/qualidade dos posts, regenerar ou remover artigos problemáticos |
+| 🎯 **Qualidade** | Fila de revisão editorial, validações e pares candidatos a duplicidade |
 | 📝 **Editor** | Criar post manual (modo "Manual" ou com apoio de IA — "Lego") |
 | 💬 **Feedbacks** | Feedbacks deixados por visitantes no site |
 | 📬 **Newsletter** | Total de inscritos, lista de e-mails, botão de envio de teste |
@@ -67,10 +73,9 @@ Protegido por senha (`ADMIN_PASSWORD`). Abas disponíveis:
 | ⚙️ **Configurações** | Ajustes gerais do blog |
 | 💡 **Ideias** | Sugestões de pauta puxadas do Reddit (r/concursospublicos, r/servidorpublico) |
 
-Os botões de **Regenerar**/**Remover** rodam dentro de uma function
-serverless (filesystem somente leitura em produção) — por isso commitam
-direto no GitHub via API em vez de escrever em disco, e a Vercel rebuilda a
-partir do novo commit (1–3 min).
+Regenerações de IA também vão para revisão antes de substituir uma publicação.
+A aprovação/rejeição e a publicação são registradas por rotas restritas e
+commits via GitHub API; só artigos aprovados entram no sitemap.
 
 ---
 
@@ -97,11 +102,9 @@ associa a um Segment (`lib/newsletter-service.js`). Todo dia, se saiu post
 novo, dispara um Broadcast para o Segment. Não precisa de banco de dados —
 o Resend guarda os inscritos (grátis até 1.000 contacts).
 
-> ⚠️ **Nota de manutenção**: a Resend renomeou "Audiences" para "Segments"
-> e mudou o modelo de Contacts (agora são globais, associados
-> explicitamente a um Segment). O arquivo `NEWSLETTER_SETUP.md` neste repo
-> ainda descreve o modelo antigo ("Audience") e precisa de uma atualização
-> — o comportamento real já está no modelo novo.
+Os formulários exigem consentimento explícito. Eventos agregados registram
+origem/data sem enviar e-mail ou nome à ferramenta de Analytics. O Resend
+gerencia o estado de descadastro do Contact e o link de unsubscribe dos e-mails.
 
 ---
 
@@ -135,7 +138,8 @@ Blog_V1/
 ├── posts/                          # Artigos gerados (Markdown) — ~75+ atualmente
 ├── scripts/
 │   ├── generate-article.js         # Geração via CLI/Action
-│   ├── ping-indexing.js            # IndexNow + Google Indexing API
+│   ├── ping-indexing.js            # IndexNow (Google: sitemap/Search Console)
+│   └── detect-topic-overlap.js     # Auditoria de pares candidatos, sem exclusão
 │   └── backfill-curiosity.js       # Gera cards de Curiosidade retroativos
 ├── .github/workflows/
 │   ├── generate-articles.yml
@@ -152,7 +156,8 @@ Veja `.env.example` para a lista completa e comentada. Resumo por área:
 | Área | Variáveis |
 |---|---|
 | Geração de conteúdo | `GROK_API_KEY`, `GROQ_API_KEY`, `OPENROUTER_API_KEY`, `GEMINI_API_KEY` |
-| Indexação | `INDEXNOW_KEY`, `GOOGLE_SERVICE_ACCOUNT_B64` |
+| Indexação | `INDEXNOW_KEY` |
+| Métricas SEO | `GOOGLE_SERVICE_ACCOUNT_B64`, `SEARCH_CONSOLE_SITE_URL` |
 | E-mail (simulado + newsletter) | `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_SEGMENT_ID` (opcional) |
 | Newsletter (cron) | `NEWSLETTER_CRON_SECRET`, `SITE_URL` (secret do GitHub Actions) |
 | Admin | `ADMIN_PASSWORD` |
@@ -174,6 +179,9 @@ npm run dev
 
 ```bash
 npm run build        # build de produção
+npm test             # testes unitários focados
+npm run audit:duplicates # gera pares candidatos em .topic-overlap.json
+npm run verify:seo -- https://passejaconcursos.com.br # verifica URLs do sitemap na versão publicada
 npm run generate-article -- --topic "tema específico" --count 1   # gerar 1 artigo manualmente
 npm run backfill-curiosity                                        # gerar cards de Curiosidade em posts antigos que não têm
 ```
@@ -186,7 +194,7 @@ npm run backfill-curiosity                                        # gerar cards 
 - ✅ JSON-LD structured data (Article schema)
 - ✅ Imagem OG dinâmica por post (`app/og/[slug]`)
 - ✅ Sitemap.xml + robots.txt automáticos
-- ✅ IndexNow + Google Indexing API (ping automático após publicar)
+- ✅ IndexNow para mecanismos compatíveis; Google via sitemap, links internos e Search Console
 - ✅ Canonical URLs, tempo de leitura, posts relacionados por categoria
 - ✅ Headers semânticos (H1→H2→H3), filtro por categoria
 

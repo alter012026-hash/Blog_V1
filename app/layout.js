@@ -6,6 +6,7 @@ import "./styles/pages.css";
 import "./styles/transitions.css";
 import { Bricolage_Grotesque, Literata } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
+import AnalyticsEvents from "../components/AnalyticsEvents";
 import PageTransition from "../components/PageTransition";
 import RouteProgress from "../components/RouteProgress";
 import ViewTransitions from "../components/ViewTransitions";
@@ -105,6 +106,7 @@ export default function RootLayout({ children }) {
           <Footer />
         </HideOn>
         <MobileDock />
+        <AnalyticsEvents />
         {isVercelProduction && <Analytics />}
       </body>
     </html>
