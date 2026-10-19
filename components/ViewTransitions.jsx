@@ -34,7 +34,7 @@ export default function ViewTransitions() {
       if (!a || a.target === "_blank" || a.hasAttribute("download") || a.closest("[data-no-vt]")) return;
 
       let url;
-      try { url = new URL(a.href, window.location.href); } catch { return; }
+      try { url = new URL(a.getAttribute("href"), window.location.href); } catch { return; }
       if (url.origin !== window.location.origin) return;
       if (/^\/(admin|api|og)(\/|$)/.test(url.pathname) || window.location.pathname.startsWith("/admin")) return;
       const next = url.pathname + url.search;
