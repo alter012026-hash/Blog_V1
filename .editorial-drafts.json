@@ -14,7 +14,7 @@
       "https://news.google.com/rss/articles/CBMikAFBVV95cUxNeUk0bzV6YTNaLVdUVjFiTGZCdkphY0hic1dTN1ZjTlh6ZWRqWmE3SW85MDM1OEgtbFM5VWs3ajFGTWx4eWhkbDZwZTMxNGhRRWxtQ0w3b01uUjBZRVQ5YzlVZk5FN2NxZXQtVmVSV2M5aUJJWnNqQjdVaG5YQi0yLU9kZHp1REQ0NjFmMGhDNlA?oc=5"
     ],
     "validationIssues": [],
-    "status": "NEEDS_REVIEW",
+    "status": "PUBLISHED",
     "generatedAt": "2026-10-19T22:29:51.189Z",
     "history": [
       {
@@ -24,7 +24,17 @@
       {
         "status": "NEEDS_REVIEW",
         "at": "2026-10-19T22:29:51.189Z"
+      },
+      {
+        "status": "APPROVED",
+        "at": "2026-10-19T23:53:46.399Z"
+      },
+      {
+        "status": "PUBLISHED",
+        "at": "2026-10-19T23:53:46.564Z"
       }
-    ]
+    ],
+    "publishedAt": "2026-10-19T23:53:46.564Z",
+    "reviewedAt": "2026-10-19T23:53:46.399Z"
   }
 ]
