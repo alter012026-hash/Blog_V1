@@ -1,18 +1,23 @@
+"use client";
+
 import { useEffect } from "react";
-import config from "../../site.config";
+import config from "../site.config";
 
 export default function AdSense({ slot, format = "auto", style = {} }) {
-  if (process.env.NODE_ENV !== "production") return null;
-
-  // Só renderiza se AdSense estiver configurado e ativado
-  if (!config.adsense.enabled) return null;
-  if (config.adsense.publisherId === "ca-pub-XXXXXXXXXXXXXXXX") return null;
+  const isConfigured = Boolean(
+    config.adsense.enabled &&
+    slot &&
+    config.adsense.publisherId !== "ca-pub-XXXXXXXXXXXXXXXX"
+  );
 
   useEffect(() => {
+    if (process.env.NODE_ENV !== "production" || !isConfigured) return;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch (e) {}
-  }, []);
+  }, [isConfigured]);
+
+  if (process.env.NODE_ENV !== "production" || !isConfigured) return null;
 
   return (
     <div className="adsense-wrapper" style={style}>

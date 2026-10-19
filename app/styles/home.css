@@ -144,39 +144,125 @@
   .hero-grid { grid-template-columns: 1.08fr 0.92fr; gap: 56px; align-items: center; }
 }
 
-/* ── Mais procurados (lista ranqueada) ──────────────────────────── */
-.rank-grid { display: grid; gap: 40px; }
-.rank-list { display: flex; flex-direction: column; }
-.rank-item {
-  position: relative;
+/* ── Concursos por estado + espaço publicitário ─────────────────── */
+.state-ad-grid {
   display: grid;
-  grid-template-columns: 44px 1fr;
-  gap: 14px;
-  align-items: start;
-  padding: 18px 0;
-  border-top: 1.5px solid var(--border);
+  gap: 20px;
 }
-.rank-item:last-child { border-bottom: 1.5px solid var(--border); }
-.rank-pos {
+.state-explorer-panel,
+.home-ad-panel {
+  min-width: 0;
+  padding: clamp(18px, 3vw, 30px);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+.state-explorer-intro {
+  max-width: 36rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+.state-map-wrap { margin-top: 16px; }
+.state-map {
+  display: block;
+  width: min(100%, 430px);
+  height: auto;
+  margin: 0 auto;
+  overflow: visible;
+}
+.state-map-link { cursor: pointer; outline: none; }
+.state-map-tile {
+  stroke: var(--surface);
+  stroke-width: 2.5px;
+  transition: filter var(--t-fast), stroke var(--t-fast), transform var(--t-fast);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.state-map-code {
+  fill: #fff;
   font-family: var(--font-display);
-  font-size: 2.2rem;
+  font-size: 13px;
   font-weight: 800;
-  font-stretch: 85%;
-  line-height: 0.9;
-  letter-spacing: -0.05em;
-  color: var(--cat, var(--primary));
-  font-variant-numeric: tabular-nums;
+  pointer-events: none;
 }
-.rank-body { min-width: 0; }
-.rank-title { margin-top: 8px; font-size: 1.12rem; font-weight: 700; line-height: 1.28; letter-spacing: -0.02em; }
-.rank-title a { text-decoration: none; }
-.rank-title a::after { content: ""; position: absolute; inset: 0; }
-.rank-item:hover .rank-title a { color: var(--link); }
-.rank-item:hover { background: linear-gradient(90deg, var(--surface-2), transparent); }
+.state-map-link:hover .state-map-tile,
+.state-map-link:focus-visible .state-map-tile {
+  filter: brightness(0.82);
+  stroke: var(--text);
+  stroke-width: 3px;
+  transform: scale(1.08);
+}
+.state-map-picker { display: none; }
+.state-map-hint {
+  margin-top: 8px;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  text-align: center;
+}
+.home-ad-panel {
+  display: flex;
+  min-height: 310px;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  background: var(--surface-2);
+}
+.home-ad-label {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-align: center;
+  text-transform: uppercase;
+}
+.home-ad-panel .adsense-wrapper {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+.home-ad-preview {
+  display: grid;
+  flex: 1;
+  min-height: 250px;
+  place-content: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
 
-@media (min-width: 860px) {
-  .rank-list { display: grid; grid-template-columns: 1fr 1fr; column-gap: 56px; }
-  .rank-item:nth-last-child(2) { border-bottom: 1.5px solid var(--border); }
+@media (min-width: 600px) and (max-width: 959px) {
+  .state-ad-grid { grid-template-columns: minmax(0, 1.2fr) minmax(220px, 0.8fr); }
+  .state-explorer-panel,
+  .home-ad-panel { padding: 20px; }
+}
+@media (min-width: 960px) {
+  .state-ad-grid { grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr); gap: 28px; }
+}
+@media (max-width: 599px) {
+  .state-explorer-panel,
+  .home-ad-panel { padding: 18px 14px; }
+  .state-map { width: min(100%, 390px); }
+  .state-map-picker { display: block; margin-top: 14px; }
+  .state-map-picker label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+  .state-map-picker-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+  .state-map-picker select {
+    min-width: 0;
+    min-height: 48px;
+    padding: 0 12px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+  }
+  .state-map-picker .btn { min-height: 48px; padding-inline: 12px; }
+  .home-ad-panel { min-height: 280px; }
 }
 
 /* ── Cards de artigo ────────────────────────────────────────────── */

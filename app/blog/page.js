@@ -2,6 +2,7 @@ import Link from "next/link";
 import PostCard from "../../components/PostCard";
 import { getAllPosts, getAllCategories } from "../../lib/posts";
 import { getCategoryMeta } from "../../lib/category-meta";
+import { getBrazilState, postMatchesBrazilState } from "../../lib/brazil-states";
 import config from "../../site.config";
 
 // ✅ OBRIGATÓRIO: força modo dinâmico para que searchParams funcione
@@ -16,41 +17,52 @@ export const dynamic = "force-dynamic";
 //    uma página indexada duplicada (era o que estava acontecendo: o GSC
 //    mostrava /blog?categoria=Editais posicionado como página própria).
 //    "follow" mantém os links dos posts sendo rastreados normalmente.
-export function generateMetadata({ searchParams }) {
-  const categoria = searchParams?.categoria || null;
+export async function generateMetadata({ searchParams }) {
+  const params = await searchParams;
+  const categoria = params?.categoria || null;
+  const estado = getBrazilState(params?.estado);
   const baseUrl = `${config.url}/blog`;
+  const pageTitle = [categoria, estado ? `Concursos em ${estado.name}` : null].filter(Boolean).join(" | ");
 
   return {
-    title: categoria ? `${categoria}` : "Blog",
-    description: categoria
-      ? `Artigos sobre ${categoria} no ${config.name}.`
+    title: pageTitle || "Blog",
+    description: pageTitle
+      ? `Artigos${categoria ? ` sobre ${categoria}` : ""}${estado ? ` relacionados a concursos em ${estado.name}` : ""} no ${config.name}.`
       : `Todos os artigos sobre ${config.niche} publicados no ${config.name}.`,
     alternates: { canonical: baseUrl },
-    robots: categoria
+    robots: categoria || estado
       ? { index: false, follow: true }
       : { index: true, follow: true },
   };
 }
 
-export default function BlogPage({ searchParams }) {
-  const categoria = searchParams?.categoria || null;
+export default async function BlogPage({ searchParams }) {
+  const params = await searchParams;
+  const categoria = params?.categoria || null;
+  const estado = getBrazilState(params?.estado);
   const allPosts = getAllPosts();
   const categories = getAllCategories();
 
-  const filteredPosts = categoria
-    ? allPosts.filter((p) => p.category === categoria)
-    : allPosts;
+  const filteredPosts = allPosts.filter((post) =>
+    (!categoria || post.category === categoria) &&
+    (!estado || postMatchesBrazilState(post, estado))
+  );
   const n = filteredPosts.length;
+  const blogTitle = estado
+    ? `Concursos em ${estado.name}`
+    : categoria || "Todos os artigos";
 
   return (
     <main>
       <section className="hero hero--page">
         <div className="container">
-          <h1>{categoria ? categoria : "Todos os artigos"}</h1>
+          <h1>{blogTitle}</h1>
           <p className="hero-desc">
-            {categoria
-              ? getCategoryMeta(categoria).description
-              : "Editais, cronogramas, carreiras e técnicas de estudo para concurso público."}
+            {estado
+              ? `Editais, notícias e conteúdos relacionados a ${estado.name} e ${estado.capital}.`
+              : categoria
+                ? getCategoryMeta(categoria).description
+                : "Editais, cronogramas, carreiras e técnicas de estudo para concurso público."}
           </p>
         </div>
       </section>
@@ -59,11 +71,19 @@ export default function BlogPage({ searchParams }) {
         <div className="container">
           <div className="filter-bar">
             <div className="categories-filter" role="list">
-              <Link href="/blog" className={`cat-btn ${!categoria ? "active" : ""}`}>Todos</Link>
+              <Link
+                href={estado ? `/blog?estado=${estado.code}` : "/blog"}
+                className={`cat-btn ${!categoria ? "active" : ""}`}
+              >
+                Todos
+              </Link>
               {categories.map((cat) => (
                 <Link
                   key={cat}
-                  href={`/blog?categoria=${encodeURIComponent(cat)}`}
+                  href={`/blog?${new URLSearchParams({
+                    ...(estado ? { estado: estado.code } : {}),
+                    categoria: cat,
+                  }).toString()}`}
                   className={`cat-btn cat ${categoria === cat ? "active" : ""}`}
                   style={{ "--h": getCategoryMeta(cat).hue }}
                 >
@@ -73,6 +93,14 @@ export default function BlogPage({ searchParams }) {
             </div>
           </div>
 
+          {estado && (
+            <p className="state-filter-notice">
+              Exibindo artigos relacionados a {estado.name}.
+              <Link href={categoria ? `/blog?categoria=${encodeURIComponent(categoria)}` : "/blog"}>
+                Limpar estado
+              </Link>
+            </p>
+          )}
           <p className="results-count">{n} artigo{n !== 1 ? "s" : ""}</p>
 
           {n > 0 ? (
@@ -82,7 +110,14 @@ export default function BlogPage({ searchParams }) {
               ))}
             </div>
           ) : (
-            <p className="empty-state">Nenhum artigo nesta categoria ainda. <Link href="/blog" className="section-link">Ver todos</Link></p>
+            <p className="empty-state">
+              {estado
+                ? `Ainda não encontramos artigos específicos para ${estado.name}.`
+                : "Nenhum artigo nesta categoria ainda."}{" "}
+              <Link href={categoria ? `/blog?categoria=${encodeURIComponent(categoria)}` : "/blog"} className="section-link">
+                Ver todos os artigos
+              </Link>
+            </p>
           )}
         </div>
       </section>

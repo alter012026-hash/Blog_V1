@@ -4,8 +4,9 @@ import CategoryCards from "../components/CategoryCards";
 import QuickStart from "../components/QuickStart";
 import HeroSheet from "../components/HeroSheet";
 import NewsletterInline from "../components/NewsletterInline";
+import BrazilStateMap from "../components/BrazilStateMap";
+import AdSense from "../components/AdSense";
 import { getAllPosts, getCategoryStats, getPostBySlug } from "../lib/posts";
-import { getCategoryMeta } from "../lib/category-meta";
 import config from "../site.config";
 
 export const revalidate = 3600;
@@ -32,11 +33,6 @@ export default function HomePage() {
     .filter((post) => post.slug !== pinnedPostSlug && !weeklyPostSlugs.has(post.slug))
     .slice(0, 6);
   const categoryStats = getCategoryStats();
-
-  const trending = (config.trending || [])
-    .map((slug) => getPostBySlug(slug))
-    .filter(Boolean)
-    .slice(0, 6);
 
   return (
     <main>
@@ -78,30 +74,38 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* ── Mais procurados + destaque ───────────────────────── */}
-      {trending.length > 0 && (
-        <section className="section">
-          <div className="container">
-            <div className="section-header">
-              <div>
-                <p className="section-label">O que os candidatos estão buscando no Google</p>
-                <h2 className="section-title">Mais procurados</h2>
-              </div>
+      {/* ── Seletor de estado + espaço para anúncio ───────────── */}
+      <section className="section">
+        <div className="container">
+          <div className="section-header">
+            <div>
+              <p className="section-label">Oportunidades perto de você</p>
+              <h2 className="section-title">Explore concursos por estado</h2>
             </div>
-            <ol className="rank-list">
-              {trending.map((p, i) => (
-                <li key={p.slug} className="rank-item cat" style={{ "--h": getCategoryMeta(p.category).hue }} data-vt-card>
-                  <span className="rank-pos" aria-hidden="true">{i + 1}</span>
-                  <div className="rank-body">
-                    <span className="chip">{p.category}</span>
-                    <h3 className="rank-title"><Link href={`/blog/${p.slug}`}>{p.title}</Link></h3>
-                  </div>
-                </li>
-              ))}
-            </ol>
           </div>
-        </section>
-      )}
+          <div className="state-ad-grid">
+            <div className="state-explorer-panel">
+              <p className="state-explorer-intro">
+                Escolha uma região no mapa para encontrar editais e notícias relacionados ao seu estado.
+              </p>
+              <BrazilStateMap />
+            </div>
+            <aside className="home-ad-panel" aria-label="Espaço publicitário">
+              <span className="home-ad-label">Publicidade</span>
+              <AdSense
+                slot={config.adsense.slots.sidebar}
+                format="auto"
+                style={{ display: "block", minHeight: 250, width: "100%" }}
+              />
+              {process.env.NODE_ENV !== "production" && (
+                <div className="home-ad-preview" aria-hidden="true">
+                  Prévia do espaço responsivo do Google AdSense
+                </div>
+              )}
+            </aside>
+          </div>
+        </div>
+      </section>
 
       {weeklyPosts.length > 0 && (
         <section className="section section--alt">
