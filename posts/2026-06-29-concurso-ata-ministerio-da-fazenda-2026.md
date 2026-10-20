@@ -1,5 +1,5 @@
 ---
-title: "Concurso ATA Minist?rio da Fazenda 2026: O Que H? de Novo e Como se Preparar"
+title: "Concurso ATA Ministério da Fazenda 2026: O Que Há de Novo e Como se Preparar"
 date: "2026-06-29"
 category: "Carreiras Públicas"
 excerpt: "O Ministério da Fazenda abriu, em 2026, um edital de contratação temporária (ATA) que atraiu milhares de candidatos em todo o país. A oportunidade reúne..."

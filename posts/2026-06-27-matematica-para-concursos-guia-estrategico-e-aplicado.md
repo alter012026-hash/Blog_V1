@@ -1,5 +1,5 @@
 ---
-title: "Matem?tica para Concursos: M?todo, Conte?do e Estrat?gia para Acertar Mais"
+title: "Matemática para Concursos: Método, Conteúdo e Estratégia para Acertar Mais"
 date: "2026-06-27"
 category: "Concursos Abertos"
 excerpt: "A disciplina de Matemática costuma ser decisiva em concursos de nível nacional e regional. Em editais de órgãos como a Polícia Federal (PF), a Receita..."

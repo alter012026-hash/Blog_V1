@@ -1,5 +1,5 @@
 ---
-title: "Estrat?gias de Estudo Eficazes para Concursos P?blicos: Como Conquistar Vagas com Mais Foco"
+title: "Estratégias de Estudo Eficazes para Concursos Públicos: Como Conquistar Vagas com Mais Foco"
 date: "2026-06-13"
 category: "Concursos Abertos"
 excerpt: "A preparação para concursos públicos é um desafio que exige dedicação, disciplina e estratégia. Com milhares de candidatos competindo por vagas limitadas..."

@@ -1,5 +1,5 @@
 ---
-title: "Revis?o Espa?ada para Memorizar Legisla??o e Fixar Conte?do de Forma Mais R?pida"
+title: "Revisão Espaçada para Memorizar Legislação e Fixar Conteúdo de Forma Mais Rápida"
 date: "2026-06-14"
 category: "Técnicas de Estudo"
 excerpt: "A preparação para concursos públicos no Brasil envolve uma vasta gama de conhecimentos, incluindo a legislação específica de cada área. A legislação é um..."

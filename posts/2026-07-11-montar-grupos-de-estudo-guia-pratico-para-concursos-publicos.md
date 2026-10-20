@@ -1,5 +1,5 @@
 ---
-title: "Como Montar um Grupo de Estudo para Concursos P?blicos e Aumentar a Produtividade"
+title: "Como Montar um Grupo de Estudo para Concursos Públicos e Aumentar a Produtividade"
 date: "2026-07-11"
 category: "Técnicas de Estudo"
 excerpt: "Introdução A preparação para concursos exige disciplina, organização e troca de conhecimento. Quando o estudo é feito em grupo, o ritmo de aprendizagem pode ace"

@@ -1,5 +1,5 @@
 ---
-title: "Concursos na ?rea da Educa??o: Guia Estrat?gico para Iniciantes e Intermedi?rios"
+title: "Concursos na Área da Educação: Guia Estratégico para Iniciantes e Intermediários"
 date: "2026-06-27"
 category: "Técnicas de Estudo"
 excerpt: "O setor educacional concentra a maior parte das oportunidades estáveis do serviço público: professor de ensino básico, técnico‑educacional, coordenador..."

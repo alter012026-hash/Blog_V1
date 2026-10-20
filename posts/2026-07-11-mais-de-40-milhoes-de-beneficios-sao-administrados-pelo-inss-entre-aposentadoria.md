@@ -1,5 +1,5 @@
 ---
-title: "INSS em N?meros: Mais de 40 Milh?es de Benef?cios Administrados e o Que Isso Significa"
+title: "INSS em Números: Mais de 40 Milhões de Benefícios Administrados e o Que Isso Significa"
 date: "2026-07-11"
 category: "Carreiras"
 excerpt: "Mais de 40 milhões de benefícios são administrados pelo INSS, entre aposentadorias e pensões."

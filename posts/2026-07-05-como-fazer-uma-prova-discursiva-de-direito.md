@@ -1,5 +1,5 @@
 ---
-title: "Como Fazer uma Prova Discursiva de Direito em Concursos: Estrutura e Estrat?gia"
+title: "Como Fazer uma Prova Discursiva de Direito em Concursos: Estrutura e Estratégia"
 date: "2026-07-05"
 category: "Redação e Discursiva"
 excerpt: "A prova discursiva de Direito costuma ser o ponto decisivo em concursos de alto nível. Diferente das questões de múltipla‑choice, ela exige domínio do..."
