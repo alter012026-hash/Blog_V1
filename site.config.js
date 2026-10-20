@@ -92,7 +92,7 @@ const siteConfig = {
     slots: {
       header: "1234567890",
       inArticle: "0987654321",
-      sidebar: "1122334455",
+      sidebar: "3027591699",
     },
   },
 
