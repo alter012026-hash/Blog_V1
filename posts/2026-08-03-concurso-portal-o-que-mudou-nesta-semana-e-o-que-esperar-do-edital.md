@@ -1,5 +1,5 @@
 ---
-title: "Concurso Portal: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concurso Portal: O que mudou na semana e o que esperar do pr?ximo edital ? 2026-08-03"
 date: "2026-08-03"
 category: "Informática para Concursos"
 excerpt: "O mundo dos concursos públicos no Brasil está sempre em constante movimento, com novos editais sendo lançados e provas sendo aplicadas regularmente. Nesta..."

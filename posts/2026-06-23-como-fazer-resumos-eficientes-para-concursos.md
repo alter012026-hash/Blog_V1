@@ -1,5 +1,5 @@
 ---
-title: "Como Fazer Resumos Eficientes para Concursos"
+title: "Como Fazer Resumos Eficientes para Concursos e Revisar com Menos Esfor?o"
 date: "2026-06-23"
 category: "Técnicas de Estudo"
 excerpt: "A preparação para concursos exige transformar volumes de conteúdo em informação que possa ser revisada rapidamente. O resumo, quando bem estruturado..."

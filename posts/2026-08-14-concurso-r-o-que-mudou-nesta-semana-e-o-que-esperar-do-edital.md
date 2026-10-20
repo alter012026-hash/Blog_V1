@@ -1,5 +1,5 @@
 ---
-title: "Concurso R: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concurso R: O que mudou na semana e o que esperar do edital ? 2026-08-14"
 date: "2026-08-14"
 category: "Informática para Concursos"
 excerpt: "O concurso público da Transpetro, uma das maiores empresas estatais do Brasil, tem sido tema de grande interesse nos últimos dias. Com a publicação de..."

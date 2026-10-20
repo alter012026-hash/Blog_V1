@@ -1,5 +1,5 @@
 ---
-title: "Português para Concursos"
+title: "Portugu?s para Concursos: Guia Pr?tico de Gram?tica, Interpreta??o e Reda??o"
 date: "2026-06-27"
 category: "Técnicas de Estudo"
 excerpt: "A disciplina de Língua Portuguesa costuma representar entre 20 % e 30 % da nota final em concursos de nível médio e superior. Esse peso, aliado à alta..."

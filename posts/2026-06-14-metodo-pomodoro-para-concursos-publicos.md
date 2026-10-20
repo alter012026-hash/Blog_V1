@@ -1,5 +1,5 @@
 ---
-title: "Método Pomodoro para Concursos Públicos"
+title: "M?todo Pomodoro para Concursos P?blicos: Como Organizar Seus Estudos e Aumentar o Foco"
 date: "2026-06-14"
 category: "Técnicas de Estudo"
 excerpt: "Você está se preparando para concursos públicos e busca uma estratégia eficaz para gerenciar seu tempo de estudo? Então você está no lugar certo! Com 15..."

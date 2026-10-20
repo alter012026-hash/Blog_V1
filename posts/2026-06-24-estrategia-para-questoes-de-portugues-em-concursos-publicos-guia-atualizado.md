@@ -1,5 +1,5 @@
 ---
-title: "Estratégia para Questões de Português em Concursos Públicos (Guia Atualizado)"
+title: "Estrat?gia para Quest?es de Portugu?s em Concursos P?blicos: O Que Estudar e Como Resolver"
 date: "2026-06-24"
 category: "Questões Comentadas"
 excerpt: "A disciplina de Português costuma representar entre 15 % e 25 % da carga total das provas de concursos federais e estaduais. Essa fatia pode ser decisiva..."

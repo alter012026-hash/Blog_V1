@@ -1,5 +1,5 @@
 ---
-title: "Concurso Blog: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concurso Blog: O que mudou na semana e o que esperar do edital ? 2026-09-18"
 date: "2026-09-18"
 category: "Direito Administrativo"
 excerpt: "A última quinzena de setembro trouxe um ritmo incomum para o universo dos concursos públicos. Em apenas dois dias, o Blog da Gran Cursos Online divulgou..."

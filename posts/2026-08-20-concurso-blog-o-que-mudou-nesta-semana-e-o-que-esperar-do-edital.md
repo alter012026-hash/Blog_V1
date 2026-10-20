@@ -1,5 +1,5 @@
 ---
-title: "Concurso Blog: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concurso Blog: O que mudou na semana e o que esperar do edital ? 2026-08-20"
 date: "2026-08-20"
 category: "Redação e Discursiva"
 excerpt: "O cenário dos concursos públicos no Brasil registrou uma movimentação atípica e extremamente acelerada na penúltima semana de agosto de 2026. Em um..."

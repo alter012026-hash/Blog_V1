@@ -1,5 +1,5 @@
 ---
-title: "Concurso R: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concurso R: O que mudou na semana e o que esperar do edital ? 2026-08-27"
 date: "2026-08-27"
 category: "Concursos Abertos"
 excerpt: "O cenário dos concursos públicos no Brasil exige dinamismo e capacidade de adaptação rápida. Entre os dias 25 e 27 de agosto de 2026, o mercado de..."

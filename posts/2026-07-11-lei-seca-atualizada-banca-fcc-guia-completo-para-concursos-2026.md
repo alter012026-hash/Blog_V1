@@ -1,5 +1,5 @@
 ---
-title: "Lei Seca Atualizada – Banca FCC: Guia Completo para Concursos 2026"
+title: "Lei Seca Atualizada: O Que a FCC Cobra e Como Estudar o Tema em Concursos"
 date: "2026-07-11"
 category: "Leis"
 excerpt: "Introdução A Lei Seca, oficialmente Lei nº 11.705/2008, sofreu três alterações estruturais entre 2017 e 2024. Cada mudança trouxe novos tipos penais, reajuste d"

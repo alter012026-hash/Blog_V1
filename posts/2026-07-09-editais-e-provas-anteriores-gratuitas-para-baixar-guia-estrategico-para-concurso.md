@@ -1,5 +1,5 @@
 ---
-title: "Editais e Provas Anteriores Gratuitas para Baixar: Guia Estratégico para Concursos Públicos"
+title: "Editais e Provas Anteriores: Como Usar Arquivos Gratuitos para Estudar de Verdade"
 date: "2026-07-09"
 category: "Materiais Gratuitos"
 excerpt: "Todo candidato que almeja uma vaga no serviço público precisa transformar informação em prática. O ponto de partida são os editais – documentos que..."

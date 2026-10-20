@@ -1,5 +1,5 @@
 ---
-title: "Concurso Blog: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concurso Blog: O que mudou na semana e o que esperar do edital ? 2026-09-17"
 date: "2026-09-17"
 category: "Concursos de Tribunais"
 excerpt: "A última sexta‑feira trouxe a primeira notícia de um novo certame – a autorização do concurso do Metrô do Distrito Federal com 224 vagas. No dia seguinte..."

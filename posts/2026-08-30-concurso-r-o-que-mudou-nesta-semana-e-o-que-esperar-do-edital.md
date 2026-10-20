@@ -1,5 +1,5 @@
 ---
-title: "Concurso R: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concurso R: O que mudou na semana e o que esperar do edital ? 2026-08-30"
 date: "2026-08-30"
 category: "Editais"
 excerpt: "O cenário dos concursos públicos no Brasil apresenta uma excelente oportunidade para quem busca estabilidade e altos salários ainda em 2026. A última..."

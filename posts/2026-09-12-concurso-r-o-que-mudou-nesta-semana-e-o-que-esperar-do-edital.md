@@ -1,5 +1,5 @@
 ---
-title: "Concurso R: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concurso R: O que mudou na semana e o que esperar do edital ? 2026-09-12"
 date: "2026-09-12"
 category: "Concursos de Tribunais"
 excerpt: "A última semana de setembro de 2026 registrou uma explosão de publicações de editais para cargos municipais em diferentes estados. O que começou como um..."

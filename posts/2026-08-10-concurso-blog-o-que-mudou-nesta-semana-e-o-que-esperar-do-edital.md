@@ -1,5 +1,5 @@
 ---
-title: "Concurso Blog: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concurso Blog: O que mudou na semana e o que esperar do edital ? 2026-08-10"
 date: "2026-08-10"
 category: "Informática para Concursos"
 excerpt: "Nesta semana, várias notícias importantes sobre concursos públicos foram divulgadas, trazendo atualizações significativas para os candidatos que buscam..."

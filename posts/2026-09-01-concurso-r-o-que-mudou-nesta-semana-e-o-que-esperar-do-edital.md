@@ -1,5 +1,5 @@
 ---
-title: "Concurso R: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concurso R: O que mudou na semana e o que esperar do edital ? 2026-09-01"
 date: "2026-09-01"
 category: "Redação e Discursiva"
 excerpt: "O cenário dos concursos públicos no Brasil apresenta uma movimentação intensa no segmento municipal e previdenciário neste início de setembro de 2026..."

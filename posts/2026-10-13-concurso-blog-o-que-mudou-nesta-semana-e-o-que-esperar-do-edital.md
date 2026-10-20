@@ -1,5 +1,5 @@
 ---
-title: "Concurso Blog: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concurso Blog: O que mudou na semana e o que esperar do edital ? 2026-10-13"
 date: "2026-10-13"
 category: "Técnicas de Estudo"
 excerpt: "Nos últimos dias, o panorama dos concursos federais ganhou ritmo acelerado. As publicações do Blog Gran Cursos Online revelaram quatro acontecimentos que..."

@@ -1,5 +1,5 @@
 ---
-title: "Concurso Blog: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concurso Blog: O que mudou na semana e o que esperar do edital ? 2026-09-23"
 date: "2026-09-23"
 category: "Materiais Gratuitos"
 excerpt: "A última semana trouxe uma enxurrada de publicações de editais que alteram o panorama dos concursos públicos em 2026. Não se tratam de anúncios isolados..."

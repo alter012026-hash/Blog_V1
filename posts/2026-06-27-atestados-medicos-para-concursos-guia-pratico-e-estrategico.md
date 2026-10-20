@@ -1,5 +1,5 @@
 ---
-title: "Atestados Médicos para Concursos: Guia Prático e Estratégico"
+title: "Atestados M?dicos em Concursos: Quando Usar, Como Funciona e Quais Regras Atender"
 date: "2026-06-27"
 category: "Editais"
 excerpt: "A preparação para um concurso público costuma focar em conteúdo, cronograma de estudos e simulados. Poucos candidatos dedicam atenção suficiente ao..."

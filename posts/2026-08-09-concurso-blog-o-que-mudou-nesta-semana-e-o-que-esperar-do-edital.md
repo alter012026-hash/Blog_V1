@@ -1,5 +1,5 @@
 ---
-title: "Concurso Blog: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concurso Blog: O que mudou na semana e o que esperar do edital ? 2026-08-09"
 date: "2026-08-09"
 category: "Concursos de Tribunais"
 excerpt: "O cenário dos concursos públicos no Brasil apresentou uma dinâmica de extrema intensidade na primeira semana de agosto de 2026. Para quem estuda para..."

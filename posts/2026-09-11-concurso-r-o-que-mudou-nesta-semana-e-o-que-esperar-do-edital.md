@@ -1,5 +1,5 @@
 ---
-title: "Concurso R: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concurso R: O que mudou na semana e o que esperar do edital ? 2026-09-11"
 date: "2026-09-11"
 category: "Cronograma de Estudos"
 excerpt: "A última semana trouxe um movimento incomum de lançamentos de concursos públicos no Nordeste e Centro‑Oeste. Em apenas quatro dias, cinco órgãos..."

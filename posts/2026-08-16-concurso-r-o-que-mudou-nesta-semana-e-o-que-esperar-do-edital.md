@@ -1,5 +1,5 @@
 ---
-title: "Concurso R: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concurso R: O que mudou na semana e o que esperar do edital ? 2026-08-16"
 date: "2026-08-16"
 category: "Questões Comentadas"
 excerpt: "O concurso público é uma das principais formas de ingresso em cargos públicos no Brasil, oferecendo estabilidade, benefícios e a oportunidade de..."

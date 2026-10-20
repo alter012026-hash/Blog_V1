@@ -1,5 +1,5 @@
 ---
-title: "Concurso R: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concurso R: O que mudou na semana e o que esperar do edital ? 2026-08-26"
 date: "2026-08-26"
 category: "Técnicas de Estudo"
 excerpt: "zN2U3R3NFMDBrRkZab3laNWVrQQ?oc=5 (Wait, let me copy the exact URL from the prompt..."
