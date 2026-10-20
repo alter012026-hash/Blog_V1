@@ -2215,5 +2215,19 @@
     "similarTo": "concurso-jc-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
     "status": "NEEDS_REVIEW",
     "issues": []
+  },
+  {
+    "timestamp": "2026-10-20T23:50:30.529Z",
+    "file": "2026-10-20-novo-cnu-2027-cenario-previsoes-e-plano-de-acao-para-o-proximo-edital.md",
+    "slug": "novo-cnu-2027-cenario-previsoes-e-plano-de-acao-para-o-proximo-edital",
+    "title": "Novo Cnu 2027: Cenário, Previsões e Plano de Ação para o Próximo Edital",
+    "category": "Direito Administrativo",
+    "provider": "Groq",
+    "wordCount": 1810,
+    "fillerCount": 0,
+    "similarity": 13,
+    "similarTo": "mudanca-nos-conteudos-das-provas-ao-longo-dos-anos",
+    "status": "NEEDS_REVIEW",
+    "issues": []
   }
 ]
