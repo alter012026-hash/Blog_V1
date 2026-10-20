@@ -16,7 +16,7 @@
       "https://news.google.com/rss/articles/CBMilgFBVV95cUxPajNmdHhDb29FMVFKZXNWSlpLeGhYRGh6dTNUbG5UbWZSdlVhb0QtUUk4SFU3c3J3WmNEaW1oRzFvbGZwTURDOTBPYW5xdmlDN3lQVGQyakxWUi02VTk4aUdGaEJuNzVYZkhzdm5VRTNGOFREVTRXOVpPekhaODg0UmxKcG43dkUzUVFUWUhNdHFEb2prZVE?oc=5"
     ],
     "validationIssues": [],
-    "status": "NEEDS_REVIEW",
+    "status": "PUBLISHED",
     "generatedAt": "2026-10-20T15:37:24.993Z",
     "history": [
       {
@@ -26,8 +26,18 @@
       {
         "status": "NEEDS_REVIEW",
         "at": "2026-10-20T15:37:24.993Z"
+      },
+      {
+        "status": "APPROVED",
+        "at": "2026-10-20T16:06:48.585Z"
+      },
+      {
+        "status": "PUBLISHED",
+        "at": "2026-10-20T16:06:48.721Z"
       }
-    ]
+    ],
+    "publishedAt": "2026-10-20T16:06:48.721Z",
+    "reviewedAt": "2026-10-20T16:06:48.585Z"
   },
   {
     "id": "2026-10-19-concurso-provas-mudancas-da-semana-e-proximos-passos",
