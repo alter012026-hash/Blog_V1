@@ -2229,5 +2229,19 @@
     "similarTo": "mudanca-nos-conteudos-das-provas-ao-longo-dos-anos",
     "status": "NEEDS_REVIEW",
     "issues": []
+  },
+  {
+    "timestamp": "2026-10-21T15:55:13.532Z",
+    "file": "2026-10-21-concurso-abdi-novidades-da-semana-e-o-que-esperar-do-edital.md",
+    "slug": "concurso-abdi-novidades-da-semana-e-o-que-esperar-do-edital",
+    "title": "Concurso Abdi: Novidades da Semana e o que Esperar do Edital",
+    "category": "Redação e Discursiva",
+    "provider": "Groq",
+    "wordCount": 1574,
+    "fillerCount": 0,
+    "similarity": 16,
+    "similarTo": "concurso-eptc-porto-alegre-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "NEEDS_REVIEW",
+    "issues": []
   }
 ]
