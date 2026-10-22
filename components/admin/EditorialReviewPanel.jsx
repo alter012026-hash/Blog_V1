@@ -13,6 +13,23 @@ const colors = {
   red: "#EF4444",
 };
 
+function getSourceError(value) {
+  const sourceList = value.split(/\r?\n/).map((item) => item.trim()).filter(Boolean);
+  if (sourceList.length === 0) return "Adicione ao menos uma fonte oficial em HTTPS para habilitar a publicação.";
+
+  try {
+    for (const source of sourceList) {
+      if (new URL(source).protocol !== "https:") {
+        return "Cada fonte deve ser uma URL HTTPS válida.";
+      }
+    }
+  } catch {
+    return "Cada fonte deve ser uma URL HTTPS válida.";
+  }
+
+  return "";
+}
+
 export default function EditorialReviewPanel({ toast, onPendingCountChange }) {
   const [drafts, setDrafts] = useState([]);
   const [sources, setSources] = useState({});
@@ -89,9 +106,10 @@ export default function EditorialReviewPanel({ toast, onPendingCountChange }) {
         <div style={{ display: "grid", gap: 14 }}>
           {drafts.map((draft) => {
             const checked = checks[draft.id] || {};
+            const sourceError = getSourceError(sources[draft.id] || "");
             const canApprove = checked.facts && checked.sources
               && !draft.validationIssues?.length
-              && (sources[draft.id] || "").split(/\r?\n/).some((item) => item.trim().startsWith("https://"));
+              && !sourceError;
             return (
               <article key={draft.id} style={{ background: colors.background, border: `1px solid ${colors.border}`, borderRadius: 10, padding: 14 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
@@ -124,6 +142,11 @@ export default function EditorialReviewPanel({ toast, onPendingCountChange }) {
                     rows={3}
                     style={{ display: "block", width: "100%", marginTop: 5, background: colors.background, color: colors.text, border: `1px solid ${colors.border}`, borderRadius: 6, padding: 8 }}
                   />
+                  {sourceError && (
+                    <span role="status" style={{ display: "block", marginTop: 5, color: colors.muted }}>
+                      {sourceError}
+                    </span>
+                  )}
                 </label>
                 <label style={{ display: "flex", gap: 8, color: colors.muted, fontSize: 12, marginBottom: 8 }}>
                   <input type="checkbox" checked={checked.facts === true} onChange={(event) => updateCheck(draft.id, "facts", event.target.checked)} />

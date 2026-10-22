@@ -54,6 +54,14 @@
   text-wrap: balance;
   overflow-wrap: break-word;
 }
+
+@media (max-width: 600px) {
+  .article-title {
+    font-size: clamp(1.55rem, 7vw, 2rem);
+    line-height: 1.12;
+  }
+}
+
 .article-excerpt {
   margin-top: 18px;
   font-family: var(--font-read);
