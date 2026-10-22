@@ -15,7 +15,7 @@
       "https://news.google.com/rss/articles/CBMiZEFVX3lxTE1QTjg2ekdCOGFxMWYyWHdLekRVQ0pJTU83a0R0QU93N291cHVlMXNHdWc3cWpVQTBNUkJUTkptYS1BT1ZvUWwycnl5UVdTM21KdnJucHA0RmdKR1hQd3NhNDFsOEfSAWpBVV95cUxQTHRyTi1aRWk2bTMycW01T0ZDck1ISkhIa1BMYklzY0doSDFtczFMbnkyY1lXMnBodHowdUE3VklUU25XY011dHlyRW5LVVN3VUxLRGxKLXE0QzZjeFY3TktvdzJYem5xOWNR?oc=5"
     ],
     "validationIssues": [],
-    "status": "NEEDS_REVIEW",
+    "status": "PUBLISHED",
     "generatedAt": "2026-10-21T15:55:13.525Z",
     "history": [
       {
@@ -25,8 +25,18 @@
       {
         "status": "NEEDS_REVIEW",
         "at": "2026-10-21T15:55:13.525Z"
+      },
+      {
+        "status": "APPROVED",
+        "at": "2026-10-22T00:39:25.832Z"
+      },
+      {
+        "status": "PUBLISHED",
+        "at": "2026-10-22T00:39:25.969Z"
       }
-    ]
+    ],
+    "publishedAt": "2026-10-22T00:39:25.969Z",
+    "reviewedAt": "2026-10-22T00:39:25.832Z"
   },
   {
     "id": "2026-10-20-novo-cnu-2027-cenario-previsoes-e-plano-de-acao-para-o-proximo-edital",
