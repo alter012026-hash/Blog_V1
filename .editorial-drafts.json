@@ -15,7 +15,7 @@
       "https://news.google.com/rss/articles/CBMiZEFVX3lxTE0tek11S25kbjdjb0NRYXItZVZoQTRRekpwUlhPLVNqS0Q1ZlVwVUtYUFlXYUtXYkUxNV9aZ21SS0tBdTQtajY4QUo2ZFJKQ1ZxMmlyNDlyVnZncVpUdlRZLUtIWUjSAWpBVV95cUxPSE9ndWtTZ29valN0MWYzQ2lBMW9uQUQ4eU5naEpaTXctazdOSFF5WWhwRFh0d3Z6ODRVemdUUEZzeEUyWkVoRXJZUS1MZUxlazJyZjItQkpmbmRoa3Z6Xy1fQ0pGR0VrQjRR?oc=5"
     ],
     "validationIssues": [],
-    "status": "NEEDS_REVIEW",
+    "status": "PUBLISHED",
     "generatedAt": "2026-10-22T15:52:14.560Z",
     "history": [
       {
@@ -25,8 +25,18 @@
       {
         "status": "NEEDS_REVIEW",
         "at": "2026-10-22T15:52:14.560Z"
+      },
+      {
+        "status": "APPROVED",
+        "at": "2026-10-22T20:16:42.791Z"
+      },
+      {
+        "status": "PUBLISHED",
+        "at": "2026-10-22T20:16:42.940Z"
       }
-    ]
+    ],
+    "publishedAt": "2026-10-22T20:16:42.940Z",
+    "reviewedAt": "2026-10-22T20:16:42.791Z"
   },
   {
     "id": "2026-10-21-como-o-concurso-publico-pode-transformar-sua-trajetoria-profissional",
