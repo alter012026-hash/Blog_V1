@@ -2257,5 +2257,19 @@
     "similarTo": "diferencas-entre-cargos-de-nivel-medio-e-superior-no-setor-publico-dicas-pratica",
     "status": "NEEDS_REVIEW",
     "issues": []
+  },
+  {
+    "timestamp": "2026-10-22T15:52:14.567Z",
+    "file": "2026-10-22-concurso-trf-3-banca-contratada-edital-iminente-e-o-panorama-dos-novos-certames-.md",
+    "slug": "concurso-trf-3-banca-contratada-edital-iminente-e-o-panorama-dos-novos-certames-",
+    "title": "Concurso TRF 3: Banca Contratada, Edital Iminente e o Panorama dos Novos Certames Federais",
+    "category": "Materiais Gratuitos",
+    "provider": "Groq",
+    "wordCount": 1833,
+    "fillerCount": 0,
+    "similarity": 16,
+    "similarTo": "concurso-cgu-2026-cebraspe-contratado-edital-a-vista-e-novas-oportunidades-na-se",
+    "status": "NEEDS_REVIEW",
+    "issues": []
   }
 ]
