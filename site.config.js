@@ -91,7 +91,7 @@ const siteConfig = {
     publisherId: "ca-pub-5977321239837606",
     slots: {
       header: "1234567890",
-      inArticle: "0987654321",
+      inArticle: "1542285482",
       sidebar: "3027591699",
     },
   },

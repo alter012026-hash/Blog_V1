@@ -11,6 +11,8 @@ import ArticleByline from "../../../components/ArticleByline";
 import ArticleToc from "../../../components/ArticleToc";
 import ShareBar from "../../../components/ShareBar";
 import PostCover from "../../../components/PostCover";
+import ContestTracker from "../../../components/ContestTracker";
+import AdSense from "../../../components/AdSense";
 import Link from "next/link";
 import { getCategoryMeta } from "../../../lib/category-meta";
 import { getAllSlugs, getPostBySlug, getPostContentHtml, getRelatedPosts, getAllPosts } from "../../../lib/posts";
@@ -266,12 +268,7 @@ export default async function PostPage({ params }) {
               {/* Spoiler do artigo — o que o leitor vai encontrar */}
               <TakeawaysCard takeaways={post.takeaways} />
 
-              {/* Imagem de capa gerada por IA */}
-              {post.coverImage && (
-                <div className="article-cover-image">
-                  <img src={post.coverImage} alt={post.title} width="1059" height="556" loading="eager" decoding="async" />
-                </div>
-              )}
+              <ContestTracker tracker={post.contestTracker} />
 
               {/* Curiosidade */}
               <CuriosityCard curiosity={post.curiosity} />
@@ -281,6 +278,15 @@ export default async function PostPage({ params }) {
               className="prose"
               dangerouslySetInnerHTML={{ __html: contentBefore }}
             />
+
+            {contentAfter && (
+              <AdSense
+                slot={config.adsense.slots.inArticle}
+                format="fluid"
+                layout="in-article"
+                style={{ display: "block", textAlign: "center", margin: "2rem 0" }}
+              />
+            )}
 
             {/* ✅ Afiliado no meio do artigo (contextual, se houver match) */}
             {contentAfter && matchedAffiliate && (

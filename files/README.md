@@ -13,7 +13,7 @@
 |--------|-----------|
 | Framework | Next.js 14 (App Router) |
 | Geração de conteúdo | Groq → OpenRouter → Gemini (fallback em cadeia) |
-| Geração de imagens | Pollinations.ai (FLUX — gratuito, sem chave) |
+| Acompanhamento de concursos | Painel editorial com situação, datas, contagem regressiva e fonte oficial |
 | CMS | Markdown puro (`posts/*.md`) — zero banco de dados |
 | Deploy | Vercel (serverless) |
 | CI/CD | GitHub Actions |
@@ -95,7 +95,7 @@ Blog_V1/
 │
 ├── posts/                       # ← Artigos em Markdown (gerados automaticamente)
 ├── public/
-│   ├── images/                  # Capas geradas pelo Pollinations.ai
+│   ├── images/                  # Imagens legadas e materiais enviados manualmente
 │   └── ads.txt                  # Verificação AdSense
 │
 ├── .github/workflows/
@@ -166,8 +166,6 @@ npm run generate-article
 # Tema específico
 node scripts/generate-article.js --topic "como estudar para o INSS" --count 1
 
-# Com imagem de referência para capa (usa modelo kontext)
-node scripts/generate-article.js --topic "Carreira de Auditor" --reference-image "https://..."
 ```
 
 ### 5. Rode localmente
@@ -251,17 +249,28 @@ Cada post na lista tem botões para **Regenerar** (reescreve o conteúdo mantend
 
 ---
 
-## Geração de Imagens de Capa
+## Painel de acompanhamento do concurso
 
-Cada artigo gerado recebe automaticamente uma imagem de capa via **Pollinations.ai** (FLUX):
+A geração automática de imagens de capa foi desativada. Para artigos sobre um
+concurso específico, o espaço da capa no artigo pode exibir um painel visual
+com status, próxima data, contagem regressiva, última atualização e fonte.
+Essas informações são editoriais: o painel só aparece quando o campo
+`contestTracker` está preenchido no frontmatter do artigo.
 
-- Gratuito, sem necessidade de chave de API
-- Imagem salva em `public/images/<slug>.jpg`
-- Tamanho 1200×630px (ideal para OG image)
-- `private=true` — não aparece no feed público do Pollinations
-- Suporte a `--reference-image` para usar o modelo **kontext** (image-to-image)
+```yaml
+contestTracker:
+  status: "inscricoes-abertas" # inscricoes-abertas | edital-publicado | aguardando-novidades
+  nextDate: "2026-11-15"
+  nextDateLabel: "Encerramento das inscrições"
+  nextDateIsEstimate: false
+  updatedAt: "2026-10-20"
+  sourceUrl: "https://www.gov.br/"
+  sourceLabel: "Consultar fonte oficial"
+```
 
-Se a geração de imagem falhar (timeout, API fora do ar), o artigo é salvo normalmente sem capa — nunca bloqueia a geração de conteúdo.
+Use `nextDateIsEstimate: true` para previsões. Nesse caso, o painel identifica
+a data como estimativa e não mostra contagem regressiva. `sourceUrl` deve ser
+um endereço HTTPS oficial; não cadastre datas ou status sem confirmar a fonte.
 
 ---
 

@@ -1140,6 +1140,172 @@ time {
   color: var(--text-secondary);
 }
 
+.contest-tracker {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin: 0 0 24px;
+  padding: 24px;
+  color: var(--text);
+  background:
+    radial-gradient(ellipse at 100% 0%, rgba(61, 139, 111, 0.15), transparent 48%),
+    var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+}
+
+.contest-tracker::after {
+  position: absolute;
+  z-index: -1;
+  top: -45px;
+  right: -36px;
+  width: 150px;
+  height: 150px;
+  content: "";
+  border: 1px solid rgba(61, 139, 111, 0.18);
+  border-radius: 50%;
+  box-shadow: 0 0 0 18px rgba(61, 139, 111, 0.04), 0 0 0 38px rgba(61, 139, 111, 0.03);
+}
+
+.contest-tracker-top,
+.contest-tracker-content,
+.contest-tracker-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.contest-tracker-eyebrow,
+.contest-tracker-label {
+  display: block;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.contest-tracker-title {
+  margin: 4px 0 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.25;
+}
+
+.contest-tracker-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 8px 12px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.contest-tracker-status-dot {
+  width: 8px;
+  height: 8px;
+  background: #3d9d74;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(61, 157, 116, 0.15);
+  animation: contest-pulse 2s ease-in-out infinite;
+}
+
+.contest-tracker-status--aguardando-novidades .contest-tracker-status-dot {
+  background: #d49b35;
+  box-shadow: 0 0 0 3px rgba(212, 155, 53, 0.15);
+}
+
+.contest-tracker-content {
+  align-items: stretch;
+  margin-top: 22px;
+  padding: 18px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.contest-tracker-date {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
+
+.contest-tracker-date strong {
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 3vw, 1.55rem);
+  line-height: 1.25;
+}
+
+.contest-tracker-date-detail,
+.contest-tracker-not-set {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  font-weight: 500 !important;
+}
+
+.contest-tracker-countdown {
+  display: flex;
+  min-width: 104px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.contest-tracker-countdown-number {
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.contest-tracker-countdown-unit {
+  margin-top: 5px;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.contest-tracker-footer {
+  flex-wrap: wrap;
+  margin-top: 16px;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.contest-tracker-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.contest-tracker-source:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@keyframes contest-pulse {
+  50% { box-shadow: 0 0 0 6px rgba(61, 157, 116, 0.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contest-tracker-status-dot { animation: none; }
+}
+
 /* ---- Card "O que você vai encontrar neste artigo" (spoiler/resumo) ----
    Fica logo abaixo do título/excerpt, antes até da imagem de capa — é a
    primeira coisa que o leitor vê depois do H1, pensado pra ajudar a
@@ -2331,6 +2497,14 @@ a { transition: color 0.15s; }
     padding: 16px 18px;
     gap: 12px;
   }
+
+  .contest-tracker { padding: 18px; }
+  .contest-tracker-top,
+  .contest-tracker-content { align-items: flex-start; }
+  .contest-tracker-status { padding: 7px 9px; font-size: 0.7rem; }
+  .contest-tracker-content { gap: 10px; }
+  .contest-tracker-countdown { min-width: 76px; padding: 9px; }
+  .contest-tracker-countdown-number { font-size: 1.5rem; }
 
   .hero {
     position: relative;
