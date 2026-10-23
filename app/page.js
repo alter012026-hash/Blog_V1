@@ -12,15 +12,12 @@ import config from "../site.config";
 
 export const revalidate = 3600;
 
-const pinnedPostSlug = "lula-ou-flavio-quem-abre-mais-concursos-os-numeros-reais-de-2027";
-
 const Check = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
 );
 
 export default function HomePage() {
   const allPosts = getAllPosts();
-  const pinnedPost = getPostBySlug(pinnedPostSlug);
   const weeklyFeatured = getWeeklyFeatured();
   const weeklyFeaturedPost = weeklyFeatured ? getPostBySlug(weeklyFeatured.slug) : null;
   const currentTime = Date.now();
@@ -28,16 +25,14 @@ export default function HomePage() {
   const weeklyPosts = allPosts
     .filter((post) => {
       const publishedAt = post.date ? new Date(post.date).getTime() : NaN;
-      return post.slug !== pinnedPostSlug
-        && post.slug !== weeklyFeaturedPost?.slug
+      return post.slug !== weeklyFeaturedPost?.slug
         && publishedAt >= weekAgo
         && publishedAt <= currentTime;
     })
     .slice(0, 3);
   const weeklyPostSlugs = new Set(weeklyPosts.map((post) => post.slug));
   const latestPosts = allPosts
-    .filter((post) => post.slug !== pinnedPostSlug
-      && post.slug !== weeklyFeaturedPost?.slug
+    .filter((post) => post.slug !== weeklyFeaturedPost?.slug
       && !weeklyPostSlugs.has(post.slug))
     .slice(0, 6);
   const categoryStats = getCategoryStats();
@@ -77,22 +72,6 @@ export default function HomePage() {
             </div>
             <div className="posts-grid">
               <PostCard post={weeklyFeaturedPost} featured photo={weeklyFeaturedPost.coverImage} />
-            </div>
-          </div>
-        </section>
-      )}
-
-      {pinnedPost && (
-        <section className="section">
-          <div className="container">
-            <div className="section-header">
-              <div>
-                <p className="section-label">Artigo principal</p>
-                <h2 className="section-title">Eleição e concursos de 2027</h2>
-              </div>
-            </div>
-            <div className="posts-grid">
-              <PostCard post={pinnedPost} featured />
             </div>
           </div>
         </section>

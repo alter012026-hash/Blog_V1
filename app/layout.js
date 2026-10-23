@@ -6,6 +6,7 @@ import "./styles/pages.css";
 import "./styles/transitions.css";
 import { Bricolage_Grotesque, Literata } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
+import AdSenseScript from "../components/AdSenseScript";
 import AnalyticsEvents from "../components/AnalyticsEvents";
 import PageTransition from "../components/PageTransition";
 import RouteProgress from "../components/RouteProgress";
@@ -85,18 +86,18 @@ export default function RootLayout({ children }) {
             __html: `(function(){try{var d=document.documentElement;var t=localStorage.getItem('theme');if(!t){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}d.setAttribute('data-theme',t);if(/^\\/(admin|simulado)(\\/|$)/.test(location.pathname)){d.setAttribute('data-nodock','');}}catch(e){}})();`,
           }}
         />
-        {isVercelProduction && config.adsense.enabled && config.adsense.publisherId !== "ca-pub-XXXXXXXXXXXXXXXX" && (
-          <script
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${config.adsense.publisherId}`}
-            crossOrigin="anonymous"
-          />
-        )}
         {config.seo.googleSiteVerification && (
           <meta name="google-site-verification" content={config.seo.googleSiteVerification} />
         )}
       </head>
       <body>
+        <AdSenseScript
+          enabled={
+            isVercelProduction &&
+            config.adsense.enabled &&
+            config.adsense.publisherId !== "ca-pub-XXXXXXXXXXXXXXXX"
+          }
+        />
         <RouteProgress />
         <ViewTransitions />
         <SideTicker items={tickerItems} />
