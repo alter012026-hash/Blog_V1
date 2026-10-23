@@ -15,7 +15,7 @@
       "https://news.google.com/rss/articles/CBMiakFVX3lxTFA5eG1pU3VBSjlXRmVmYmxpSG9jS1QtNG9LbzZZWnJHTldja2VLdmU2Y1NGbzNkREFnZ21fbFU0VG1tX3NXWE55LTlSY2N2NW1Wak1WR2FOTVJQVjI4OTM2QTFhczhSRUczUGfSAW9BVV95cUxQd21GM0MyNko1U1pSVnpkWTFqVFJMZ2twc1RxaDN5djlLWEc5b25QbTZOZ29EbEZRQmVNdGZZOWZaZ0toZkoyaWM2ejMtTk83elBvd1lMLU8yUmxZVnlhc1MzRzdTUWg1MTVSODdkbUk?oc=5"
     ],
     "validationIssues": [],
-    "status": "NEEDS_REVIEW",
+    "status": "REJECTED",
     "generatedAt": "2026-10-23T15:41:27.528Z",
     "history": [
       {
@@ -25,8 +25,14 @@
       {
         "status": "NEEDS_REVIEW",
         "at": "2026-10-23T15:41:27.529Z"
+      },
+      {
+        "status": "REJECTED",
+        "at": "2026-10-23T21:21:51.294Z",
+        "reason": "Titulo ruim ( generico)"
       }
-    ]
+    ],
+    "rejectionReason": "Titulo ruim ( generico)"
   },
   {
     "id": "2026-10-22-concurso-trf-3-banca-contratada-edital-iminente-e-o-panorama-dos-novos-certames-",
