@@ -33,9 +33,11 @@ function getSourceError(value) {
 export default function EditorialReviewPanel({ toast, onPendingCountChange }) {
   const [drafts, setDrafts] = useState([]);
   const [sources, setSources] = useState({});
+  const [coverImages, setCoverImages] = useState({});
   const [checks, setChecks] = useState({});
   const [reasons, setReasons] = useState({});
   const [busyId, setBusyId] = useState("");
+  const [uploadingId, setUploadingId] = useState("");
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
@@ -51,6 +53,10 @@ export default function EditorialReviewPanel({ toast, onPendingCountChange }) {
         draft.id,
         (draft.sourceUrls || []).join("\n"),
       ])));
+      setCoverImages(Object.fromEntries(queue.map((draft) => [
+        draft.id,
+        draft.coverImage || "",
+      ])));
     } catch (loadError) {
       setError(loadError.message);
     }
@@ -63,6 +69,45 @@ export default function EditorialReviewPanel({ toast, onPendingCountChange }) {
       ...current,
       [id]: { ...(current[id] || {}), [field]: checked },
     }));
+  }
+
+  async function uploadCoverImage(draft, file) {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setError("Selecione um arquivo de imagem.");
+      return;
+    }
+    if (file.size > 4 * 1024 * 1024) {
+      setError("A imagem deve ter no máximo 4 MB.");
+      return;
+    }
+
+    setUploadingId(draft.id);
+    setError("");
+    try {
+      const contentBase64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("Não foi possível ler a imagem."));
+        reader.readAsDataURL(file);
+      });
+      const response = await fetch("/api/admin/manual-post/upload-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fileName: file.name,
+          mimeType: file.type,
+          contentBase64,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Falha ao enviar a imagem.");
+      setCoverImages((current) => ({ ...current, [draft.id]: data.url }));
+    } catch (uploadError) {
+      setError(uploadError.message);
+    } finally {
+      setUploadingId("");
+    }
   }
 
   async function submit(draft, action) {
@@ -79,6 +124,7 @@ export default function EditorialReviewPanel({ toast, onPendingCountChange }) {
           sources: sourceList,
           verifiedFacts: checks[draft.id]?.facts === true,
           verifiedOfficialSources: checks[draft.id]?.sources === true,
+          coverImage: coverImages[draft.id] || "",
           reason: reasons[draft.id],
         }),
       });
@@ -134,6 +180,32 @@ export default function EditorialReviewPanel({ toast, onPendingCountChange }) {
                     {draft.content}
                   </pre>
                 </details>
+                <label style={{ display: "block", color: colors.muted, fontSize: 12, marginBottom: 12 }}>
+                  Imagem do artigo (opcional; só será exibida enquanto este post estiver em destaque semanal)
+                  <input
+                    type="text"
+                    value={coverImages[draft.id] || ""}
+                    onChange={(event) => setCoverImages((current) => ({ ...current, [draft.id]: event.target.value }))}
+                    placeholder="URL HTTPS ou caminho /images/..."
+                    style={{ display: "block", width: "100%", marginTop: 5, background: colors.background, color: colors.text, border: `1px solid ${colors.border}`, borderRadius: 6, padding: 8 }}
+                  />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    aria-label={`Enviar imagem para ${draft.title}`}
+                    disabled={uploadingId === draft.id}
+                    onChange={(event) => uploadCoverImage(draft, event.target.files?.[0])}
+                    style={{ display: "block", marginTop: 8 }}
+                  />
+                  {uploadingId === draft.id && <span role="status">Enviando imagem…</span>}
+                  {coverImages[draft.id] && (
+                    <img
+                      src={coverImages[draft.id]}
+                      alt={`Prévia da imagem para ${draft.title}`}
+                      style={{ display: "block", width: "100%", maxWidth: 320, maxHeight: 180, objectFit: "cover", borderRadius: 6, marginTop: 8 }}
+                    />
+                  )}
+                </label>
                 <label style={{ display: "block", color: colors.muted, fontSize: 12, marginBottom: 10 }}>
                   Fontes oficiais conferidas (uma URL HTTPS por linha)
                   <textarea
@@ -159,7 +231,7 @@ export default function EditorialReviewPanel({ toast, onPendingCountChange }) {
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   <button
                     type="button"
-                    disabled={!canApprove || busyId === draft.id}
+                    disabled={!canApprove || busyId === draft.id || uploadingId === draft.id}
                     onClick={() => submit(draft, "approve")}
                     style={{ background: colors.green, border: 0, borderRadius: 7, color: "#fff", padding: "8px 12px", cursor: canApprove ? "pointer" : "not-allowed", opacity: canApprove ? 1 : 0.55 }}
                   >

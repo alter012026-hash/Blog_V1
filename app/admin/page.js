@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import RichEditor from "../../components/admin/RichEditor";
 import EditorialReviewPanel from "../../components/admin/EditorialReviewPanel";
+import WeeklyFeaturedPanel from "../../components/admin/WeeklyFeaturedPanel";
 import { markdownToHtml, htmlToMarkdown } from "../../lib/markdown-html";
 import titleQuality from "../../lib/article-title.cjs";
 
@@ -2338,6 +2339,7 @@ function NewsletterTab({ toast }) {
 /* ─── TABS config ─── */
 const TABS = [
   { id: "editorial", label: "Aprovações editoriais", icon: "✅", shortLabel: "Revisar" },
+  { id: "weekly", label: "Destaque semanal", icon: "⭐", shortLabel: "Destaque" },
   { id: "newsletter", label: "Inscritos da newsletter", icon: "📬", shortLabel: "Inscritos" },
   { id: "editor", label: "Artigos", icon: "📝", shortLabel: "Artigos" },
 ];
@@ -2497,6 +2499,7 @@ export default function AdminPage() {
               onPendingCountChange={setPendingEditorialCount}
             />
           )}
+          {tab === "weekly" && <WeeklyFeaturedPanel toast={showToast} />}
           {tab === "editor" && <ManualComposerTab toast={showToast} mode="manual" />}
           {tab === "newsletter" && <NewsletterTab toast={showToast} />}
         </main>

@@ -17,6 +17,7 @@ import Link from "next/link";
 import { getCategoryMeta } from "../../../lib/category-meta";
 import { getAllSlugs, getPostBySlug, getPostContentHtml, getRelatedPosts, getAllPosts } from "../../../lib/posts";
 import { matchAffiliate, getAffiliatePair, getPinnedAffiliates } from "../../../lib/affiliate-matcher";
+import { getWeeklyFeatured } from "../../../lib/weekly-featured";
 import { extractFAQs, generateFAQSchema } from "../../../lib/faq-extractor";
 import config from "../../../site.config";
 
@@ -37,6 +38,8 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }) {
   const post = getPostBySlug(params.slug);
   if (!post) return {};
+  const weeklyFeatured = getWeeklyFeatured();
+  const featuredImage = weeklyFeatured?.slug === params.slug ? post.coverImage : null;
 
   const siteUrl = config.url;
   const pageUrl = `${siteUrl}/blog/${params.slug}`;
@@ -48,7 +51,9 @@ export async function generateMetadata({ params }) {
     excerpt: post.excerpt ?? "",
     readingTime: post.readingTime ?? "",
   });
-  const ogImageUrl = `${siteUrl}/og/${params.slug}?${ogParams.toString()}`;
+  const ogImageUrl = featuredImage
+    ? (featuredImage.startsWith("/") ? `${siteUrl}${featuredImage}` : featuredImage)
+    : `${siteUrl}/og/${params.slug}?${ogParams.toString()}`;
 
   return {
     title: post.title,
@@ -135,6 +140,8 @@ function addHeadingIds(html) {
 export default async function PostPage({ params }) {
   const post = getPostBySlug(params.slug);
   if (!post) notFound();
+  const weeklyFeatured = getWeeklyFeatured();
+  const featuredImage = weeklyFeatured?.slug === params.slug ? post.coverImage : null;
 
   const rawHtml       = await getPostContentHtml(post.content);
   const { html: contentHtml, toc } = addHeadingIds(rawHtml);
@@ -164,7 +171,9 @@ export default async function PostPage({ params }) {
     excerpt: post.excerpt ?? "",
     readingTime: post.readingTime ?? "",
   });
-  const ogImage  = `${siteUrl}/og/${params.slug}?${ogParams.toString()}`;
+  const ogImage  = featuredImage
+    ? (featuredImage.startsWith("/") ? `${siteUrl}${featuredImage}` : featuredImage)
+    : `${siteUrl}/og/${params.slug}?${ogParams.toString()}`;
 
   // JSON-LD Article — com image e dateModified corretos
   const articleSchema = {
@@ -246,7 +255,7 @@ export default async function PostPage({ params }) {
                 </nav>
 
                 <div className="article-art" aria-hidden="true">
-                  <PostCover slug={params.slug} category={post.category} />
+                  <PostCover slug={params.slug} category={post.category} photo={featuredImage} />
                 </div>
 
                 <div className="article-category-bar">

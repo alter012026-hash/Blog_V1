@@ -26,17 +26,34 @@ function validateSources(sources) {
     });
 }
 
-function markPublished(content, verifiedAt) {
+function markPublished(content, verifiedAt, coverImage) {
   const header = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!header) throw new Error("O rascunho não tem frontmatter válido.");
-  const cleanFrontmatter = header[1]
-    .split(/\r?\n/)
-    .filter((line) => !/^(editorialStatus|lastVerifiedAt):/.test(line))
+  const lines = header[1].split(/\r?\n/);
+  const existingCoverImage = lines.find((line) => /^coverImage\s*:/.test(line));
+  const cleanFrontmatter = lines
+    .filter((line) => !/^(editorialStatus|lastVerifiedAt|coverImage)\s*:/.test(line))
     .join("\n");
+  const imageLine = coverImage
+    ? `coverImage: "${String(coverImage).replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`
+    : existingCoverImage;
   return content.replace(
     header[0],
-    `---\n${cleanFrontmatter}\neditorialStatus: "PUBLISHED"\nlastVerifiedAt: "${verifiedAt}"\n---`
+    `---\n${[cleanFrontmatter, imageLine, `editorialStatus: "PUBLISHED"`, `lastVerifiedAt: "${verifiedAt}"`].filter(Boolean).join("\n")}\n---`
   );
+}
+
+function validateCoverImage(value) {
+  const image = String(value || "").trim();
+  if (!image) return "";
+  if (image.startsWith("/") && !image.startsWith("//")) return image;
+  try {
+    const url = new URL(image);
+    if (url.protocol === "https:") return url.toString();
+  } catch {
+    // Return a validation error below for malformed URLs.
+  }
+  throw new Error("A imagem deve usar um caminho local ou uma URL HTTPS.");
 }
 
 function appendVerifiedSources(content, sources) {
@@ -140,9 +157,16 @@ export async function POST(request) {
       }, { status: 409 });
     }
 
+    let coverImage;
+    try {
+      coverImage = validateCoverImage(payload.coverImage);
+    } catch (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
     const publishedAt = new Date().toISOString();
     const contentWithSources = appendVerifiedSources(draft.content, sources);
-    const publishedContent = markPublished(contentWithSources, reviewedAt);
+    const publishedContent = markPublished(contentWithSources, reviewedAt, coverImage);
     if (existingPost?.content !== publishedContent) {
       await commitFile(`posts/${safeFile}`, publishedContent, `editorial: publicar ${safeFile}`);
     }
@@ -150,6 +174,7 @@ export async function POST(request) {
     drafts[index] = {
       ...draft,
       sourceUrls: sources,
+      coverImage,
       status: "PUBLISHED",
       publishedAt,
       reviewedAt,

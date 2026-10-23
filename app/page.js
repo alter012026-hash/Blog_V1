@@ -7,6 +7,7 @@ import NewsletterInline from "../components/NewsletterInline";
 import BrazilStateMap from "../components/BrazilStateMap";
 import AdSense from "../components/AdSense";
 import { getAllPosts, getCategoryStats, getPostBySlug } from "../lib/posts";
+import { getWeeklyFeatured } from "../lib/weekly-featured";
 import config from "../site.config";
 
 export const revalidate = 3600;
@@ -20,17 +21,24 @@ const Check = () => (
 export default function HomePage() {
   const allPosts = getAllPosts();
   const pinnedPost = getPostBySlug(pinnedPostSlug);
+  const weeklyFeatured = getWeeklyFeatured();
+  const weeklyFeaturedPost = weeklyFeatured ? getPostBySlug(weeklyFeatured.slug) : null;
   const currentTime = Date.now();
   const weekAgo = currentTime - 7 * 24 * 60 * 60 * 1000;
   const weeklyPosts = allPosts
     .filter((post) => {
       const publishedAt = post.date ? new Date(post.date).getTime() : NaN;
-      return post.slug !== pinnedPostSlug && publishedAt >= weekAgo && publishedAt <= currentTime;
+      return post.slug !== pinnedPostSlug
+        && post.slug !== weeklyFeaturedPost?.slug
+        && publishedAt >= weekAgo
+        && publishedAt <= currentTime;
     })
     .slice(0, 3);
   const weeklyPostSlugs = new Set(weeklyPosts.map((post) => post.slug));
   const latestPosts = allPosts
-    .filter((post) => post.slug !== pinnedPostSlug && !weeklyPostSlugs.has(post.slug))
+    .filter((post) => post.slug !== pinnedPostSlug
+      && post.slug !== weeklyFeaturedPost?.slug
+      && !weeklyPostSlugs.has(post.slug))
     .slice(0, 6);
   const categoryStats = getCategoryStats();
 
@@ -57,6 +65,22 @@ export default function HomePage() {
           <QuickStart />
         </div>
       </section>
+
+      {weeklyFeaturedPost && (
+        <section className="section">
+          <div className="container">
+            <div className="section-header">
+              <div>
+                <p className="section-label">Escolhido pela redação</p>
+                <h2 className="section-title">Destaque da semana</h2>
+              </div>
+            </div>
+            <div className="posts-grid">
+              <PostCard post={weeklyFeaturedPost} featured photo={weeklyFeaturedPost.coverImage} />
+            </div>
+          </div>
+        </section>
+      )}
 
       {pinnedPost && (
         <section className="section">
@@ -113,7 +137,7 @@ export default function HomePage() {
             <div className="section-header">
               <div>
                 <p className="section-label">Publicados nos últimos 7 dias</p>
-                <h2 className="section-title">Destaques da semana</h2>
+                <h2 className="section-title">Artigos recentes da semana</h2>
               </div>
               <Link href="/blog" className="section-link">Ver todos</Link>
             </div>

@@ -21,7 +21,7 @@ function formatDate(dateStr) {
  * Celular: linha compacta (miniatura + título). A partir de 640px: card
  * vertical. `featured` = destaque grande com a foto em duotone.
  */
-export default function PostCard({ post, featured = false, headingLevel = 3, related = false }) {
+export default function PostCard({ post, featured = false, photo = null, headingLevel = 3, related = false }) {
   const formattedDate = formatDate(post.date);
   const meta = getCategoryMeta(post.category || "Geral");
   const H = `h${headingLevel}`;
@@ -36,6 +36,7 @@ export default function PostCard({ post, featured = false, headingLevel = 3, rel
         <PostCover
           slug={post.slug}
           category={post.category}
+          photo={photo}
           deep={featured}
         />
       </div>

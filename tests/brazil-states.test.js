@@ -35,3 +35,16 @@ test("matches state abbreviations only when tied to a contest-related title", ()
     slug: "dicas-para-revisar",
   }, rioGrandeDoSul), false);
 });
+
+test("handles missing post data and still returns false instead of crashing", () => {
+  const sp = getBrazilState("SP");
+  assert.equal(postMatchesBrazilState(null, sp), false);
+  assert.equal(postMatchesBrazilState(undefined, sp), false);
+  assert.equal(postMatchesBrazilState({}, sp), false);
+
+  const ce = getBrazilState("CE");
+  assert.equal(postMatchesBrazilState({
+    title: "Edital de concurso para Fortaleza",
+    excerpt: "Oportunidades para quem mora na capital cearense.",
+  }, ce), true);
+});
