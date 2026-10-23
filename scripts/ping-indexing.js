@@ -7,6 +7,7 @@ require("dotenv").config({ path: ".env.local", override: false });
 
 const fs = require("fs");
 const path = require("path");
+const postSlugs = require("../lib/post-slugs.cjs");
 const configModule = require("../site.config.js");
 const config = configModule?.default || configModule || {};
 const SITE_URL = (config.url || "").replace(/\/$/, "");
@@ -27,14 +28,15 @@ function getPostUrls() {
 
   const now = Date.now();
   const oneDayMs = 24 * 60 * 60 * 1000;
-  return fs.readdirSync(postsDir)
-    .filter((file) => file.endsWith(".md"))
+  const files = fs.readdirSync(postsDir).filter((file) => file.endsWith(".md"));
+  const slugByFile = new Map(postSlugs.buildSlugEntries(files).map((e) => [e.fileName, e.slug]));
+  return files
     .filter((file) => {
       if (!onlyNew) return true;
       const match = file.match(/^(\d{4}-\d{2}-\d{2})/);
       return match && now - new Date(match[1]).getTime() < oneDayMs;
     })
-    .map((file) => `${SITE_URL}/blog/${file.replace(/^\d{4}-\d{2}-\d{2}-/, "").replace(/\.md$/, "")}`);
+    .map((file) => `${SITE_URL}/blog/${slugByFile.get(file)}`);
 }
 
 async function pingIndexNow(urls) {

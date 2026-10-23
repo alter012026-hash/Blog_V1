@@ -3,20 +3,22 @@ import { checkAdminAuth } from "../../../../lib/admin-auth";
 import fs from "node:fs";
 import path from "node:path";
 import config from "../../../../site.config";
+import postSlugs from "../../../../lib/post-slugs.cjs";
 
 const postsDir = path.join(process.cwd(), "posts");
 
 function getUrls(mode) {
   if (!fs.existsSync(postsDir)) return [];
   const now = Date.now();
-  return fs.readdirSync(postsDir)
-    .filter((file) => file.endsWith(".md"))
+  const files = fs.readdirSync(postsDir).filter((file) => file.endsWith(".md"));
+  const slugByFile = new Map(postSlugs.buildSlugEntries(files).map((e) => [e.fileName, e.slug]));
+  return files
     .filter((file) => {
       if (mode !== "new") return true;
       const date = file.match(/^(\d{4}-\d{2}-\d{2})/)?.[1];
       return date && now - new Date(date).getTime() < 24 * 60 * 60 * 1000;
     })
-    .map((file) => `${config.url.replace(/\/$/, "")}/blog/${file.replace(/^\d{4}-\d{2}-\d{2}-/, "").replace(/\.md$/, "")}`);
+    .map((file) => `${config.url.replace(/\/$/, "")}/blog/${slugByFile.get(file)}`);
 }
 
 async function notifyIndexNow(urls) {

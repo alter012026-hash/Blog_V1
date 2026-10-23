@@ -10,7 +10,8 @@
     "audit:duplicates": "node scripts/detect-topic-overlap.js",
     "verify:seo": "node scripts/verify-seo.js",
     "generate-article": "node scripts/generate-article.js",
-    "backfill-curiosity": "node scripts/backfill-curiosity.js"
+    "backfill-curiosity": "node scripts/backfill-curiosity.js",
+    "audit:seo": "node scripts/audit-seo.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.20.0",

@@ -61,9 +61,11 @@ export const metadata = {
     url: config.url,
     siteName: config.name,
     description: config.description,
+    images: [{ url: config.seo.ogImage, width: 1200, height: 630, alt: config.name }],
   },
   twitter: {
     card: "summary_large_image",
+    images: [config.seo.ogImage],
     ...(config.seo.twitterHandle ? { site: config.seo.twitterHandle } : {}),
   },
   robots: {
