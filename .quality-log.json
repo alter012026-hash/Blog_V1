@@ -2285,5 +2285,19 @@
     "similarTo": "concurso-estrategia-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
     "status": "NEEDS_REVIEW",
     "issues": []
+  },
+  {
+    "timestamp": "2026-10-24T14:20:17.595Z",
+    "file": "2026-10-24-concurso-defensoria-pb-mudancas-recentes-e-o-que-esperar.md",
+    "slug": "concurso-defensoria-pb-mudancas-recentes-e-o-que-esperar",
+    "title": "Concurso Defensoria Pb: Mudanças Recentes e o que Esperar",
+    "category": "Materiais Gratuitos",
+    "provider": "Groq",
+    "wordCount": 1601,
+    "fillerCount": 0,
+    "similarity": 21,
+    "similarTo": "concurso-par-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "NEEDS_REVIEW",
+    "issues": []
   }
 ]
