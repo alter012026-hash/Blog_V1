@@ -14,7 +14,7 @@
       "https://news.google.com/rss/articles/CBMie0FVX3lxTE1PVmx6cTc0eHktblZXZU9JYlJKdzZlSXJuaF9pUEZYMk1BMXo3R3JuVHhZLWpibW5HTmpHeFAweU80czl0U0NwUG5HbzczUVhRYUFudG1qMXBOZ0ItMzJjVUo1THg3SGpNQnUzcm5uVEwzZEdVT2ZfTXpqUQ?oc=5"
     ],
     "validationIssues": [],
-    "status": "PUBLISHED",
+    "status": "NEEDS_REVIEW",
     "generatedAt": "2026-10-24T14:20:17.588Z",
     "history": [
       {
@@ -24,19 +24,8 @@
       {
         "status": "NEEDS_REVIEW",
         "at": "2026-10-24T14:20:17.588Z"
-      },
-      {
-        "status": "APPROVED",
-        "at": "2026-10-24T18:27:41.211Z"
-      },
-      {
-        "status": "PUBLISHED",
-        "at": "2026-10-24T18:27:41.375Z"
       }
-    ],
-    "coverImage": "/images/manual-1792866454936-concurso-defensoria-pb-mudancas-e-expectativas.png",
-    "publishedAt": "2026-10-24T18:27:41.375Z",
-    "reviewedAt": "2026-10-24T18:27:41.211Z"
+    ]
   },
   {
     "id": "2026-10-23-concurso-estrategia-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",

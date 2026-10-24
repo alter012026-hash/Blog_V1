@@ -1,5 +1,6 @@
 import Link from "next/link";
 import PostCard from "../components/PostCard";
+import LatestCarousel from "../components/LatestCarousel";
 import CategoryCards from "../components/CategoryCards";
 import QuickStart from "../components/QuickStart";
 import HeroSheet from "../components/HeroSheet";
@@ -34,7 +35,7 @@ export default function HomePage() {
   const latestPosts = allPosts
     .filter((post) => post.slug !== weeklyFeaturedPost?.slug
       && !weeklyPostSlugs.has(post.slug))
-    .slice(0, 6);
+    .slice(0, 10);
   const categoryStats = getCategoryStats();
 
   return (
@@ -135,9 +136,7 @@ export default function HomePage() {
             <h2 className="section-title">Novos artigos</h2>
             <Link href="/blog" className="section-link">Ver todos</Link>
           </div>
-          <div className="posts-grid">
-            {latestPosts.map((post) => <PostCard key={post.slug} post={post} />)}
-          </div>
+          <LatestCarousel posts={latestPosts} />
         </div>
       </section>
 

@@ -658,3 +658,122 @@
 @media (min-width: 860px) {
   .filter-bar { margin: 0 0 32px; padding: 14px 0; border-radius: var(--radius-lg); border: 1px solid var(--glass-border); padding-left: 14px; padding-right: 14px; top: calc(var(--header-h) + 8px); }
 }
+
+/* ── Carrossel "Novos artigos" ─────────────────────────────────────
+   Cole no FIM de app/styles/home.css. */
+.lc { position: relative; }
+.lc-track {
+  list-style: none;
+  display: flex;
+  gap: 16px;
+  margin: 0 calc(var(--gutter) * -1);
+  padding: 4px var(--gutter) 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--gutter);
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.lc-track::-webkit-scrollbar { display: none; }
+.lc-slide { flex: 0 0 76%; scroll-snap-align: start; min-width: 0; }
+
+.lc-card {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: border-color var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease-out);
+}
+.lc-card:hover { border-color: var(--cat, var(--primary)); transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.lc-card:active { transform: scale(0.99); }
+
+.lc-media { position: relative; aspect-ratio: 16 / 8; overflow: hidden; }
+.lc-media .cover { width: 100%; height: 100%; }
+.lc-chip {
+  position: absolute;
+  left: 10px; bottom: 10px;
+  max-width: calc(100% - 20px);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.74rem;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: var(--shadow-sm);
+}
+.lc-body { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px 14px; flex: 1; }
+.lc-title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.lc-title a {
+  text-decoration: none;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.lc-title a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+.lc-card:hover .lc-title a { color: var(--link); }
+.lc-foot { margin-top: auto; display: flex; flex-wrap: wrap; gap: 2px 8px; font-size: 0.8rem; color: var(--text-muted); }
+.lc-foot > * + *::before {
+  content: "";
+  display: inline-block;
+  width: 3px; height: 3px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  vertical-align: middle;
+  opacity: 0.6;
+}
+
+/* setas: só em telas com mouse/largas; no celular o gesto de arrastar basta */
+.lc-arrow {
+  display: none;
+  position: absolute;
+  top: calc(50% - 30px);
+  z-index: 2;
+  width: 44px; height: 44px;
+  align-items: center; justify-content: center;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: opacity var(--t-fast), transform var(--t-fast), border-color var(--t-fast);
+}
+.lc-arrow svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.lc-arrow:hover:not(:disabled) { border-color: var(--primary); transform: scale(1.06); }
+.lc-arrow:disabled { opacity: 0; pointer-events: none; }
+.lc-arrow--prev { left: -14px; }
+.lc-arrow--next { right: -14px; }
+
+.lc-progress { height: 3px; margin-top: 6px; border-radius: 99px; background: var(--surface-3); position: relative; overflow: hidden; }
+.lc-progress span { position: absolute; top: 0; bottom: 0; border-radius: 99px; background: var(--primary); transition: left 80ms linear; }
+
+@media (min-width: 640px) {
+  .lc-slide { flex-basis: calc((100% - 16px) / 2.15); }
+  .lc-track { margin: 0; padding-inline: 2px; scroll-padding-inline: 2px; }
+}
+@media (min-width: 900px) {
+  .lc-slide { flex-basis: calc((100% - 32px) / 3.2); }
+  .lc-arrow { display: inline-flex; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lc-track { scroll-behavior: auto; }
+  .lc-card, .lc-arrow, .lc-progress span { transition: none; }
+}

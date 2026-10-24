@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import RichEditor from "../../components/admin/RichEditor";
 import EditorialReviewPanel from "../../components/admin/EditorialReviewPanel";
 import WeeklyFeaturedPanel from "../../components/admin/WeeklyFeaturedPanel";
+import AnalyticsPanel from "../../components/admin/AnalyticsPanel";
 import { markdownToHtml, htmlToMarkdown } from "../../lib/markdown-html";
 import titleQuality from "../../lib/article-title.cjs";
 
@@ -2464,6 +2465,7 @@ function OverviewTab({ pendingEditorialCount, goTo }) {
 /* ─── TABS config ─── */
 const TABS = [
   { id: "overview", label: "Visão geral", shortLabel: "Início", hint: "O que precisa da sua atenção hoje." },
+  { id: "traffic", label: "Tráfego", shortLabel: "Tráfego", hint: "Visitas reais ao site, por dia, semana e mês." },
   { id: "editorial", label: "Aprovações editoriais", shortLabel: "Revisar", hint: "Rascunhos aguardando revisão antes de publicar." },
   { id: "editor", label: "Artigos", shortLabel: "Artigos", hint: "Escreva e edite artigos com o editor visual." },
   { id: "weekly", label: "Destaque semanal", shortLabel: "Destaque", hint: "O artigo em evidência na home esta semana." },
@@ -2601,6 +2603,7 @@ export default function AdminPage() {
           </h1>
           <p style={{ margin: "0 0 24px", color: C.textMuted, fontSize: 14 }}>{activeTab?.hint}</p>
           {tab === "overview" && <OverviewTab pendingEditorialCount={pendingEditorialCount} goTo={setTab} />}
+          {tab === "traffic" && <AnalyticsPanel />}
           {tab === "editorial" && (
             <EditorialReviewPanel
               toast={showToast}
