@@ -11,7 +11,8 @@
     "verify:seo": "node scripts/verify-seo.js",
     "generate-article": "node scripts/generate-article.js",
     "backfill-curiosity": "node scripts/backfill-curiosity.js",
-    "audit:seo": "node scripts/audit-seo.js"
+    "audit:seo": "node scripts/audit-seo.js",
+    "check:redis": "node scripts/check-redis.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.20.0",
