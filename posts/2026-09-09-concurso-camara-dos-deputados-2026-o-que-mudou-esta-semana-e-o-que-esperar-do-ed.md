@@ -1,5 +1,5 @@
 ---
-title: "Concurso Câmara dos Deputados 2026: O que Mudou Esta Semana e o que Esperar do Edital"
+title: "Concurso Câmara dos Deputados 2026: mais de 150 vagas e edital previsto para setembro"
 date: "2026-09-09"
 category: "Técnicas de Estudo"
 excerpt: "A Câmara dos Deputados anunciou, nos últimos dias, a abertura de um novo certame com “mais de 150 vagas”. Todas as fontes consultadas convergem em torno..."

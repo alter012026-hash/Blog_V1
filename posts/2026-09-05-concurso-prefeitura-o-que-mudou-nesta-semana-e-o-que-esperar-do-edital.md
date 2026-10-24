@@ -1,5 +1,5 @@
 ---
-title: "Concurso Prefeitura: O que mudou na semana municipal e o que esperar do edital ? 2026-09-05"
+title: "Concursos municipais: Conceição da Barra (até R$ 16 mil) e Dores do Indaiá (158 vagas)"
 date: "2026-09-05"
 category: "Técnicas de Estudo"
 excerpt: "Nos primeiros dias de setembro de 2026, uma série de editais de concursos municipais foi publicada quase simultaneamente por prefeituras de Minas Gerais e..."

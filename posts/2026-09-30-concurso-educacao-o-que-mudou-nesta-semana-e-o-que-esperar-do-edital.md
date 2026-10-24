@@ -1,5 +1,5 @@
 ---
-title: "Concurso Educação: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concursos de Educação em Aparecida de Goiânia, Porto Velho e Amparo somam mais de 3.300 vagas"
 date: "2026-09-30"
 category: "Concursos Abertos"
 excerpt: "Na última quinzena de setembro, três municípios anunciaram concursos voltados para a área da Educação, totalizando mais de 3 300 vagas. A sequência de..."

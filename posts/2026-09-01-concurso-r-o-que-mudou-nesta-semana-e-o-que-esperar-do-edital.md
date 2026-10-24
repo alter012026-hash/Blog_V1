@@ -1,5 +1,5 @@
 ---
-title: "Concurso R: O que mudou na semana e o que esperar do edital ? 2026-09-01"
+title: "Manausprev (R$ 9,1 mil) e Prefeitura de Horizonte (CE): inscrições e edital"
 date: "2026-09-01"
 category: "Redação e Discursiva"
 excerpt: "O cenário dos concursos públicos no Brasil apresenta uma movimentação intensa no segmento municipal e previdenciário neste início de setembro de 2026..."

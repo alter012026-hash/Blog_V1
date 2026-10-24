@@ -1,5 +1,5 @@
 ---
-title: "Concurso PC: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "PC-BA com 750 vagas, Transpetro e Abaetetuba: editais em destaque da semana"
 date: "2026-08-13"
 category: "Informática para Concursos"
 excerpt: "Nos últimos dias, várias notícias sobre concursos públicos no Brasil têm chamado a atenção de muitos candidatos que buscam uma oportunidade de carreira..."

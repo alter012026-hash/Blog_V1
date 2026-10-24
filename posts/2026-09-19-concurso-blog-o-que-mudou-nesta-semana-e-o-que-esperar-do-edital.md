@@ -1,5 +1,5 @@
 ---
-title: "Concurso Blog: O que mudou na semana e o que esperar do edital ? 2026-09-19"
+title: "GCM Salvador contrata a FGV: o que esperar do edital e da prova"
 date: "2026-09-19"
 category: "Editais"
 excerpt: "A última terça‑feira (17/09) o cenário dos concursos públicos ganhou novo ritmo. Em um único dia o Blog Gran Cursos Online trouxe à tona quatro notícias..."

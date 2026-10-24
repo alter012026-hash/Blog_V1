@@ -1,5 +1,5 @@
 ---
-title: "Concurso Par: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "SEDUC-PA com cerca de 2 mil vagas e Itanhaém (SP): editais da semana"
 date: "2026-09-03"
 category: "Concursos de Tribunais"
 excerpt: "A sequência revela um padrão de divulgação: primeiro o governo estadual do Pará anuncia o grande concurso da SEDUC; a mesma informação é recapitulada por..."

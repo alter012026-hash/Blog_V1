@@ -1,5 +1,5 @@
 ---
-title: "Concurso Resultado: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Seduc-PI: resultado final do concurso com 4 mil vagas para professores"
 date: "2026-09-25"
 category: "Informática para Concursos"
 excerpt: "Na última quinzena de setembro de 2026 duas etapas decisivas de concursos públicos foram concluídas: a homologação do resultado final do Concurso Público..."

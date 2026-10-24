@@ -1,5 +1,5 @@
 ---
-title: "Concurso Inb 2026: Mudanças Recentes e o que Esperar do Edital"
+title: "Concurso INB 2026: edital com vagas de nível médio e superior e salário de até R$ 8,3 mil"
 date: "2026-10-14"
 category: "Informática para Concursos"
 excerpt: "Na última semana o Instituto Nacional de Bem‑Estar (INB) entrou em foco nacional após a publicação do edital que traz cargos de nível médio e superior..."

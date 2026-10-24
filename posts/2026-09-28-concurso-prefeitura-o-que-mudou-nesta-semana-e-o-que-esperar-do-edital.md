@@ -1,5 +1,5 @@
 ---
-title: "Concurso Prefeitura: O que mudou na semana municipal e o que esperar do edital ? 2026-09-28"
+title: "Gabaritos de Embu das Artes, Matinhos e Paulínia: como recorrer e planejar o próximo edital"
 date: "2026-09-28"
 category: "Editais"
 excerpt: "A última sexta‑feira (27/09/2026) marcou um ponto de inflexão para os concursos municipais que vêm ganhando atenção de milhares de candidatos em todo o..."

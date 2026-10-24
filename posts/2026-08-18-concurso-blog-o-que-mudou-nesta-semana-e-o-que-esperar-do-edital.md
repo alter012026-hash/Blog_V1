@@ -1,5 +1,5 @@
 ---
-title: "Concurso Blog: O que mudou na semana e o que esperar do edital ? 2026-08-18"
+title: "Concurso de Juiz Federal do TRF 5 e as 4.472 vagas dos editais de agosto"
 date: "2026-08-18"
 category: "Técnicas de Estudo"
 excerpt: "O cenário dos concursos públicos no Brasil acaba de registrar uma das semanas mais movimentadas do ano. Entre os dias 14 e 18 de agosto de 2026, uma..."

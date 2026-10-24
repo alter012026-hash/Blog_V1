@@ -1,5 +1,5 @@
 ---
-title: "Concurso Ceará: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Ceará abre 12 editais ao mesmo tempo: como organizar as inscrições"
 date: "2026-09-22"
 category: "Materiais Gratuitos"
 excerpt: "A segunda‑feira, 21 de setembro de 2026, marcou um novo marco para quem acompanha o calendário de concursos públicos no Ceará. Em apenas 24 horas, três..."

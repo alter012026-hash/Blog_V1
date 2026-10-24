@@ -1,5 +1,5 @@
 ---
-title: "Concurso Pará: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concursos no Pará e na PC-AP: salários, cargos e prazos de inscrição"
 date: "2026-09-27"
 category: "Cronograma de Estudos"
 excerpt: "Nos últimos dias, o cenário de concursos públicos no Norte do Brasil ganhou nova energia. Três veículos de comunicação — DOL, :: Bahia Jornal :: e CBN..."

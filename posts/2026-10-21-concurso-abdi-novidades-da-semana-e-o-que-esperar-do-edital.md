@@ -1,5 +1,5 @@
 ---
-title: "Concurso Abdi: Novidades da Semana e o que Esperar do Edital"
+title: "Concurso ABDI: 180 vagas com salário de até R$ 16 mil"
 date: "2026-10-21"
 category: "Redação e Discursiva"
 excerpt: "Na última quinzena de outubro surgiram três notícias que redefiniram o cenário dos concursos de alto salário. Primeiro, o edital da Polícia Militar de..."

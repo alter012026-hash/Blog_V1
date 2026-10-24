@@ -1,5 +1,5 @@
 ---
-title: "Concurso Eptc Porto Alegre: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concurso EPTC Porto Alegre: cargos gerenciais com salário de até R$ 9,7 mil"
 date: "2026-09-06"
 category: "Cronograma de Estudos"
 excerpt: "A primeira quinzena de setembro de 2026 trouxe um turbilhão de notícias para quem acompanha o calendário de concursos públicos. Entre os 18 editais..."

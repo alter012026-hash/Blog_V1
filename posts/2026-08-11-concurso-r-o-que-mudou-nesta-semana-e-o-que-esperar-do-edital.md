@@ -1,5 +1,5 @@
 ---
-title: "Concurso R: O que mudou na semana e o que esperar do edital ? 2026-08-11"
+title: "Concursos no Tocantins e em Pernambuco: salários de até R$ 17 mil"
 date: "2026-08-11"
 category: "Concursos de Tribunais"
 excerpt: "O cenário nacional de concursos públicos acaba de passar por uma movimentação sem precedentes nesta segunda semana de agosto de 2026. Se você estuda para..."

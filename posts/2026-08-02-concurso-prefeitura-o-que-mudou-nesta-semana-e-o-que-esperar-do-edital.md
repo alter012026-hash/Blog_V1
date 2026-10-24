@@ -1,5 +1,5 @@
 ---
-title: "Concurso Prefeitura: O que mudou na semana municipal e o que esperar do edital ? 2026-08-02"
+title: "Concurso de prefeitura na Bahia: vagas com salários de até R$ 3 mil e como estudar"
 date: "2026-08-02"
 category: "Questões Comentadas"
 excerpt: "O concurso público para a prefeitura de uma cidade baiana tem sido objeto de grande interesse nos últimos dias, com várias notícias sendo divulgadas sobre..."

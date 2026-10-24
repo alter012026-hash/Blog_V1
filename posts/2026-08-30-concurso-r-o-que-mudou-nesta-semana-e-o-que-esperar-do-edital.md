@@ -1,5 +1,5 @@
 ---
-title: "Concurso R: O que mudou na semana e o que esperar do edital ? 2026-08-30"
+title: "CRA-RJ confirma concurso com 84 vagas: conselhos e autarquias em alta"
 date: "2026-08-30"
 category: "Editais"
 excerpt: "O cenário dos concursos públicos no Brasil apresenta uma excelente oportunidade para quem busca estabilidade e altos salários ainda em 2026. A última..."

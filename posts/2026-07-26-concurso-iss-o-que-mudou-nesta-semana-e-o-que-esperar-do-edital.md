@@ -1,5 +1,5 @@
 ---
-title: "Concurso Iss: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concurso ISS Manaus: o que já se sabe do edital e como se preparar"
 date: "2026-07-26"
 category: "Cronograma de Estudos"
 excerpt: "O concurso público para o Instituto de Serviços Sociais (ISS) em Manaus, Amazonas, tem sido um tema quente nos últimos dias, com várias notícias e..."

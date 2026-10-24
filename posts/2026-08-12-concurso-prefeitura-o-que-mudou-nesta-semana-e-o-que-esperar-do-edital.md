@@ -1,5 +1,5 @@
 ---
-title: "Concurso Prefeitura: O que mudou na semana municipal e o que esperar do edital ? 2026-08-12"
+title: "Concursos de prefeitura em São Roque, Carrancas e na Bahia: como estudar para bancas locais"
 date: "2026-08-12"
 category: "Informática para Concursos"
 excerpt: "O cenário dos concursos públicos municipais no Brasil apresenta uma movimentação intensa em meados de agosto de 2026. Prefeituras de diferentes regiões do..."

@@ -1,5 +1,5 @@
 ---
-title: "Concurso Fiibrasil: Mudanças Recentes e o que Esperar do Edital"
+title: "Gabaritos de seis concursos em um dia: como usar a correção para planejar recursos"
 date: "2026-10-19"
 category: "Informática para Concursos"
 excerpt: "Nos últimos dias, o portal FiiBrasil publicou simultaneamente o gabarito de seis concursos diferentes, todos em 18 de outubro de 2026. Essa enxurrada de..."

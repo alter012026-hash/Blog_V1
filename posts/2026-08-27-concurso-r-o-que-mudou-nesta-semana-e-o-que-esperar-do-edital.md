@@ -1,5 +1,5 @@
 ---
-title: "Concurso R: O que mudou na semana e o que esperar do edital ? 2026-08-27"
+title: "Três editais em 72 horas: o que as publicações de 25 a 27 de agosto indicam"
 date: "2026-08-27"
 category: "Concursos Abertos"
 excerpt: "O cenário dos concursos públicos no Brasil exige dinamismo e capacidade de adaptação rápida. Entre os dias 25 e 27 de agosto de 2026, o mercado de..."

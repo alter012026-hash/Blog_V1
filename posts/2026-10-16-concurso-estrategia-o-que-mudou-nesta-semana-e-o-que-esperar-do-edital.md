@@ -1,5 +1,5 @@
 ---
-title: "Concurso Estratégia: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "TCE-SP com salário inicial de R$ 20,9 mil e os concursos de alta remuneração da semana"
 date: "2026-10-16"
 category: "Direito Administrativo"
 excerpt: "A última semana trouxe um verdadeiro tsunami de anúncios de concursos públicos, todos publicados pela Estratégia Concursos. Salários que ultrapassam R$ 30..."

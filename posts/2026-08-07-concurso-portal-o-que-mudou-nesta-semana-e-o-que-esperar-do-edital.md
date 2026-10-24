@@ -1,5 +1,5 @@
 ---
-title: "Concurso Portal: O que mudou na semana e o que esperar do próximo edital — 2026-08-07"
+title: "Concursos da Prefeitura de Igaraçu do Tietê, Caer (RR) e Petrolina de Goiás"
 date: "2026-08-07"
 category: "Cronograma de Estudos"
 excerpt: "O mundo dos concursos públicos no Brasil é extremamente dinâmico, com novidades surgindo a cada semana. Nesta semana, não foi diferente, com várias..."

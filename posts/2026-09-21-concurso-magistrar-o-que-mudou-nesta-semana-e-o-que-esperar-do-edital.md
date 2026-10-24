@@ -1,5 +1,5 @@
 ---
-title: "Concurso Magistrar: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "DPE-PB publica edital e GCM Salvador abre 50 vagas: o que esperar"
 date: "2026-09-21"
 category: "Direito Administrativo"
 excerpt: "A última semana trouxe um ritmo acelerado de anúncios no cenário dos concursos públicos, concentrando‑se em dois órgãos que costumam atrair milhares de..."

@@ -1,5 +1,5 @@
 ---
-title: "Concurso Estratégia: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concursos de Pirpirituba e Nova União: por que vale olhar para as prefeituras"
 date: "2026-08-15"
 category: "Cronograma de Estudos"
 excerpt: "O cenário dos concursos públicos no Brasil apresenta uma dinâmica de constante descentralização, revelando que as melhores oportunidades de curto prazo..."

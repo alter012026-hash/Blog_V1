@@ -1,5 +1,5 @@
 ---
-title: "Concurso Estratégia: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "CREMERJ com vagas remotas de R$ 18 mil e PC-AP com 396 vagas"
 date: "2026-09-24"
 category: "Editais"
 excerpt: "Nos últimos quatro dias, o cenário de concursos públicos recebeu quatro anúncios que, embora pareçam independentes, compõem um movimento coordenado de..."

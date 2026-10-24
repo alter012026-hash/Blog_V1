@@ -1,5 +1,5 @@
 ---
-title: "Concurso Câmara dos Deputados: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Câmara dos Deputados: Analista com salário de até R$ 30 mil e prova do Cebraspe"
 date: "2026-09-10"
 category: "Questões Comentadas"
 excerpt: "A última semana trouxe uma enxurrada de anúncios sobre o próximo concurso da Câmara dos Deputados. O que antes era apenas um rumor sobre a abertura de..."

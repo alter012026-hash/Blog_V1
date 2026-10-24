@@ -1,5 +1,5 @@
 ---
-title: "Concurso R: O que mudou na semana e o que esperar do edital ? 2026-09-20"
+title: "DPE-PB (20 vagas + CR) e concurso do Rio com salário de R$ 18 mil"
 date: "2026-09-20"
 category: "Concursos Abertos"
 excerpt: "A última sexta‑feira trouxe um turbilhão de anúncios que, à primeira vista, parecem ser concursos isolados. Na prática, eles revelam um padrão de..."

@@ -1,5 +1,5 @@
 ---
-title: "Concurso Gabarito: O que Mudou Esta Semana e o que Esperar do Próximo Edital"
+title: "Gabaritos do IBAM e da FAFIPA em cinco municípios: o que mudou na divulgação"
 date: "2026-09-29"
 category: "Técnicas de Estudo"
 excerpt: "Nos últimos dias, o cenário de divulgação de gabaritos de concursos municipais ganhou novo ritmo. Cinco municípios – Santos (SP), Matinhos (PR) (com duas..."

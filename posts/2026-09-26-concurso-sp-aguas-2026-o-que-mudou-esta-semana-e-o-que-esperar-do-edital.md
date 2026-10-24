@@ -1,5 +1,5 @@
 ---
-title: "Concurso Sp Águas 2026: O que Mudou Esta Semana e o que Esperar do Edital"
+title: "Concurso SP Águas: 190 vagas previstas e o que estudar para a prova"
 date: "2026-09-26"
 category: "Concursos Abertos"
 excerpt: "A Semana de 23 a 25 de setembro de 2026 foi decisiva para os concurseiros que miram cargos na Secretaria de Estado de Águas e Saneamento de São Paulo (SP..."

@@ -1,5 +1,5 @@
 ---
-title: "Concurso Blog: O que mudou na semana e o que esperar do edital ? 2026-09-18"
+title: "Fundação Gaspar Vianna (215 vagas) e SME de São José (SC): editais da semana"
 date: "2026-09-18"
 category: "Direito Administrativo"
 excerpt: "A última quinzena de setembro trouxe um ritmo incomum para o universo dos concursos públicos. Em apenas dois dias, o Blog da Gran Cursos Online divulgou..."

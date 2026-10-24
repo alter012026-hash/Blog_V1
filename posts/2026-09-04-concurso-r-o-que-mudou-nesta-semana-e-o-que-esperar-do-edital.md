@@ -1,5 +1,5 @@
 ---
-title: "Concurso R: O que mudou na semana e o que esperar do edital ? 2026-09-04"
+title: "SEDUC-PA, Seplag-RJ e PMMG: três editais com salários de até R$ 14,3 mil"
 date: "2026-09-04"
 category: "Técnicas de Estudo"
 excerpt: "A última semana trouxe a liberação de três editais de grande relevância para quem está preparando a carreira no serviço público. Em apenas quatro dias..."

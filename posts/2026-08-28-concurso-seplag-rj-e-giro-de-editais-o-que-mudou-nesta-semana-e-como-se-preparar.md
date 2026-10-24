@@ -1,5 +1,5 @@
 ---
-title: "Concurso Seplag Rj e Giro de Editais: O que Mudou Nesta Semana e Como Se Preparar"
+title: "Seplag-RJ confirma cronograma e TCE-GO publica edital para nível médio"
 date: "2026-08-28"
 category: "Redação e Discursiva"
 excerpt: "O cenário dos concursos públicos no Brasil apresenta movimentações de grande impacto no fechamento de agosto de 2026. Para os candidatos que buscam..."

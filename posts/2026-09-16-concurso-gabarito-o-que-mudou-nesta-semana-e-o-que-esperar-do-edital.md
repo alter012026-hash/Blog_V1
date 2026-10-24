@@ -1,5 +1,5 @@
 ---
-title: "Concurso Gabarito: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Gabaritos liberados em até 24 horas: como usar a correção rápida nos estudos"
 date: "2026-09-16"
 category: "Editais"
 excerpt: "A última segunda‑feira (14 de setembro de 2026) marcou um ponto de inflexão para quem acompanha concursos municipais e estaduais no sul e sudeste do..."

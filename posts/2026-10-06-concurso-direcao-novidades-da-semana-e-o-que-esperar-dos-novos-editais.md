@@ -1,5 +1,5 @@
 ---
-title: "Concurso Direção: Novidades da Semana e o que Esperar dos Novos Editais"
+title: "TRT-8, PC-PE, Câmara e CAU: cinco editais publicados quase ao mesmo tempo"
 date: "2026-10-06"
 category: "Informática para Concursos"
 excerpt: "A última semana de outubro trouxe um volume incomum de publicações de editais de concurso público. O Tribunal Regional do Trabalho da 8ª Região (TRT‑8), o..."

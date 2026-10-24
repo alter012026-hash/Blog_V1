@@ -1,5 +1,5 @@
 ---
-title: "Concurso Público: O que Mudou Nesta Semana e o que Esperar dos Editais"
+title: "PC-PE com 1.315 vagas e Câmara de Rio Branco: editais de destaque da semana"
 date: "2026-09-13"
 category: "Técnicas de Estudo"
 excerpt: "A última semana de setembro de 2026 foi marcada por um surto de publicações de editais que mudou o ritmo das estratégias de estudo de milhares de..."

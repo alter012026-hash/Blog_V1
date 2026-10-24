@@ -1,5 +1,5 @@
 ---
-title: "Concurso Ba: O que Mudou Nesta Semana e o que Esperar do Edital de Saúde da PM e Cbm Ba"
+title: "PM-BA e CBM-BA: edital unificado com 40 vagas para Oficiais de Saúde"
 date: "2026-08-23"
 category: "Editais"
 excerpt: "A terceira semana de agosto de 2026 redefiniu o cenário de preparação para os profissionais da área da saúde que buscam a estabilidade do cargo público..."

@@ -1,5 +1,5 @@
 ---
-title: "Concurso Blog: O que mudou na semana e o que esperar do edital ? 2026-08-22"
+title: "TCE-AP e 34 novos editais: os concursos da área de controle ganham força"
 date: "2026-08-22"
 category: "Técnicas de Estudo"
 excerpt: "O universo dos concursos públicos no Brasil exige dos candidatos uma capacidade constante de adaptação e análise estratégica. Na semana de 17 a 21 de..."

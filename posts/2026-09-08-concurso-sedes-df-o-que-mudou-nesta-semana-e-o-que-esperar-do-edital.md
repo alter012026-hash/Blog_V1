@@ -1,5 +1,5 @@
 ---
-title: "Concurso Sedes Df: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concurso SEDES-DF: gabaritos extraoficiais de cinco cargos e como recorrer"
 date: "2026-09-08"
 category: "Carreiras Públicas"
 excerpt: "A semana de 6 de setembro de 2026 marcou um ponto de inflexão para o concurso da Secretaria de Estado de Desenvolvimento Social do Distrito Federal..."

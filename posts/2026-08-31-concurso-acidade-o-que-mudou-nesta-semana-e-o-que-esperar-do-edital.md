@@ -1,5 +1,5 @@
 ---
-title: "Concurso Acidade: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concurso para professores com 5.000 vagas é autorizado em SP; prazos finais de 31/08"
 date: "2026-08-31"
 category: "Redação e Discursiva"
 excerpt: "O cenário dos concursos públicos no Brasil apresenta movimentações decisivas nesta segunda-feira, 31 de agosto de 2026. Para quem busca a estabilidade no..."

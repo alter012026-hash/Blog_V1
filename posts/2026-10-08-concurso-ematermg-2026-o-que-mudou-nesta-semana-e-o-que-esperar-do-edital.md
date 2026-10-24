@@ -1,5 +1,5 @@
 ---
-title: "Concurso Emater‑mg 2026: O que Mudou Nesta Semana e o que Esperar do Edital"
+title: "Concurso Emater-MG: salários de até R$ 7,3 mil e cargos técnicos e superiores"
 date: "2026-10-08"
 category: "Materiais Gratuitos"
 excerpt: "A Emater‑MG (Empresa de Assistência Técnica e Extensão Rural de Minas Gerais) divulgou, entre 7 e 8 de outubro de 2026, a abertura de um novo concurso..."

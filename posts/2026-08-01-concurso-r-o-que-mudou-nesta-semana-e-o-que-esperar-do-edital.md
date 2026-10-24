@@ -1,5 +1,5 @@
 ---
-title: "Concurso R: O que mudou na semana e o que esperar do edital ? 2026-08-01"
+title: "SES-TO com salário de R$ 17,7 mil e vagas em prefeituras: concursos da semana"
 date: "2026-08-01"
 category: "Informática para Concursos"
 excerpt: "O mundo dos concursos públicos no Brasil está sempre em constante mudança, com novos editais sendo publicados regularmente e muitas oportunidades surgindo..."

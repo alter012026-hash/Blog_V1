@@ -1,5 +1,5 @@
 ---
-title: "Concurso Blog: O que mudou na semana e o que esperar do edital ? 2026-10-13"
+title: "Concursos AGU e CGU 2026: banca em definição e 60 vagas abertas na CGU"
 date: "2026-10-13"
 category: "Técnicas de Estudo"
 excerpt: "Nos últimos dias, o panorama dos concursos federais ganhou ritmo acelerado. As publicações do Blog Gran Cursos Online revelaram quatro acontecimentos que..."

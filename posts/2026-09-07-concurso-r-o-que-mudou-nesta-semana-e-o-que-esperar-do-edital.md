@@ -1,5 +1,5 @@
 ---
-title: "Concurso R: O que mudou na semana e o que esperar do edital ? 2026-09-07"
+title: "Concurso de Floresta (PE): 432 vagas e salários de até R$ 15 mil"
 date: "2026-09-07"
 category: "Direito Administrativo"
 excerpt: "Na última semana, quatro municípios diferentes anunciaram concursos públicos que, embora variem bastante em número de vagas e remuneração, compartilham um..."

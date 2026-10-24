@@ -1,5 +1,5 @@
 ---
-title: "Concurso Polícia Penal 2026: O que Mudou Nesta Semana e o que Esperar do Próximo Edital"
+title: "Polícia Penal de PE terá Cebraspe como banca; gabaritos do RN em breve"
 date: "2026-09-14"
 category: "Editais"
 excerpt: "A última quinta‑feira foi decisiva para quem acompanha os concursos da Polícia Penal nos estados de Pernambuco (PE) e Rio Grande do Norte (RN). Três..."
