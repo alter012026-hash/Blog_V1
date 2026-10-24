@@ -97,8 +97,9 @@ export default function HomePage() {
               <span className="home-ad-label">Publicidade</span>
               <AdSense
                 slot={config.adsense.slots.sidebar}
+                placement="home"
                 format="auto"
-                style={{ display: "block", minHeight: 250, width: "100%" }}
+                label={false}
               />
               {process.env.NODE_ENV !== "production" && (
                 <div className="home-ad-preview" aria-hidden="true">

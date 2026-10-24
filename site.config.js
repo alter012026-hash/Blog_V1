@@ -90,9 +90,10 @@ const siteConfig = {
     enabled: true,
     publisherId: "ca-pub-5977321239837606",
     slots: {
-      header: "1234567890",
-      inArticle: "1542285482",
-      sidebar: "3027591699",
+      header: "",                // não usado (mantido porque o painel de config da API edita esta chave)
+      inArticle: "1542285482",   // meio do artigo
+      sidebar: "3027591699",     // home, ao lado do mapa
+      articleEnd: "3027591699",  // fim do artigo — reutiliza o bloco responsivo; crie um próprio no AdSense para relatório separado
     },
   },
 

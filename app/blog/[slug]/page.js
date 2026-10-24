@@ -291,9 +291,9 @@ export default async function PostPage({ params }) {
             {contentAfter && (
               <AdSense
                 slot={config.adsense.slots.inArticle}
+                placement="inline"
                 format="fluid"
                 layout="in-article"
-                style={{ display: "block", textAlign: "center", margin: "2rem 0" }}
               />
             )}
 
@@ -313,6 +313,11 @@ export default async function PostPage({ params }) {
                 className="prose"
                 dangerouslySetInnerHTML={{ __html: contentAfter }}
               />
+            )}
+
+            {/* Anúncio fixo no fim do texto, antes dos afiliados */}
+            {contentAfter && (
+              <AdSense slot={config.adsense.slots.articleEnd} placement="end" format="auto" />
             )}
 
             {/* Afiliado contextual no fim (só se NÃO foi inserido no meio) */}

@@ -325,7 +325,6 @@
 [data-theme="dark"] .affiliate-box-link { background: var(--hl); color: var(--on-hl); }
 .affiliate-box-link:hover { transform: translateY(-2px); }
 
-.adsense-wrapper { margin: 32px 0; display: flex; justify-content: center; border-radius: var(--radius); overflow: hidden; }
 
 /* Tire sua dúvida */
 .article-qa { margin: 40px 0; padding: 22px; border-radius: var(--radius-xl); background: var(--surface-2); }
