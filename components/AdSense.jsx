@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import config from "../site.config";
 
 /**
@@ -30,8 +30,13 @@ export default function AdSense({
     config.adsense.publisherId !== "ca-pub-XXXXXXXXXXXXXXXX"
   );
 
+  const insRef = useRef(null);
+
   useEffect(() => {
     if (process.env.NODE_ENV !== "production" || !isConfigured) return;
+    const el = insRef.current;
+    // Evita inicializar o mesmo <ins> duas vezes (gera bloco em branco/erro).
+    if (!el || el.getAttribute("data-adsbygoogle-status")) return;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch (e) {}
@@ -46,6 +51,7 @@ export default function AdSense({
     >
       {label && <span className="ad-slot__label">Publicidade</span>}
       <ins
+        ref={insRef}
         className="adsbygoogle"
         style={{ display: "block" }}
         data-ad-client={config.adsense.publisherId}

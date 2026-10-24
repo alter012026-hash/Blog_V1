@@ -12,12 +12,10 @@ import PageViewTracker from "../components/PageViewTracker";
 import PageTransition from "../components/PageTransition";
 import RouteProgress from "../components/RouteProgress";
 import ViewTransitions from "../components/ViewTransitions";
-import SideTicker from "../components/SideTicker";
 import Header from "../components/Header";
 import MobileDock from "../components/MobileDock";
 import Footer from "../components/Footer";
 import HideOn from "../components/HideOn";
-import { getTickerItems } from "../lib/ticker-data";
 import { getSearchIndex } from "../lib/search-index";
 import config from "../site.config";
 
@@ -77,7 +75,6 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  const tickerItems = getTickerItems();
   const searchIndex = getSearchIndex();
 
   return (
@@ -103,7 +100,6 @@ export default function RootLayout({ children }) {
         />
         <RouteProgress />
         <ViewTransitions />
-        <SideTicker items={tickerItems} />
         <Header posts={searchIndex} />
         <PageTransition>{children}</PageTransition>
         <HideOn paths={["/admin"]}>

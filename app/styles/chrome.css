@@ -390,40 +390,67 @@
   box-shadow: var(--shadow-md);
 }
 
-/* ── Ticker lateral (só em telas muito largas) ──────────────────── */
-.side-ticker {
-  display: none;
-  position: fixed;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 208px;
-  max-height: 60vh;
-  overflow: hidden;
-  z-index: 40;
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent);
-          mask-image: linear-gradient(to bottom, transparent, #000 10%, #000 90%, transparent);
+/* ── AdSense: locais fixos, contidos e sem "quadrado branco" ─────── */
+/* Este bloco precisa ficar aqui (CSS ativo importado no layout). As regras
+   antigas viviam só no globals.css, que não é importado — por isso o espaço
+   do anúncio não era reservado nem contido. */
+.ad-slot {
+  position: relative;
+  z-index: 0;                 /* abaixo de header, dock, popups e menus */
+  clear: both;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  min-height: 280px;          /* reserva o espaço: o texto não pula quando o anúncio carrega */
+  margin: 32px auto;
+  overflow: hidden;           /* o anúncio nunca vaza por cima do conteúdo */
+  isolation: isolate;
+  contain: layout paint;
+  background: transparent;
 }
-.side-ticker--left  { left: 28px; }
-.side-ticker--right { right: 28px; }
-.side-ticker-track { display: flex; flex-direction: column; gap: 14px; animation: side-ticker-up 48s linear infinite; }
-.side-ticker-track--right { animation-name: side-ticker-down; }
-.side-ticker:hover .side-ticker-track { animation-play-state: paused; }
-@keyframes side-ticker-up   { from { transform: translateY(0); }     to { transform: translateY(-50%); } }
-@keyframes side-ticker-down { from { transform: translateY(-50%); } to { transform: translateY(0); } }
-.side-ticker-card {
+.ad-slot__label {
+  margin-bottom: 6px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+.ad-slot ins.adsbygoogle {
   display: block;
-  padding: 14px 16px;
-  background: var(--surface);
-  border: 1.5px solid var(--border-soft);
-  border-radius: var(--radius);
-  text-decoration: none;
-  transition: border-color var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out);
+  width: 100%;
+  max-width: 100%;
+  min-height: 250px;
+  background: transparent !important;
+  overflow: hidden;
 }
-.side-ticker-card:hover { border-color: var(--primary); transform: translateY(-2px); }
-.side-ticker-tag { display: block; font-size: 0.72rem; font-weight: 700; color: var(--link); margin-bottom: 6px; }
-.side-ticker-text { font-size: 0.8rem; line-height: 1.45; color: var(--text-secondary); }
-@media (min-width: 1720px) { .side-ticker { display: block; } }
-@media (prefers-reduced-motion: reduce) { .side-ticker-track { animation: none; } }
+.ad-slot ins.adsbygoogle iframe { max-width: 100% !important; background: transparent; }
+.ad-slot--home { flex: 1; justify-content: center; margin: 0; }
+.ad-slot--inline,
+.ad-slot--end { min-height: 280px; }
+
+/* Sem anúncio para exibir: some inteiro (não deixa buraco/quadrado em branco) */
+.ad-slot:has(ins.adsbygoogle[data-ad-status="unfilled"]),
+.ad-slot ins.adsbygoogle[data-ad-status="unfilled"] { display: none !important; }
+
+/* Painel da home: se o anúncio não preencher, o painel inteiro recolhe */
+.home-ad-panel:has(ins.adsbygoogle[data-ad-status="unfilled"]) { display: none; }
+@media (min-width: 600px) {
+  .state-ad-grid:has(.home-ad-panel ins.adsbygoogle[data-ad-status="unfilled"]) { grid-template-columns: 1fr; }
+}
+
+/* Formatos automáticos do Google (âncora, vinheta, laterais) não podem
+   cobrir o conteúdo com fundo branco: ficam atrás do header/dock do site. */
+.google-auto-placed { max-width: 100%; overflow: hidden; }
+ins.adsbygoogle[data-anchor-status="dismissed"],
+ins.adsbygoogle[data-vignette-status="dismissed"] { display: none !important; }
+
+@media (max-width: 599px) {
+  .ad-slot { margin: 24px auto; }
+  /* espaço extra no fim da página para o dock/âncora não cobrir o rodapé */
+  body { scroll-padding-bottom: 96px; }
+}
 
 /* ── Rodapé ─────────────────────────────────────────────────────── */
 .footer {
