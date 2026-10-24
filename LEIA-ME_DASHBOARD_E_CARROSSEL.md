@@ -15,11 +15,17 @@ Os arquivos deste pacote têm os mesmos caminhos do repositório. Basta copiar a
 | `components/LatestCarousel.jsx` | Carrossel da home |
 | `tests/visit-store.test.mjs` | 6 testes da lógica (rodam com `npm test`) |
 
+## Arquivo ALTERADO extra: temas
+- `components/CategoryCards.jsx` — "Explore por tema" agora são chips compactos (bolinha de gabarito + nome + quantidade) em vez de 13 blocos coloridos de ~230px. Celular: uma fileira rolável; desktop: 3 linhas.
+- Animação: os chips sobem em sequência quando a seção aparece, e no hover/toque a bolinha é "preenchida" como marcar o gabarito. Respeita "reduzir movimento".
+- `app/styles/home.css` — o bloco antigo `.category-card*` foi trocado pelo novo `.tc*`; `app/page.js` ganhou a classe `section--tight` nessa seção.
+- A descrição de cada tema virou dica (`title`) ao passar o mouse.
+
 ## Arquivos ALTERADOS (mudanças pequenas)
 - `app/layout.js` — 2 linhas: importa e renderiza `<PageViewTracker />`
 - `app/admin/page.js` — 3 trechos: import, nova aba `traffic` em `TABS`, e `{tab === "traffic" && <AnalyticsPanel />}`
 - `app/page.js` — a lista "Novos artigos" virou `<LatestCarousel posts={latestPosts} />` (agora com 10 artigos, antes 6)
-- `app/styles/home.css` — CSS do carrossel acrescentado no FINAL do arquivo
+- `app/styles/home.css` — CSS do carrossel acrescentado no FINAL do arquivo e bloco de categorias trocado pelos chips
 - `.env.example` — documenta as 2 variáveis novas
 
 Se preferir não substituir `admin/page.js` e `home.css` inteiros (caso tenha mexido neles depois),

@@ -350,72 +350,118 @@
 .post-card--featured .cover-photo { filter: none; mix-blend-mode: normal; opacity: 1; }
 .post-card--featured .cover-marks { display: none; }
 
-/* ── Categorias: blocos de cor ──────────────────────────────────── */
-.category-scroll-hint { display: none; }
-.category-cards-grid {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: min(78%, 280px);
-  gap: 12px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  margin: 0 calc(var(--gutter) * -1);
-  padding: 4px var(--gutter) 16px;
-  scrollbar-width: none;
-}
-.category-cards-grid::-webkit-scrollbar { display: none; }
-
-.category-card {
-  position: relative;
+/* ── Temas: chips compactos ─────────────────────────────────────── */
+.tc { position: relative; }
+.tc-list {
+  list-style: none;
   display: flex;
-  flex-direction: column;
-  min-height: 190px;
-  padding: 18px;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  isolation: isolate;
-  scroll-snap-align: start;
-  text-decoration: none;
-  color: #fff;
-  background: var(--cat-deep);
-  transition: transform var(--t-base) var(--ease-out), background var(--t-base);
+  gap: 10px;
+  margin: 0 calc(var(--gutter) * -1);
+  padding: 4px var(--gutter) 8px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--gutter);
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  /* esmaece as bordas para indicar que há mais à direita/esquerda */
+  -webkit-mask: linear-gradient(90deg, transparent 0, #000 var(--gutter), #000 calc(100% - 28px), transparent 100%);
+          mask: linear-gradient(90deg, transparent 0, #000 var(--gutter), #000 calc(100% - 28px), transparent 100%);
 }
-.category-card::before {
+.tc-list::-webkit-scrollbar { display: none; }
+.tc-item { flex: none; scroll-snap-align: start; }
+
+.tc-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 5px 16px 5px 5px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color var(--t-base) var(--ease-out), transform var(--t-base) var(--ease-out), box-shadow var(--t-base) var(--ease-out);
+}
+/* a bolinha do gabarito: anel na cor do tema que se preenche no hover */
+.tc-bubble {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--cat);
+  overflow: hidden;
+}
+.tc-bubble::before {
   content: "";
   position: absolute; inset: 0; z-index: -1;
   background: var(--cat);
-  opacity: 0.5;
-  -webkit-mask: var(--rings) 70% 40% / 230% auto no-repeat;
-          mask: var(--rings) 70% 40% / 230% auto no-repeat;
-  transition: transform var(--t-slow) var(--ease-out), opacity var(--t-base);
+  transform: scale(0);
+  transition: transform var(--t-base) var(--ease-out);
 }
-.category-card:hover { transform: translateY(-4px); }
-.category-card:hover::before { transform: scale(1.08); opacity: 0.8; }
-.category-card:active { transform: scale(0.98); }
-.category-card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.category-card-code {
-  display: grid; place-items: center;
-  width: 42px; height: 42px;
-  border-radius: 50%;
-  background: var(--hl);
-  color: var(--on-hl);
+.tc-code {
+  font-size: 0.72rem;
   font-weight: 800;
-  font-size: 0.9rem;
   letter-spacing: -0.02em;
+  color: var(--cat-text);
+  transition: color var(--t-fast);
 }
-.category-card-count { font-size: 0.85rem; font-weight: 600; opacity: 0.85; }
-.category-card-title { margin-top: auto; padding-top: 28px; font-size: 1.4rem; font-weight: 800; line-height: 1.1; letter-spacing: -0.035em; font-stretch: 92%; }
-.category-card-desc { margin-top: 8px; font-size: 0.9rem; line-height: 1.4; color: rgba(255, 255, 255, 0.8); display: none; }
-.category-card-cta { margin-top: 12px; font-size: 0.9rem; font-weight: 700; display: inline-flex; gap: 6px; }
-.category-card-arrow { transition: transform var(--t-base) var(--ease-out); }
-.category-card:hover .category-card-arrow { transform: translateX(5px); }
+.tc-name { font-weight: 700; font-size: 0.95rem; letter-spacing: -0.01em; }
+.tc-count {
+  min-width: 24px;
+  padding: 1px 8px;
+  border-radius: var(--radius-full);
+  background: var(--cat-soft);
+  color: var(--cat-text);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.tc-chip:hover, .tc-chip:focus-visible { border-color: var(--cat); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.tc-chip:hover .tc-bubble::before, .tc-chip:focus-visible .tc-bubble::before { transform: scale(1); }
+.tc-chip:hover .tc-code, .tc-chip:focus-visible .tc-code { color: #fff; }
+.tc-chip:active { transform: scale(0.97); }
+[data-theme="dark"] .tc-chip:hover .tc-code, [data-theme="dark"] .tc-chip:focus-visible .tc-code { color: #0A0D24; }
+
+/* entrada em sequência (só quando o JS "armou" a seção) */
+.tc.is-armed .tc-item { opacity: 0; transform: translateY(10px) scale(0.96); }
+.tc.is-armed.is-in .tc-item {
+  opacity: 1;
+  transform: none;
+  transition: opacity 420ms var(--ease-out), transform 520ms var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 45ms);
+}
+/* depois de entrar, a bolinha "marca" uma vez, em cascata */
+.tc.is-in .tc-bubble { animation: tc-pop 520ms var(--ease-spring) both; animation-delay: calc(var(--i, 0) * 45ms + 160ms); }
+@keyframes tc-pop { 0% { transform: scale(0.6); } 100% { transform: scale(1); } }
+
+/* seção mais baixa quando contém só os chips */
+.section--tight { padding: 32px 0; }
+.section--tight .section-header { margin-bottom: 14px; }
+.section--tight .section-title { font-size: clamp(1.3rem, 1.1rem + 0.9vw, 1.7rem); }
 
 @media (min-width: 720px) {
-  .category-cards-grid { grid-auto-flow: row; grid-auto-columns: auto; grid-template-columns: repeat(3, 1fr); overflow: visible; margin: 0; padding: 0; gap: 16px; }
-  .category-card { min-height: 230px; padding: 22px; }
-  .category-card-desc { display: block; }
+  .tc-list {
+    flex-wrap: wrap;
+    gap: 10px 12px;
+    margin: 0;
+    padding: 2px 0;
+    overflow: visible;
+    -webkit-mask: none;
+            mask: none;
+  }
 }
-@media (min-width: 1040px) { .category-cards-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (prefers-reduced-motion: reduce) {
+  .tc-chip, .tc-bubble::before, .tc-code { transition: none; }
+  .tc.is-in .tc-bubble { animation: none; }
+}
 
 /* ── Ferramentas (simulado / materiais) ─────────────────────────── */
 .tools-grid { display: grid; gap: 16px; }

@@ -1,37 +1,69 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import { getCategoryMeta } from "../lib/category-meta";
 
-/** Blocos de cor por tema. Celular: carrossel com snap; desktop: grade. */
+/**
+ * Temas em formato "chip": uma bolinha de cartão-resposta (código da
+ * categoria) + nome + quantidade. Celular: uma única fileira rolável com
+ * snap; desktop: quebra em poucas linhas. Ocupa uma fração da altura dos
+ * antigos blocos coloridos.
+ *
+ * Animação (só CSS, ativada por IntersectionObserver):
+ *  - entrada: os chips sobem e aparecem em sequência quando a seção surge;
+ *  - hover/foco/toque: a bolinha é "preenchida", como marcar o gabarito.
+ * Sem JS ou com "reduzir movimento" tudo aparece parado, sem animação.
+ */
 export default function CategoryCards({ categories }) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
+
+    el.classList.add("is-armed");
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.classList.add("is-in");
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   if (!categories || categories.length === 0) return null;
 
   return (
-    <div className="category-cards-wrap">
-      <div className="category-cards-grid">
-        {categories.map((cat) => {
+    <nav className="tc" ref={ref} aria-label="Explorar por tema">
+      <ul className="tc-list">
+        {categories.map((cat, i) => {
           const meta = getCategoryMeta(cat.name);
           return (
-            <Link
-              key={cat.name}
-              href={`/blog?categoria=${encodeURIComponent(cat.name)}`}
-              className="category-card cat"
-              style={{ "--h": meta.hue }}
-            >
-              <div className="category-card-top">
-                <span className="category-card-code" aria-hidden="true">{meta.code}</span>
-                <span className="category-card-count">
-                  {cat.count} {cat.count === 1 ? "artigo" : "artigos"}
+            <li key={cat.name} className="tc-item" style={{ "--i": Math.min(i, 10) }}>
+              <Link
+                href={`/blog?categoria=${encodeURIComponent(cat.name)}`}
+                className="tc-chip cat"
+                style={{ "--h": meta.hue }}
+                title={meta.description}
+              >
+                <span className="tc-bubble" aria-hidden="true">
+                  <span className="tc-code">{meta.code}</span>
                 </span>
-              </div>
-              <h3 className="category-card-title">{cat.name}</h3>
-              <p className="category-card-desc">{meta.description}</p>
-              <span className="category-card-cta">
-                Ver artigos <span className="category-card-arrow" aria-hidden="true">→</span>
-              </span>
-            </Link>
+                <span className="tc-name">{cat.name}</span>
+                <span className="tc-count" aria-label={`${cat.count} ${cat.count === 1 ? "artigo" : "artigos"}`}>
+                  {cat.count}
+                </span>
+              </Link>
+            </li>
           );
         })}
-      </div>
-    </div>
+      </ul>
+    </nav>
   );
 }
