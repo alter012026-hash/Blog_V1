@@ -10,13 +10,13 @@ import Placeholder from "@tiptap/extension-placeholder";
 import TextAlign from "@tiptap/extension-text-align";
 
 const C = {
-  border: "#1F2D45",
-  bg: "#111827",
-  bgSoft: "#0D1526",
-  text: "#F1F5F9",
-  textMuted: "#94A3B8",
-  primary: "#3B82F6",
-  primaryGlow: "rgba(59,130,246,0.15)",
+  border: "#D3D9F4",
+  bg: "#FFFFFF",
+  bgSoft: "#E9EDFF",
+  text: "#12163A",
+  textMuted: "#454B73",
+  primary: "#2430E6",
+  primaryGlow: "rgba(36,48,230,0.10)",
 };
 
 function ToolButton({ onClick, active, disabled, title, children }) {

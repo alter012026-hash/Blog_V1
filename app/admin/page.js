@@ -11,26 +11,28 @@ const { getEditorialTitleIssue } = titleQuality;
 
 /* ─── Design tokens ─── */
 const C = {
-  bg: "#080E1A",
-  bgElevated: "#0D1526",
-  surface: "#111827",
-  surfaceHover: "#1A2535",
-  border: "#1F2D45",
-  borderSoft: "#151E2E",
-  primary: "#3B82F6",
-  primaryHover: "#2563EB",
-  primaryGlow: "rgba(59,130,246,0.15)",
-  accent: "#F59E0B",
-  accentGlow: "rgba(245,158,11,0.12)",
-  green: "#10B981",
-  greenGlow: "rgba(16,185,129,0.12)",
-  red: "#EF4444",
-  redGlow: "rgba(239,68,68,0.12)",
-  purple: "#8B5CF6",
-  text: "#F1F5F9",
-  textMuted: "#94A3B8",
-  textFaint: "#4B607A",
-  gradient: "linear-gradient(135deg, #1a2a4a 0%, #0f1929 100%)",
+  bg: "#F4F6FF",          /* papel */
+  bgElevated: "#E9EDFF",
+  surface: "#FFFFFF",
+  surfaceHover: "#E9EDFF",
+  border: "#D3D9F4",
+  borderSoft: "#E3E7FA",
+  primary: "#2430E6",     /* azul-caneta */
+  primaryHover: "#1A22B8",
+  primaryGlow: "rgba(36,48,230,0.10)",
+  accent: "#9A6B00",      /* âmbar legível em texto */
+  accentGlow: "rgba(255,212,59,0.30)",
+  hl: "#FFD43B",          /* marca-texto: preenchimentos */
+  ink: "#12163A",         /* tinta */
+  green: "#0B7A47",       /* gabarito */
+  greenGlow: "rgba(11,122,71,0.10)",
+  red: "#C93525",
+  redGlow: "rgba(201,53,37,0.10)",
+  purple: "#5B3FD0",
+  text: "#12163A",
+  textMuted: "#454B73",
+  textFaint: "#5F6590",
+  gradient: "none",
 };
 
 /* ─── Injeta CSS global para responsividade ─── */
@@ -41,6 +43,42 @@ const globalCSS = `
 
   input, textarea, select, button {
     font-family: inherit;
+  }
+  button, input, textarea, select, a {
+    transition: background-color .15s, border-color .15s, box-shadow .15s, color .15s;
+  }
+  button:disabled { cursor: not-allowed; opacity: .6; }
+  button:not(:disabled):hover { filter: brightness(0.95); }
+  :focus-visible { outline: 2px solid ${C.primary}; outline-offset: 2px; }
+  input:focus, textarea:focus, select:focus {
+    border-color: ${C.primary} !important;
+    box-shadow: 0 0 0 3px ${C.primaryGlow};
+    outline: none;
+  }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .55; } }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  }
+
+  .nav-btn {
+    display: flex; align-items: center; gap: 12px; width: 100%;
+    padding: 10px 12px; border-radius: 10px; border: 0;
+    background: transparent; color: ${C.textMuted};
+    font-size: 14px; font-weight: 500; cursor: pointer; text-align: left;
+  }
+  .nav-btn:hover { background: ${C.bgElevated}; color: ${C.text}; filter: none !important; }
+  .nav-btn[aria-current="page"] {
+    background: ${C.surface}; color: ${C.text}; font-weight: 700;
+    box-shadow: inset 0 0 0 1px ${C.border};
+  }
+  .nav-bubble {
+    width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
+    border: 2px solid ${C.textFaint}; background: transparent;
+  }
+  .nav-btn:hover .nav-bubble { border-color: ${C.primary}; }
+  [aria-current="page"] > .nav-bubble {
+    background: ${C.primary}; border-color: ${C.primary};
+    box-shadow: 0 0 0 3px ${C.primaryGlow};
   }
 
   ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -55,7 +93,7 @@ const globalCSS = `
     padding: 28px 20px;
   }
   .admin-sidebar {
-    width: 200px;
+    width: 220px;
     flex-shrink: 0;
     margin-right: 24px;
     position: sticky;
@@ -132,7 +170,7 @@ const globalCSS = `
       cursor: pointer;
       border-radius: 8px;
     }
-    .mobile-nav-icon { font-size: 18px; }
+    .mobile-nav-btn .nav-bubble { width: 14px; height: 14px; }
     .mobile-nav-label { font-size: 10px; font-weight: 600; }
     .mobile-nav-badge {
       position: absolute;
@@ -141,8 +179,8 @@ const globalCSS = `
       min-width: 16px;
       padding: 1px 4px;
       border-radius: 999px;
-      background: ${C.accent};
-      color: ${C.bg};
+      background: ${C.hl};
+      color: ${C.ink};
       font-size: 9px;
       font-weight: 800;
       line-height: 14px;
@@ -289,11 +327,9 @@ const s = {
   },
   label: {
     display: "block",
-    fontSize: 11,
-    fontWeight: 700,
-    color: C.textFaint,
-    textTransform: "uppercase",
-    letterSpacing: "0.09em",
+    fontSize: 13,
+    fontWeight: 600,
+    color: C.textMuted,
     marginBottom: 6,
   },
   fieldGroup: { marginBottom: 0 },
@@ -308,12 +344,11 @@ const s = {
     fontWeight: 600,
   }),
   sectionTitle: {
-    fontSize: 13,
+    fontFamily: "var(--font-display)",
+    fontSize: 16,
     fontWeight: 700,
-    color: C.textFaint,
-    textTransform: "uppercase",
-    letterSpacing: "0.1em",
-    marginBottom: 14,
+    color: C.text,
+    marginBottom: 12,
   },
 };
 
@@ -328,7 +363,7 @@ function Toast({ msg, type }) {
       background: C.surface, border: `1px solid ${color}44`,
       borderRadius: 12, padding: "12px 18px", color,
       fontWeight: 600, fontSize: 13,
-      boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px ${color}22`,
+      boxShadow: `0 8px 28px rgba(18,22,58,0.18), 0 0 0 1px ${color}22`,
       display: "flex", alignItems: "center", gap: 8,
       maxWidth: "calc(100vw - 32px)",
       animation: "fadeInUp 0.2s ease",
@@ -339,25 +374,17 @@ function Toast({ msg, type }) {
 }
 
 /* ─── StatCard ─── */
-function StatCard({ label, value, sub, color, icon }) {
+function StatCard({ label, value, sub, color }) {
   return (
-    <div style={{
-      ...s.card,
-      position: "relative",
-      overflow: "hidden",
-      padding: "18px 16px",
-    }}>
+    <div style={{ ...s.card, padding: "16px 18px", minWidth: 0 }}>
+      <div style={{ fontSize: 13, color: C.textMuted, marginBottom: 8 }}>{label}</div>
       <div style={{
-        position: "absolute", top: 0, right: 0, width: 80, height: 80,
-        background: (color || C.primary) + "08",
-        borderRadius: "0 14px 0 80px",
-        display: "flex", alignItems: "flex-start", justifyContent: "flex-end",
-        padding: "12px 12px 0 0",
-        fontSize: 18,
-      }}>{icon}</div>
-      <div style={{ fontSize: 10, color: C.textFaint, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>{label}</div>
-      <div style={{ fontSize: 32, fontWeight: 800, color: color || C.text, lineHeight: 1, marginBottom: 4 }}>{value}</div>
-      {sub && <div style={{ fontSize: 11, color: C.textFaint }}>{sub}</div>}
+        fontFamily: "var(--font-display)", fontSize: 32, fontWeight: 800,
+        color: color || C.text, lineHeight: 1, marginBottom: 6, letterSpacing: "-0.02em",
+      }}>{value}</div>
+      {sub && (
+        <div style={{ fontSize: 12, color: C.textFaint, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{sub}</div>
+      )}
     </div>
   );
 }
@@ -424,24 +451,24 @@ function LoginScreen({ onLogin }) {
         width: "100%", maxWidth: 380,
         background: C.surface, border: `1px solid ${C.border}`,
         borderRadius: 20, padding: "36px 32px",
-        boxShadow: "0 24px 80px rgba(0,0,0,0.5)",
+        boxShadow: "0 24px 64px rgba(18,22,58,0.12)",
       }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <div style={{
-            width: 56, height: 56, borderRadius: 14,
-            background: C.primaryGlow, border: `1px solid ${C.primary}33`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 24, margin: "0 auto 16px",
-          }}>🔐</div>
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: C.text, marginBottom: 4 }}>Painel Admin</h1>
-          <p style={{ color: C.textFaint, fontSize: 13 }}>Passeja Concursos</p>
+          <span aria-hidden="true" style={{
+            display: "block", width: 28, height: 28, borderRadius: "50%",
+            background: C.primary, boxShadow: `0 0 0 6px ${C.primaryGlow}`, margin: "0 auto 20px",
+          }} />
+          <h1 style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 800, color: C.text, marginBottom: 4 }}>Redação</h1>
+          <p style={{ color: C.textMuted, fontSize: 14 }}>Passeja Concursos</p>
         </div>
 
         <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div style={{ position: "relative" }}>
-            <label style={s.label}>Senha de administrador</label>
+            <label htmlFor="admin-password" style={s.label}>Senha de administrador</label>
             <input
+              id="admin-password"
               type={showPw ? "text" : "password"}
+              autoComplete="current-password"
               placeholder="••••••••"
               value={pw}
               onChange={(e) => setPw(e.target.value)}
@@ -451,12 +478,13 @@ function LoginScreen({ onLogin }) {
             <button
               type="button"
               onClick={() => setShowPw(!showPw)}
+              aria-label={showPw ? "Ocultar senha" : "Mostrar senha"}
               style={{
-                position: "absolute", right: 12, bottom: 10,
+                position: "absolute", right: 10, bottom: 9,
                 background: "none", border: "none", cursor: "pointer",
-                color: C.textFaint, fontSize: 15,
+                color: C.primary, fontSize: 12, fontWeight: 600, padding: "2px 4px",
               }}
-            >{showPw ? "🙈" : "👁"}</button>
+            >{showPw ? "Ocultar" : "Mostrar"}</button>
           </div>
 
           {error && (
@@ -465,7 +493,7 @@ function LoginScreen({ onLogin }) {
               borderRadius: 8, padding: "10px 14px",
               color: C.red, fontSize: 13, display: "flex", alignItems: "center", gap: 8,
             }}>
-              ✕ {error}
+              {error}
             </div>
           )}
 
@@ -474,9 +502,6 @@ function LoginScreen({ onLogin }) {
           </button>
         </form>
 
-        <p style={{ color: C.textFaint, fontSize: 11, marginTop: 24, textAlign: "center", lineHeight: 1.6 }}>
-          Configure <code style={{ background: C.bgElevated, padding: "1px 5px", borderRadius: 4 }}>ADMIN_PASSWORD</code> no .env.local
-        </p>
       </div>
     </div>
   );
@@ -2205,6 +2230,26 @@ function FeedbacksTab({ toast }) {
 }
 
 /* ─── ABA: NEWSLETTER ─── */
+function daysSince(iso) {
+  if (!iso) return null;
+  const t = new Date(iso).getTime();
+  return Number.isNaN(t) ? null : Math.floor((Date.now() - t) / 86400000);
+}
+
+function StaleSendNotice({ lastNotifiedDate }) {
+  const days = daysSince(lastNotifiedDate);
+  if (days === null || days < 4) return null;
+  return (
+    <div role="alert" style={{
+      background: C.accentGlow, border: `1px solid ${C.hl}`, borderRadius: 12,
+      padding: "12px 16px", fontSize: 14, color: C.text, lineHeight: 1.6,
+    }}>
+      <strong>Último envio há {days} dias.</strong> Se saíram artigos nesse período, abra a aba
+      Actions do repositório e confira a execução “Enviar Newsletter Diária”.
+    </div>
+  );
+}
+
 function NewsletterTab({ toast }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -2260,6 +2305,7 @@ function NewsletterTab({ toast }) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      <StaleSendNotice lastNotifiedDate={data.lastNotifiedDate} />
       {/* Cards */}
       <div className="stat-grid">
         <StatCard label="Inscritos ativos" value={data.active} sub="recebendo e-mails" color={C.green} icon="📬" />
@@ -2277,11 +2323,11 @@ function NewsletterTab({ toast }) {
       {/* Como funciona */}
       <div style={s.card}>
         <div style={s.sectionTitle}>Como funciona o envio automático</div>
-        <p style={{ fontSize: 13, color: C.textMuted, lineHeight: 1.7, margin: 0 }}>
-          Um GitHub Action roda 1x por dia e verifica se saiu post novo desde o
-          último aviso. Se sim, envia automaticamente um e-mail para todos os
-          inscritos ativos com o(s) post(s) novo(s). Se não saiu nada novo, o
-          dia é pulado — sem e-mails repetidos ou vazios.
+        <p style={{ fontSize: 14, color: C.textMuted, lineHeight: 1.7, margin: 0, maxWidth: 70 + "ch" }}>
+          Todo dia às 11h um GitHub Action procura artigos novos desde o último aviso.
+          Entram no e-mail os publicados nas últimas 48 horas, até 5 por envio. Artigos
+          com título genérico (como “Concurso R: …”) ficam de fora. Sem artigo elegível,
+          o dia é pulado.
         </p>
       </div>
 
@@ -2336,19 +2382,99 @@ function NewsletterTab({ toast }) {
   );
 }
 
+/* ─── ABA: VISÃO GERAL ─── */
+function OverviewTab({ pendingEditorialCount, goTo }) {
+  const [metrics, setMetrics] = useState(null);
+  const [news, setNews] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    const get = (url) => fetch(url, { cache: "no-store" }).then((r) => (r.ok ? r.json() : Promise.reject(new Error(url))));
+    Promise.allSettled([get("/api/admin/metrics"), get("/api/admin/newsletter")]).then(([m, n]) => {
+      if (!active) return;
+      if (m.status === "fulfilled") setMetrics(m.value);
+      if (n.status === "fulfilled") setNews(n.value);
+      setLoading(false);
+    });
+    return () => { active = false; };
+  }, []);
+
+  if (loading) return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      {[1, 2].map((i) => (
+        <div key={i} style={{ ...s.card, height: 80, background: C.surfaceHover, animation: "pulse 1.5s infinite" }} />
+      ))}
+    </div>
+  );
+
+  const staleDays = daysSince(news?.lastNotifiedDate);
+  const todo = [];
+  if (pendingEditorialCount > 0) {
+    todo.push({
+      key: "editorial",
+      text: pendingEditorialCount === 1 ? "1 rascunho aguarda sua revisão." : `${pendingEditorialCount} rascunhos aguardam sua revisão.`,
+      action: "Revisar", tab: "editorial",
+    });
+  }
+  if (staleDays !== null && staleDays >= 4) {
+    todo.push({
+      key: "newsletter",
+      text: `A newsletter não envia há ${staleDays} dias. Confira a execução no GitHub Actions.`,
+      action: "Ver newsletter", tab: "newsletter",
+    });
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      <div style={s.card}>
+        <div style={s.sectionTitle}>Precisa de atenção</div>
+        {todo.length === 0 ? (
+          <p style={{ fontSize: 14, color: C.textMuted, margin: 0 }}>Nada pendente. Revisões e newsletter estão em dia.</p>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {todo.map((item) => (
+              <div key={item.key} style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap",
+                padding: "12px 14px", background: C.accentGlow, borderRadius: 10, fontSize: 14, color: C.text,
+              }}>
+                <span style={{ flex: "1 1 240px" }}>{item.text}</span>
+                <button style={s.btn} onClick={() => goTo(item.tab)}>{item.action}</button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="stat-grid">
+        <StatCard label="Artigos publicados" value={metrics?.totalPosts ?? "—"} sub="no site" color={C.primary} />
+        <StatCard label="Nos últimos 7 dias" value={metrics?.postsLast7d ?? "—"} sub="artigos novos" color={C.green} />
+        <StatCard label="Inscritos ativos" value={news?.active ?? "—"} sub="recebem a newsletter" color={C.text} />
+        <StatCard
+          label="Último envio"
+          value={news?.lastNotifiedDate ? new Date(news.lastNotifiedDate).toLocaleDateString("pt-BR") : "—"}
+          sub={news?.lastNotifiedSlug || "nenhum registro"}
+          color={staleDays !== null && staleDays >= 4 ? C.red : C.text}
+        />
+      </div>
+    </div>
+  );
+}
+
 /* ─── TABS config ─── */
 const TABS = [
-  { id: "editorial", label: "Aprovações editoriais", icon: "✅", shortLabel: "Revisar" },
-  { id: "weekly", label: "Destaque semanal", icon: "⭐", shortLabel: "Destaque" },
-  { id: "newsletter", label: "Inscritos da newsletter", icon: "📬", shortLabel: "Inscritos" },
-  { id: "editor", label: "Artigos", icon: "📝", shortLabel: "Artigos" },
+  { id: "overview", label: "Visão geral", shortLabel: "Início", hint: "O que precisa da sua atenção hoje." },
+  { id: "editorial", label: "Aprovações editoriais", shortLabel: "Revisar", hint: "Rascunhos aguardando revisão antes de publicar." },
+  { id: "editor", label: "Artigos", shortLabel: "Artigos", hint: "Escreva e edite artigos com o editor visual." },
+  { id: "weekly", label: "Destaque semanal", shortLabel: "Destaque", hint: "O artigo em evidência na home esta semana." },
+  { id: "newsletter", label: "Newsletter", shortLabel: "Newsletter", hint: "Inscritos e envio diário por e-mail." },
 ];
 
 /* ─── PÁGINA PRINCIPAL ─── */
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [checking, setChecking] = useState(true);
-  const [tab, setTab] = useState("newsletter");
+  const [tab, setTab] = useState("overview");
   const [pendingEditorialCount, setPendingEditorialCount] = useState(null);
   const [toastState, setToastState] = useState({ msg: "", type: "ok" });
 
@@ -2390,7 +2516,7 @@ export default function AdminPage() {
   );
 
   if (!authed) return (
-    <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "var(--font-body), system-ui, sans-serif" }}>
       <StyleInjector />
       <LoginScreen onLogin={() => setAuthed(true)} />
     </div>
@@ -2398,20 +2524,33 @@ export default function AdminPage() {
 
   const activeTab = TABS.find((t) => t.id === tab);
 
+  const pendingBadge = (t, mobile) => t.id === "editorial" && pendingEditorialCount > 0 && (
+    <span
+      aria-label={`${pendingEditorialCount} aguardando revisão`}
+      className={mobile ? "mobile-nav-badge" : undefined}
+      style={mobile ? undefined : {
+        minWidth: 22, padding: "2px 7px", borderRadius: 999, background: C.hl, color: C.ink,
+        fontSize: 12, fontWeight: 800, textAlign: "center",
+      }}
+    >
+      {pendingEditorialCount}
+    </span>
+  );
+
   return (
     <div style={{
       minHeight: "100vh",
       background: C.bg,
       color: C.text,
-      fontFamily: "'Inter', system-ui, sans-serif",
+      fontFamily: "var(--font-body), system-ui, sans-serif",
       fontSize: 14,
     }}>
       <StyleInjector />
 
-      {/* Header */}
-      <div style={{
+      {/* Cabeçalho */}
+      <header style={{
         borderBottom: `1px solid ${C.border}`,
-        background: C.surface + "ee",
+        background: "rgba(244,246,255,0.88)",
         backdropFilter: "blur(12px)",
         padding: "0 20px",
         display: "flex",
@@ -2422,77 +2561,46 @@ export default function AdminPage() {
         top: 0,
         zIndex: 100,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <span style={{ fontWeight: 800, fontSize: 15, letterSpacing: "-0.02em" }} className="header-title">
-            <span style={{ color: C.accent }}>▲</span>{" "}
-            <span style={{ color: C.text }}>Admin</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span className="header-title" style={{ display: "flex", alignItems: "center", gap: 10, fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 17, letterSpacing: "-0.02em" }}>
+            <span aria-hidden="true" style={{ width: 14, height: 14, borderRadius: "50%", background: C.primary }} />
+            Passeja <span style={{ color: C.textFaint, fontWeight: 600 }}>redação</span>
           </span>
-          <span style={{ color: C.border, fontSize: 18 }}>|</span>
-          <a href="/" target="_blank" rel="noreferrer"
-            style={{ color: C.textFaint, fontSize: 12, textDecoration: "none", display: "flex", alignItems: "center", gap: 4 }}>
-            Ver site ↗
-          </a>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <button style={{ ...s.btnGhost, padding: "6px 14px", fontSize: 12 }} onClick={handleLogout}>Sair</button>
+          <a href="/" target="_blank" rel="noreferrer"
+            style={{ color: C.primary, fontSize: 13, fontWeight: 600, textDecoration: "none", padding: "6px 8px" }}>
+            Ver site ↗
+          </a>
+          <button style={{ ...s.btnGhost, padding: "6px 14px", fontSize: 13 }} onClick={handleLogout}>Sair</button>
         </div>
-      </div>
+      </header>
 
       {/* Layout principal */}
       <div className="admin-layout">
-        {/* Sidebar desktop */}
         <aside className="admin-sidebar">
-          <nav style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <nav aria-label="Seções do admin" style={{ display: "flex", flexDirection: "column", gap: 4, width: "100%" }}>
             {TABS.map((t) => (
               <button
                 key={t.id}
+                className="nav-btn"
+                aria-current={tab === t.id ? "page" : undefined}
                 onClick={() => setTab(t.id)}
-                style={{
-                  background: tab === t.id ? C.primaryGlow : "transparent",
-                  color: tab === t.id ? C.primary : C.textMuted,
-                  border: `1px solid ${tab === t.id ? C.primary + "44" : "transparent"}`,
-                  borderRadius: 9,
-                  padding: "10px 14px",
-                  fontSize: 13,
-                  fontWeight: tab === t.id ? 700 : 500,
-                  cursor: "pointer",
-                  textAlign: "left",
-                  width: "100%",
-                  transition: "all 0.15s",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                }}
               >
-                <span>{t.icon}</span>
+                <span className="nav-bubble" aria-hidden="true" />
                 <span style={{ flex: 1 }}>{t.label}</span>
-                {t.id === "editorial" && pendingEditorialCount !== null && (
-                  <span
-                    aria-label={`${pendingEditorialCount} artigos aguardando revisão`}
-                    style={{
-                      minWidth: 22,
-                      padding: "2px 6px",
-                      borderRadius: 999,
-                      background: pendingEditorialCount > 0 ? C.accentGlow : C.surfaceHover,
-                      color: pendingEditorialCount > 0 ? C.accent : C.textFaint,
-                      fontSize: 11,
-                      fontWeight: 800,
-                      textAlign: "center",
-                    }}
-                  >
-                    {pendingEditorialCount}
-                  </span>
-                )}
+                {pendingBadge(t, false)}
               </button>
             ))}
           </nav>
         </aside>
 
-        {/* Conteúdo */}
         <main style={{ flex: 1, minWidth: 0 }}>
-          <h1 style={{ fontSize: 20, fontWeight: 800, marginBottom: 24, marginTop: 0, color: C.text, display: "flex", alignItems: "center", gap: 8 }}>
-            <span>{activeTab?.icon}</span> {activeTab?.label}
+          <h1 style={{ fontFamily: "var(--font-display)", fontSize: 26, fontWeight: 800, letterSpacing: "-0.02em", margin: "0 0 4px", color: C.text }}>
+            {activeTab?.label}
           </h1>
+          <p style={{ margin: "0 0 24px", color: C.textMuted, fontSize: 14 }}>{activeTab?.hint}</p>
+          {tab === "overview" && <OverviewTab pendingEditorialCount={pendingEditorialCount} goTo={setTab} />}
           {tab === "editorial" && (
             <EditorialReviewPanel
               toast={showToast}
@@ -2505,25 +2613,19 @@ export default function AdminPage() {
         </main>
       </div>
 
-      {/* Nav mobile (bottom) */}
-      <nav className="mobile-nav">
+      {/* Navegação mobile (inferior) */}
+      <nav className="mobile-nav" aria-label="Seções do admin">
         {TABS.map((t) => (
           <button
             key={t.id}
             className="mobile-nav-btn"
+            aria-current={tab === t.id ? "page" : undefined}
             onClick={() => setTab(t.id)}
-            style={{
-              color: tab === t.id ? C.primary : C.textFaint,
-              position: "relative",
-            }}
+            style={{ color: tab === t.id ? C.primary : C.textFaint, position: "relative", fontWeight: tab === t.id ? 700 : 500 }}
           >
-            <span className="mobile-nav-icon">{t.icon}</span>
+            <span className="nav-bubble" aria-hidden="true" />
             <span className="mobile-nav-label">{t.shortLabel}</span>
-            {t.id === "editorial" && pendingEditorialCount > 0 && (
-              <span aria-label={`${pendingEditorialCount} pendentes`} className="mobile-nav-badge">
-                {pendingEditorialCount}
-              </span>
-            )}
+            {pendingBadge(t, true)}
           </button>
         ))}
       </nav>

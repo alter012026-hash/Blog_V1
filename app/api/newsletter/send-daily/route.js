@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAllPosts } from "../../../../lib/posts";
-import { sendDailyBroadcast } from "../../../../lib/newsletter-service";
+import { sendDailyBroadcast, selectPostsToNotify } from "../../../../lib/newsletter-service";
 import { getFile, commitFile } from "../../../../lib/github-commit";
 import config from "../../../../site.config";
 
@@ -64,28 +64,43 @@ export async function GET(request) {
     }
 
     // ── 2. Define quais posts são "novos" desde o último envio ──
-    const now = Date.now();
-    const windowMs = 48 * 60 * 60 * 1000; // 48h de tolerância
-    const lastNotifiedIndex = state.lastNotifiedSlug
-      ? posts.findIndex((p) => p.slug === state.lastNotifiedSlug)
-      : -1;
+    // (não avisados + dentro de 48h + título válido + máx. 5 por e-mail)
+    const { toSend: newPosts, skipped, latestSlug } = selectPostsToNotify({
+      posts,
+      lastNotifiedSlug: state.lastNotifiedSlug,
+    });
 
-    let newPosts;
-    if (lastNotifiedIndex === -1) {
-      // Nunca avisamos nada ainda (ou o post de referência não existe mais):
-      // considera "novo" só o que foi publicado dentro da janela de tolerância,
-      // para não disparar um e-mail com os 75 posts antigos de uma vez.
-      newPosts = posts.filter((p) => {
-        const d = p.date ? new Date(p.date).getTime() : 0;
-        return d && now - d < windowMs;
-      });
-    } else {
-      // Tudo que está "antes" do último avisado na lista (mais recente primeiro)
-      newPosts = posts.slice(0, lastNotifiedIndex);
+    if (skipped.length) {
+      console.warn(
+        `[newsletter] ${skipped.length} post(s) ignorado(s) por título inválido:`,
+        skipped.map((s) => `${s.slug} — ${s.issue}`)
+      );
     }
 
     if (!newPosts.length) {
-      return NextResponse.json({ ok: true, sent: false, reason: "Nenhum post novo nas últimas 24h." });
+      // Mesmo sem nada para enviar, avança o state: senão posts ignorados/antigos
+      // seriam reavaliados todo dia e o state ficaria preso para sempre.
+      if (latestSlug && latestSlug !== state.lastNotifiedSlug) {
+        try {
+          await commitFile(
+            STATE_PATH,
+            JSON.stringify(
+              { ...state, lastNotifiedSlug: latestSlug, lastNotifiedDate: new Date().toISOString() },
+              null,
+              2
+            ) + "\n",
+            "chore: avança state da newsletter (nenhum post elegível para envio)"
+          );
+        } catch (err) {
+          console.error("Falha ao salvar newsletter-state.json:", err.message);
+        }
+      }
+      return NextResponse.json({
+        ok: true,
+        sent: false,
+        reason: "Nenhum post elegível (novo, com título válido e dentro de 48h).",
+        skipped: skipped.map((s) => s.slug),
+      });
     }
 
     // ── 3. Envia o broadcast ──
@@ -97,7 +112,7 @@ export async function GET(request) {
 
     // ── 4. Atualiza o state (slug mais recente entre os avisados agora) ──
     const newState = {
-      lastNotifiedSlug: newPosts[0].slug,
+      lastNotifiedSlug: latestSlug,
       lastNotifiedDate: new Date().toISOString(),
       lastBroadcastId: result?.id || null,
     };
@@ -118,6 +133,7 @@ export async function GET(request) {
       ok: true,
       sent: true,
       postsNotified: newPosts.map((p) => p.slug),
+      skipped: skipped.map((s) => s.slug),
       broadcastId: result?.id || null,
     });
   } catch (err) {
