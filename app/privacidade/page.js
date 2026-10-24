@@ -50,6 +50,13 @@ export default function PrivacidadePage() {
                 enviamos e-mail, nome ou consulta digitada nesses eventos.
               </li>
               <li>
+                <strong>Estatísticas próprias de visitas:</strong> contamos visualizações,
+                tempo de leitura, rolagem, tipo de aparelho, navegador, origem do acesso e
+                país/estado/cidade aproximados. Não usamos cookies para isso nem guardamos o seu
+                endereço IP: o visitante é representado por um código diário irreversível, que
+                muda a cada dia e não permite identificar você.
+              </li>
+              <li>
                 <strong>Cookies e identificadores de anúncios:</strong> usados pelo Google
                 AdSense para exibir anúncios, inclusive anúncios personalizados com base no seu
                 histórico de navegação (ver seção abaixo).

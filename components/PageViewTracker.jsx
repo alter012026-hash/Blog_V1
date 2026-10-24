@@ -3,40 +3,125 @@
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
+function send(body) {
+  const payload = JSON.stringify(body);
+  try {
+    if (navigator.sendBeacon) {
+      const ok = navigator.sendBeacon("/api/track", new Blob([payload], { type: "application/json" }));
+      if (ok) return;
+    }
+    fetch("/api/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: payload,
+      keepalive: true,
+    }).catch(() => {});
+  } catch {
+    /* rastreio nunca deve quebrar a página */
+  }
+}
+
+function readUtm() {
+  try {
+    const q = new URLSearchParams(window.location.search);
+    const utm = { source: q.get("utm_source"), medium: q.get("utm_medium"), campaign: q.get("utm_campaign") };
+    return utm.source || utm.medium || utm.campaign ? utm : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function scrollPercent() {
+  const el = document.documentElement;
+  const total = Math.max(el.scrollHeight, 1);
+  return Math.min(100, Math.round(((window.scrollY + window.innerHeight) / total) * 100));
+}
+
 /**
- * Registra cada visualização de página (inclusive navegação interna do Next,
- * que não recarrega o documento). Sem cookies, sem localStorage.
+ * Registra visualizações (inclusive navegação interna do Next) e, ao sair de
+ * cada página, o tempo de leitura, a rolagem e se foi uma visita de uma
+ * página só (rejeição). Sem cookies, sem localStorage: tudo vive na memória
+ * da aba e some quando ela fecha.
  */
 export default function PageViewTracker() {
   const pathname = usePathname();
-  const lastPath = useRef(null);
-  const firstHit = useRef(true);
+  const st = useRef({ path: null, pages: 0, firstSent: false, since: null, acc: 0, scroll: 0, entry: true });
+
+  // Envia o que foi medido da página atual e zera os contadores.
+  function flush() {
+    const s = st.current;
+    if (!s.path) return;
+    if (s.since !== null) {
+      s.acc += Date.now() - s.since;
+      s.since = document.visibilityState === "visible" ? Date.now() : null;
+    }
+    const sec = Math.round(s.acc / 1000);
+    if (sec < 1 && s.firstSent) return;
+    send({ t: "e", path: s.path, sec, scroll: s.scroll, pages: s.pages, first: !s.firstSent });
+    s.firstSent = true;
+    s.acc = 0;
+  }
+
+  // Ouvintes globais (uma vez só).
+  useEffect(() => {
+    const s = st.current;
+    let raf = 0;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        s.scroll = Math.max(s.scroll, scrollPercent());
+      });
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") flush();
+      else if (s.path) s.since = Date.now();
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pagehide", flush);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pagehide", flush);
+      if (raf) cancelAnimationFrame(raf);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
-    if (!pathname || pathname === lastPath.current) return;
-    if (pathname === "/admin" || pathname.startsWith("/admin/")) return;
-    lastPath.current = pathname;
+    const s = st.current;
+    if (!pathname || pathname === s.path) return;
 
-    // O referrer externo só vale para a primeira página do carregamento;
-    // depois disso a origem é o próprio site.
-    const referrer = firstHit.current ? document.referrer : "";
-    firstHit.current = false;
-
-    const payload = JSON.stringify({ path: pathname, referrer });
-    try {
-      if (navigator.sendBeacon) {
-        const ok = navigator.sendBeacon("/api/track", new Blob([payload], { type: "application/json" }));
-        if (ok) return;
-      }
-      fetch("/api/track", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: payload,
-        keepalive: true,
-      }).catch(() => {});
-    } catch {
-      /* rastreio nunca deve quebrar a página */
+    // Foi para o /admin: fecha a medição da página pública e para de contar.
+    if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+      flush();
+      s.path = null;
+      s.since = null;
+      return;
     }
+
+    // Saindo de uma página pública para outra: envia o tempo da anterior.
+    s.pages += 1;
+    if (s.path) flush();
+
+    s.path = pathname;
+    s.scroll = 0;
+    s.acc = 0;
+    s.since = document.visibilityState === "visible" ? Date.now() : null;
+    const t = setTimeout(() => { s.scroll = Math.max(s.scroll, scrollPercent()); }, 500);
+
+    // O referrer externo só vale para a primeira página do carregamento.
+    const entry = s.entry;
+    send({
+      path: pathname,
+      referrer: entry ? document.referrer : "",
+      entry,
+      ...(entry ? { utm: readUtm() } : {}),
+    });
+    s.entry = false;
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
   return null;

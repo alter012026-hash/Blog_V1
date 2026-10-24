@@ -8,9 +8,11 @@ import {
   isVisitStoreConfigured,
   normalizePath,
   normalizeReferrer,
+  recordEngagement,
   recordVisit,
   visitorHash,
 } from "../../../lib/visit-store";
+import { classifyChannel, cleanUtm, parseGeo, parseUserAgent } from "../../../lib/visit-meta";
 
 export const dynamic = "force-dynamic";
 
@@ -43,16 +45,39 @@ export async function POST(request) {
     if (checkAdminAuth()) return done();
 
     const ip = getClientIp(request);
-    if (!checkRateLimit(`track:${ip}`, { limit: 120, windowMs: 60_000 }).allowed) return done();
+    if (!checkRateLimit(`track:${ip}`, { limit: 240, windowMs: 60_000 }).allowed) return done();
 
     const body = await request.json().catch(() => null);
     const path = normalizePath(body?.path, new Set(getAllSlugs()));
     if (!path) return done();
 
+    // Tempo na página + rolagem + rejeição (enviado ao sair da página).
+    if (body?.t === "e") {
+      await recordEngagement({
+        path,
+        seconds: body.sec,
+        scroll: body.scroll,
+        first: body.first === true,
+        bounce: body.first === true && Number(body.pages) === 1,
+      });
+      return done();
+    }
+
+    const entry = body?.entry === true;
+    const utm = entry ? cleanUtm(body?.utm) : null;
+    const source = normalizeReferrer(body?.referrer, host);
+    const { device, browser, os } = parseUserAgent(userAgent);
+    const geo = parseGeo(request.headers);
+
     await recordVisit({
       path,
-      referrer: normalizeReferrer(body?.referrer, host),
+      referrer: source,
       visitor: visitorHash({ ip, userAgent, day: dayKey() }),
+      device, browser, os,
+      ...geo,
+      channel: classifyChannel(source, utm || {}),
+      entry,
+      utm,
     });
   } catch (error) {
     console.error("[track]", error.message);

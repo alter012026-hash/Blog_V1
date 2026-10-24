@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { checkAdminAuth } from "../../../../lib/admin-auth";
 import { getAllPosts } from "../../../../lib/posts";
-import { isVisitStoreConfigured, readStats } from "../../../../lib/visit-store";
+import { isVisitStoreConfigured, readLive, readStats } from "../../../../lib/visit-store";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +13,15 @@ export async function GET(request) {
   }
   if (!isVisitStoreConfigured()) {
     return NextResponse.json({ configured: false });
+  }
+
+  // Consulta leve só do "online agora" (1 comando) — usada no polling do painel.
+  if (new URL(request.url).searchParams.get("live") === "1") {
+    try {
+      return NextResponse.json({ live: await readLive() }, { headers: { "Cache-Control": "no-store" } });
+    } catch (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
   }
 
   const requested = Number(new URL(request.url).searchParams.get("range"));
