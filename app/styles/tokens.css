@@ -179,6 +179,7 @@ body {
   overscroll-behavior-x: none;
   -webkit-tap-highlight-color: transparent;
   min-height: 100vh;
+  min-height: 100dvh;
   padding-bottom: calc(var(--dock-h) + env(safe-area-inset-bottom, 0px));
   transition: background var(--t-base) var(--ease-out), color var(--t-base) var(--ease-out);
 }
@@ -208,7 +209,8 @@ time, .tabular, .post-card-date, .post-card-reading, .article-meta-item {
   width: 100%;
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 0 var(--gutter);
+  /* respeita o "notch" do celular em modo paisagem */
+  padding-inline: max(var(--gutter), env(safe-area-inset-left, 0px)) max(var(--gutter), env(safe-area-inset-right, 0px));
 }
 
 .sr-only {
@@ -344,6 +346,16 @@ time, .tabular, .post-card-date, .post-card-reading, .article-meta-item {
 .section-link:hover { border-bottom-color: currentColor; }
 
 @media (min-width: 860px) { .section { padding: 80px 0; } }
+
+/* Duas seções "lisas" seguidas somavam os dois paddings (buraco enorme entre elas).
+   A segunda cede o espaço de cima: o respiro fica só o de uma seção. */
+.section:not(.section--alt) + .section:not(.section--alt) { padding-top: 0; }
+/* Celular: seções mais compactas */
+@media (max-width: 639px) {
+  .section { padding: 40px 0; }
+  .section-header { margin-bottom: 22px; gap: 10px; }
+  .section--tight { padding: 28px 0; }
+}
 
 /* Revelação ao rolar: desativada de propósito. Elementos ficam visíveis
    desde o primeiro paint (melhor LCP/CLS no celular); o movimento do site

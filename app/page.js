@@ -7,6 +7,7 @@ import HeroSheet from "../components/HeroSheet";
 import NewsletterInline from "../components/NewsletterInline";
 import BrazilStateMap from "../components/BrazilStateMap";
 import AdSense from "../components/AdSense";
+import AdSliverGuard from "../components/AdSliverGuard";
 import { getAllPosts, getCategoryStats, getPostBySlug } from "../lib/posts";
 import { getWeeklyFeatured } from "../lib/weekly-featured";
 import config from "../site.config";
@@ -38,8 +39,18 @@ export default function HomePage() {
     .slice(0, 10);
   const categoryStats = getCategoryStats();
 
+  // O painel de anúncio só existe quando o AdSense está realmente configurado
+  // e em produção. Antes ele aparecia como uma caixa vazia ("Publicidade" sem anúncio).
+  const adsReady = Boolean(
+    process.env.NODE_ENV === "production" &&
+    config.adsense.enabled &&
+    config.adsense.slots.sidebar &&
+    config.adsense.publisherId !== "ca-pub-XXXXXXXXXXXXXXXX"
+  );
+
   return (
     <main>
+      <AdSliverGuard />
       {/* ── Hero ─────────────────────────────────────────────── */}
       <section className="hero">
         <HeroSheet />
@@ -87,27 +98,24 @@ export default function HomePage() {
               <h2 className="section-title">Explore concursos por estado</h2>
             </div>
           </div>
-          <div className="state-ad-grid">
+          <div className={`state-ad-grid ${adsReady ? "" : "state-ad-grid--solo"}`.trim()}>
             <div className="state-explorer-panel">
               <p className="state-explorer-intro">
                 Escolha uma região no mapa para encontrar editais e notícias relacionados ao seu estado.
               </p>
               <BrazilStateMap />
             </div>
-            <aside className="home-ad-panel" aria-label="Espaço publicitário">
-              <span className="home-ad-label">Publicidade</span>
-              <AdSense
-                slot={config.adsense.slots.sidebar}
-                placement="home"
-                format="auto"
-                label={false}
-              />
-              {process.env.NODE_ENV !== "production" && (
-                <div className="home-ad-preview" aria-hidden="true">
-                  Prévia do espaço responsivo do Google AdSense
-                </div>
-              )}
-            </aside>
+            {adsReady && (
+              <aside className="home-ad-panel" aria-label="Espaço publicitário">
+                <span className="home-ad-label">Publicidade</span>
+                <AdSense
+                  slot={config.adsense.slots.sidebar}
+                  placement="home"
+                  format="auto"
+                  label={false}
+                />
+              </aside>
+            )}
           </div>
         </div>
       </section>

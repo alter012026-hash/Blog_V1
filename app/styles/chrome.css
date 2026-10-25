@@ -436,13 +436,22 @@
 
 /* Painel da home: se o anúncio não preencher, o painel inteiro recolhe */
 .home-ad-panel:has(ins.adsbygoogle[data-ad-status="unfilled"]) { display: none; }
-@media (min-width: 600px) {
+@media (min-width: 900px) {
   .state-ad-grid:has(.home-ad-panel ins.adsbygoogle[data-ad-status="unfilled"]) { grid-template-columns: 1fr; }
 }
 
 /* Formatos automáticos do Google (âncora, vinheta, laterais) não podem
    cobrir o conteúdo com fundo branco: ficam atrás do header/dock do site. */
-.google-auto-placed { max-width: 100%; overflow: hidden; }
+.google-auto-placed {
+  max-width: 100% !important;
+  margin-inline: auto !important;   /* o Google às vezes injeta margin-left deslocado (tira branca "torta") */
+  overflow: hidden;
+  background: transparent !important;
+}
+/* Anúncio automático sem conteúdo: recolhe por inteiro (era a faixa branca da home) */
+.google-auto-placed:has(ins.adsbygoogle[data-ad-status="unfilled"]),
+ins.adsbygoogle[data-ad-status="unfilled"] { display: none !important; }
+.google-auto-placed ins.adsbygoogle { max-width: 100% !important; }
 ins.adsbygoogle[data-anchor-status="dismissed"],
 ins.adsbygoogle[data-vignette-status="dismissed"] { display: none !important; }
 

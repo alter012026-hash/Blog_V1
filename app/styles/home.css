@@ -225,24 +225,22 @@
   text-align: center;
 }
 
-@media (min-width: 600px) and (max-width: 959px) {
-  .state-ad-grid { grid-template-columns: minmax(0, 1.2fr) minmax(220px, 0.8fr); }
-  .state-explorer-panel,
-  .home-ad-panel { padding: 20px; }
-}
-@media (min-width: 960px) {
-  .state-ad-grid { grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr); gap: 28px; }
+/* Estado + anúncio: uma coluna até 899px (o anúncio responsivo precisa de >= 300px
+   de largura para ser veiculado). Duas colunas só em telas largas. */
+.state-ad-grid--solo { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) {
+  .state-ad-grid:not(.state-ad-grid--solo) { grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.65fr); gap: 28px; }
 }
 @media (max-width: 599px) {
   .state-explorer-panel,
   .home-ad-panel { padding: 18px 14px; }
-  .state-map { width: min(100%, 390px); }
-  .state-map-picker { display: block; margin-top: 14px; }
-  .state-map-picker label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 700;
-  }
+  .home-ad-panel { min-height: 280px; }
+  .state-map-wrap { display: flex; flex-direction: column; }
+  /* celular: a lista de estados vem primeiro (alvo de toque grande); o mapa fica abaixo */
+  .state-map-picker { display: block; order: -1; margin: 16px 0 4px; }
+  .state-map { order: 1; width: min(100%, 390px); margin-top: 14px; }
+  .state-map-hint { order: 2; }
+  .state-map-picker label { display: block; margin-bottom: 8px; font-weight: 700; }
   .state-map-picker-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
   .state-map-picker select {
     min-width: 0;
@@ -253,9 +251,9 @@
     background: var(--surface);
     color: var(--text);
     font: inherit;
+    font-size: 16px; /* evita o zoom automático do iOS ao focar */
   }
-  .state-map-picker .btn { min-height: 48px; padding-inline: 12px; }
-  .home-ad-panel { min-height: 280px; }
+  .state-map-picker .btn { min-height: 48px; padding-inline: 14px; }
 }
 
 /* ── Cards de artigo ────────────────────────────────────────────── */
@@ -328,9 +326,10 @@
 }
 @media (min-width: 1000px) { .posts-grid { grid-template-columns: repeat(3, 1fr); } }
 
-/* destaque: ocupa duas colunas, capa gigante */
+/* destaque: ocupa a linha toda. Lado a lado só em telas largas (>= 860px);
+   abaixo disso empilha (capa em cima, texto embaixo) para o texto não ficar espremido. */
 .post-card--featured { grid-column: 1 / -1; }
-@media (min-width: 640px) {
+@media (min-width: 860px) {
   .post-card--featured { flex-direction: row; align-items: stretch; min-height: 320px; }
   .post-card--featured .post-card-media { width: 52%; aspect-ratio: auto; flex: none; }
   .post-card--featured .post-card-body { padding: 32px; justify-content: center; gap: 14px; }
@@ -338,11 +337,11 @@
   .post-card--featured .post-card-title a { -webkit-line-clamp: 4; }
   .post-card--featured .post-card-excerpt { -webkit-line-clamp: 3; font-size: 1.05rem; }
 }
-@media (max-width: 639px) {
+@media (max-width: 859px) {
   .post-card--featured { display: flex; flex-direction: column; padding: 0; overflow: hidden; gap: 0; }
   .post-card--featured .post-card-media { width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 0; }
-  .post-card--featured .post-card-body { padding: 18px; }
-  .post-card--featured .post-card-title { font-size: 1.4rem; line-height: 1.15; }
+  .post-card--featured .post-card-body { padding: 18px 20px 20px; }
+  .post-card--featured .post-card-title { font-size: clamp(1.3rem, 1.05rem + 1.6vw, 1.7rem); line-height: 1.15; }
   .post-card--featured .post-card-excerpt { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 }
 /* foto da capa (quando existir) em duotone da categoria — unifica ilustrações de qualidades diferentes */
@@ -822,4 +821,72 @@
 @media (prefers-reduced-motion: reduce) {
   .lc-track { scroll-behavior: auto; }
   .lc-card, .lc-arrow, .lc-progress span { transition: none; }
+}
+
+/* ================================================================
+   REVISÃO MOBILE DA HOME (celular primeiro)
+   ================================================================ */
+
+/* Sem anúncio: o painel do mapa vira "texto à esquerda, mapa à direita" em telas largas */
+@media (min-width: 760px) {
+  .state-ad-grid--solo .state-explorer-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 430px);
+    gap: 8px 40px;
+    align-items: center;
+  }
+  .state-ad-grid--solo .state-map-wrap { margin-top: 0; }
+}
+
+/* Toque: sem atraso de 300 ms e sem zoom por duplo toque nos controles */
+a, button, select, summary { touch-action: manipulation; }
+
+@media (max-width: 639px) {
+  /* Hero: mais compacto, título que nunca estoura a largura */
+  .hero { padding: 32px 0 40px; }
+  .hero h1 { font-size: clamp(2.1rem, 1.2rem + 6.2vw, 2.7rem); overflow-wrap: anywhere; hyphens: auto; }
+  .hero-desc { margin-top: 14px; font-size: 1.02rem; }
+  .hero-grid { gap: 26px; }
+  .hero-actions { flex-direction: column; gap: 10px; margin-top: 22px; }
+  .hero-actions .btn { width: 100%; min-height: 52px; white-space: normal; text-align: center; }
+  .hero-facts { margin-top: 16px; font-size: 0.88rem; }
+
+  /* "Por onde começar": linhas mais enxutas, alvo de toque >= 56px */
+  .qs { padding: 6px; }
+  .qs-head { padding: 14px 14px 8px; }
+  .qs-row { padding: 12px 14px; min-height: 60px; gap: 12px; }
+  .qs-row + .qs-row::before { left: 14px; right: 14px; }
+
+  /* Links "Ver todos": área de toque de 44px */
+  .section-link { display: inline-flex; align-items: center; min-height: 44px; }
+
+  /* Ferramentas: cartões menores, texto sem corte */
+  .tool { min-height: 0; padding: 22px 20px; gap: 8px; }
+  .tool-cta { margin-top: 14px; }
+  .tool-title { max-width: none; }
+
+  /* Confiança + newsletter */
+  .trust { gap: 22px; }
+  .trust-item { padding: 16px; gap: 12px; }
+  .nl-inline { padding: 24px 18px; gap: 20px; }
+  .nl-inline-input, .nl-inline-btn { width: 100%; height: 52px; }
+  .nl-inline-input { font-size: 16px; } /* evita zoom do iOS */
+
+  /* Carrossel: mostra um pedaço do próximo card (convida a arrastar) */
+  .lc-slide { flex-basis: 80%; }
+}
+
+/* Telas bem estreitas (iPhone SE, Android compactos) */
+@media (max-width: 360px) {
+  .hero h1 { font-size: 2rem; }
+  .qs-label { font-size: 0.98rem; }
+  .post-card { grid-template-columns: 80px 1fr; gap: 12px; padding: 10px; }
+  .post-card-media { width: 80px; height: 80px; }
+  .state-map-picker-controls { grid-template-columns: 1fr; }
+  .state-map-picker .btn { width: 100%; }
+}
+
+/* Paisagem baixa no celular: o hero não ocupa a tela inteira */
+@media (max-height: 480px) and (orientation: landscape) {
+  .hero { padding: 24px 0 28px; }
 }
