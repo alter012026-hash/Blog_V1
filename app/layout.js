@@ -8,6 +8,7 @@ import { Bricolage_Grotesque, Literata } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import AdSenseScript from "../components/AdSenseScript";
 import AnalyticsEvents from "../components/AnalyticsEvents";
+import ConsentBanner from "../components/ConsentBanner";
 import PageViewTracker from "../components/PageViewTracker";
 import PageTransition from "../components/PageTransition";
 import RouteProgress from "../components/RouteProgress";
@@ -108,6 +109,9 @@ export default function RootLayout({ children }) {
         <MobileDock />
         <AnalyticsEvents />
         <PageViewTracker />
+        <HideOn paths={["/admin"]}>
+          <ConsentBanner />
+        </HideOn>
         {isVercelProduction && <Analytics />}
       </body>
     </html>

@@ -40,12 +40,14 @@ function scrollPercent() {
 /**
  * Registra visualizações (inclusive navegação interna do Next) e, ao sair de
  * cada página, o tempo de leitura, a rolagem e se foi uma visita de uma
- * página só (rejeição). Sem cookies, sem localStorage: tudo vive na memória
- * da aba e some quando ela fecha.
+ * página só (rejeição). Esta camada é anônima: sem cookies, sem localStorage,
+ * tudo vive na memória da aba. Quem aceita os cookies (ver ConsentBanner) tem
+ * também a visita individual registrada pelo servidor, que reconhece o
+ * consentimento pelo cookie enviado nessas mesmas requisições.
  */
 export default function PageViewTracker() {
   const pathname = usePathname();
-  const st = useRef({ path: null, pages: 0, firstSent: false, since: null, acc: 0, scroll: 0, entry: true });
+  const st = useRef({ path: null, pages: 0, firstSent: false, since: null, acc: 0, scroll: 0, entry: true, ref0: "", utm0: undefined });
 
   // Envia o que foi medido da página atual e zera os contadores.
   function flush() {
@@ -89,6 +91,19 @@ export default function PageViewTracker() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Aceitou os cookies agora: abre a visita individual com a página atual.
+  // (As visualizações anteriores ao aceite ficam só no painel anônimo.)
+  useEffect(() => {
+    const onConsent = (event) => {
+      const s = st.current;
+      if (event.detail?.choice !== "accepted" || !s.path) return;
+      const first = s.pages === 1;
+      send({ t: "c", path: s.path, entry: first, referrer: first ? s.ref0 : "", ...(first ? { utm: s.utm0 } : {}) });
+    };
+    window.addEventListener("pj:consent", onConsent);
+    return () => window.removeEventListener("pj:consent", onConsent);
+  }, []);
+
   useEffect(() => {
     const s = st.current;
     if (!pathname || pathname === s.path) return;
@@ -113,11 +128,15 @@ export default function PageViewTracker() {
 
     // O referrer externo só vale para a primeira página do carregamento.
     const entry = s.entry;
+    if (entry) {
+      s.ref0 = document.referrer;
+      s.utm0 = readUtm();
+    }
     send({
       path: pathname,
-      referrer: entry ? document.referrer : "",
+      referrer: entry ? s.ref0 : "",
       entry,
-      ...(entry ? { utm: readUtm() } : {}),
+      ...(entry ? { utm: s.utm0 } : {}),
     });
     s.entry = false;
     return () => clearTimeout(t);

@@ -2,6 +2,7 @@ import Link from "next/link";
 import config from "../site.config";
 import Logo from "./Logo";
 import NewsletterBox from "./NewsletterBox";
+import { CookiePrefsButton } from "./ConsentBanner";
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -43,6 +44,7 @@ export default function Footer() {
           <p className="footer-copy">
             © {year} {config.name}. Todos os direitos reservados.
             <small>Links de afiliado podem gerar comissão sem custo para você.</small>
+            <CookiePrefsButton className="footer-linkbtn" />
           </p>
         </div>
       </div>

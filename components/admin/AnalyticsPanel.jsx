@@ -14,13 +14,13 @@ const GROUPS = { day: "Dia", week: "Semana", month: "Mês" };
 const GROUPS_BY_RANGE = { 7: ["day"], 30: ["day", "week"], 90: ["day", "week", "month"], 365: ["week", "month"] };
 const DEFAULT_GROUP = { 7: "day", 30: "day", 90: "week", 365: "month" };
 
-const nf = new Intl.NumberFormat("pt-BR");
+export const nf = new Intl.NumberFormat("pt-BR");
 const MONTHS = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
 const WEEKDAYS = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
 const WEEKDAYS_LONG = ["segunda", "terça", "quarta", "quinta", "sexta", "sábado", "domingo"];
 
-const PALETTE = ["#2430E6", "#7C3AED", "#0EA5E9", "#10B981", "#F59E0B", "#EC4899", "#64748B", "#14B8A6"];
-const CHANNEL_COLORS = {
+export const PALETTE = ["#2430E6", "#7C3AED", "#0EA5E9", "#10B981", "#F59E0B", "#EC4899", "#64748B", "#14B8A6"];
+export const CHANNEL_COLORS = {
   "Busca orgânica": "#10B981", Direto: "#2430E6", Social: "#EC4899", Referência: "#F59E0B", "E-mail": "#0EA5E9", Pago: "#7C3AED",
 };
 
@@ -52,7 +52,7 @@ const ICONS = {
 /* ───────────────────────── utilitários ───────────────────────── */
 
 const parseKey = (key) => { const [y, m, d] = key.split("-").map(Number); return { y, m, d }; };
-const shortDay = (key) => { const { m, d } = parseKey(key); return `${d} ${MONTHS[m - 1]}`; };
+export const shortDay = (key) => { const { m, d } = parseKey(key); return `${d} ${MONTHS[m - 1]}`; };
 const dow = (key) => (new Date(`${key}T00:00:00Z`).getUTCDay() + 6) % 7; // segunda = 0
 
 function weekStart(key) {
@@ -77,15 +77,15 @@ function groupSeries(series, group) {
   });
 }
 
-function fmtDur(sec) {
+export function fmtDur(sec) {
   if (sec === null || sec === undefined) return "—";
   if (sec < 60) return `${sec}s`;
   const m = Math.floor(sec / 60), s = sec % 60;
   return s ? `${m}min ${s}s` : `${m}min`;
 }
-const pctOf = (n, total) => (total ? Math.round((n / total) * 100) : 0);
-const flag = (code) => (/^[A-Z]{2}$/.test(code) ? String.fromCodePoint(...[...code].map((c) => 127397 + c.charCodeAt(0))) : "🌐");
-function countryName(code) {
+export const pctOf = (n, total) => (total ? Math.round((n / total) * 100) : 0);
+export const flag = (code) => (/^[A-Z]{2}$/.test(code) ? String.fromCodePoint(...[...code].map((c) => 127397 + c.charCodeAt(0))) : "🌐");
+export function countryName(code) {
   if (code === "??") return "Desconhecido";
   try { return new Intl.DisplayNames(["pt-BR"], { type: "region" }).of(code) || code; } catch { return code; }
 }
@@ -123,7 +123,7 @@ function useWidth() {
 
 /* ───────────────────────── estilos ───────────────────────── */
 
-const CSS = `
+export const CSS = `
 .tp{--c-primary:#2430E6;--c-violet:#7C3AED;--c-text:#12163A;--c-muted:#454B73;--c-faint:#6A6F99;--c-line:#E3E7FA;--c-soft:#F3F5FF;--c-card:#fff;--c-green:#0B7A47;--c-red:#C93525;
   display:flex;flex-direction:column;gap:18px;color:var(--c-text)}
 .tp *{box-sizing:border-box}
@@ -203,7 +203,7 @@ const CSS = `
 
 /* ───────────────────────── blocos visuais ───────────────────────── */
 
-function Segmented({ options, value, onChange, label, light }) {
+export function Segmented({ options, value, onChange, label, light }) {
   return (
     <div role="group" aria-label={label} className={`tp-seg${light ? " light" : ""}`}>
       {options.map((o) => (
@@ -228,7 +228,7 @@ function Spark({ values, color }) {
   );
 }
 
-function Kpi({ label, value, sub, delta, icon, color, spark }) {
+export function Kpi({ label, value, sub, delta, icon, color, spark }) {
   return (
     <div className="tp-card tp-kpi">
       <div className="tp-kpi-top">
@@ -247,7 +247,7 @@ function Kpi({ label, value, sub, delta, icon, color, spark }) {
   );
 }
 
-function deltaOf(now, before) {
+export function deltaOf(now, before) {
   if (before === null || before === undefined) return null;
   if (before === 0) return now > 0 ? { text: "novo", up: true } : null;
   const pct = Math.round(((now - before) / before) * 100);
@@ -320,7 +320,7 @@ function AreaChart({ points }) {
   );
 }
 
-function Donut({ items, colorOf, centerValue, centerLabel }) {
+export function Donut({ items, colorOf, centerValue, centerLabel }) {
   const total = items.reduce((s, i) => s + i.views, 0);
   const R = 52, C = 2 * Math.PI * R;
   let acc = 0;
@@ -353,7 +353,7 @@ function Donut({ items, colorOf, centerValue, centerLabel }) {
   );
 }
 
-function BarsH({ items, labelOf, subOf, total }) {
+export function BarsH({ items, labelOf, subOf, total }) {
   const max = Math.max(...items.map((i) => i.views), 1);
   if (!items.length) return <div className="tp-empty">Ainda sem dados neste período.</div>;
   return (
@@ -372,7 +372,7 @@ function BarsH({ items, labelOf, subOf, total }) {
   );
 }
 
-function ColumnChart({ values, labels, labelEvery = 1, highlight, unit = "visualizações", height = 150 }) {
+export function ColumnChart({ values, labels, labelEvery = 1, highlight, unit = "visualizações", height = 150 }) {
   const max = Math.max(...values, 1);
   const [hov, setHov] = useState(null);
   return (
@@ -423,7 +423,7 @@ function BrazilTiles({ regions }) {
   );
 }
 
-function Card({ title, sub, children, right, delay = 0 }) {
+export function Card({ title, sub, children, right, delay = 0 }) {
   return (
     <section className="tp-card" style={{ animationDelay: `${delay}ms` }}>
       <div className="tp-head">
