@@ -51,6 +51,13 @@ export default function PrivacidadePage() {
                 enviamos e-mail, nome ou consulta digitada nesses eventos.
               </li>
               <li>
+                <strong>Progresso no simulado (só no seu aparelho):</strong> seu nível, XP,
+                sequência de dias, conquistas e a lista de questões que você errou ficam guardados
+                no armazenamento local do seu navegador, para você continuar de onde parou. Não
+                enviamos esse histórico aos nossos servidores e ele não identifica você. Para
+                apagar, limpe os dados do site no navegador.
+              </li>
+              <li>
                 <strong>Estatísticas próprias de visitas (sem cookies):</strong> contamos
                 visualizações, tempo de leitura, rolagem, tipo de aparelho, navegador, origem do
                 acesso e país/estado/cidade aproximados. Para todos os visitantes isso é feito sem

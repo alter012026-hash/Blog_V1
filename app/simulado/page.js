@@ -1,938 +1,852 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import "./simulado.css";
 
-import { BANCAS, getMaterias, getQuestions } from "../../lib/quiz-bank";
+import {
+  BANCAS, BANCA_INFO, ESCOPO_TODAS,
+  getMaterias, countQuestions, getQuestions, getQuestionById, getDailyChallenge, allQuestions, shuffle,
+} from "../../lib/quiz-bank";
+import { PORTAIS, ACERVOS } from "../../lib/quiz-sources";
+import { loadState, saveState, applyRun, levelInfo, hojeKey, pontosFracos, CONQUISTAS, emptyState } from "../../lib/simulado-store";
 import { trackSiteEvent } from "../../lib/analytics-events";
 
-// ─── TELAS ────────────────────────────────────────────────────────────────────
-// 0 = config, 1 = email gate, 2 = quiz, 3 = resultado
+// ─── constantes e utilitários ────────────────────────────────────────────────
+const SEC_CE = 60;   // segundos por item Certo/Errado (modo prova)
+const SEC_MC = 100;  // segundos por questão de múltipla escolha (modo prova)
+const AI_EXTRA = 5;  // questões inéditas de IA adicionadas quando o aluno pede
 
-export default function SimuladoPage() {
-  const [screen, setScreen] = useState(0);
-  const [banca, setBanca] = useState(BANCAS[0]);
-  const [materia, setMateria] = useState(getMaterias(BANCAS[0])[0]);
-  const [email, setEmail] = useState("");
-  const [nome, setNome] = useState("");
-  const [emailSent, setEmailSent] = useState(false);
-  const [emailError, setEmailError] = useState("");
+const fmt = (s) => {
+  const v = Math.max(0, Math.round(s));
+  return `${String(Math.floor(v / 60)).padStart(2, "0")}:${String(v % 60).padStart(2, "0")}`;
+};
 
-  const [questions, setQuestions] = useState([]);
-  const [current, setCurrent] = useState(0);
-  const [selected, setSelected] = useState(null);
-  const [answers, setAnswers] = useState([]);
-  const [showExplain, setShowExplain] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(0);
-  const [totalTime, setTotalTime] = useState(0);
-  const [elapsedPerQ, setElapsedPerQ] = useState([]);
-  const [qStart, setQStart] = useState(Date.now());
-  const [streak, setStreak] = useState(0);
-  const [maxStreak, setMaxStreak] = useState(0);
-  const [xp, setXp] = useState(0);
-  const [combo, setCombo] = useState(0);
-  const [showCombo, setShowCombo] = useState(false);
-  const [comboText, setComboText] = useState("");
-  const [answered, setAnswered] = useState(false);
-  const timerRef = useRef(null);
-  const [emailLoading, setEmailLoading] = useState(false);
+const ontemKey = () => hojeKey(new Date(Date.now() - 864e5));
+const escopoLabel = (e) => (e === ESCOPO_TODAS ? "Simulado completo" : e);
+const secPorQuestao = (q) => (q.formato === "ce" ? SEC_CE : SEC_MC);
 
-  // ── IA: geração de questões e tutor (novo) ──────────────────────────────
-  const [quantidade, setQuantidade] = useState(10);
-  const [loadingQuiz, setLoadingQuiz] = useState(false);
-  const [quizError, setQuizError] = useState("");
-  const [questionSource, setQuestionSource] = useState(null); // "ai" | "fallback"
-  const [tutorFeedback, setTutorFeedback] = useState(null);
-  const [tutorLoading, setTutorLoading] = useState(false);
-  const [tutorFetched, setTutorFetched] = useState(false);
-
-  const SEC_PER_Q = 90;
-
-  // ── banca change
-  useEffect(() => {
-    const mats = getMaterias(banca);
-    setMateria(mats[0] || "");
-  }, [banca]);
-
-  // ── timer
-  useEffect(() => {
-    if (screen !== 2) return;
-    const total = questions.length * SEC_PER_Q;
-    setTotalTime(total);
-    setTimeLeft(total);
-    timerRef.current = setInterval(() => {
-      setTimeLeft(t => {
-        if (t <= 1) {
-          clearInterval(timerRef.current);
-          finishQuiz();
-          return 0;
-        }
-        return t - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timerRef.current);
-  }, [screen]);
-
-  async function startQuiz() {
-    trackSiteEvent("quiz_start", { banca, materia, question_count: quantidade });
-    setLoadingQuiz(true);
-    setQuizError("");
-    setQuestionSource(null);
-    setTutorFeedback(null);
-    setTutorFetched(false);
-
-    let qs = [];
-    let source = "fallback";
-
-    try {
-      const res = await fetch("/api/simulado/questions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ banca, materia, quantidade }),
-      });
-      const data = await res.json();
-
-      if (!res.ok || !Array.isArray(data.questions) || data.questions.length < 5) {
-        throw new Error(data.error || "Não foi possível gerar as questões.");
-      }
-      qs = data.questions;
-      source = data.source || "fallback";
-    } catch (err) {
-      // Última tentativa: usa o banco estático direto no cliente, caso a
-      // própria requisição à API tenha falhado (ex.: sem conexão).
-      qs = getQuestions(banca, materia, quantidade);
-      source = "fallback";
-      if (qs.length < 5) {
-        setLoadingQuiz(false);
-        setQuizError("Não foi possível carregar questões para esta combinação. Tente outra banca/matéria.");
-        return;
-      }
-    }
-
-    setQuestions(qs);
-    setQuestionSource(source);
-    setAnswers([]);
-    setCurrent(0);
-    setSelected(null);
-    setAnswered(false);
-    setShowExplain(false);
-    setStreak(0);
-    setMaxStreak(0);
-    setXp(0);
-    setCombo(0);
-    setElapsedPerQ([]);
-    setQStart(Date.now());
-    setLoadingQuiz(false);
-    setScreen(2);
-  }
-
-  function handleSelect(idx) {
-    if (answered) return;
-    setSelected(idx);
-    setAnswered(true);
-    setShowExplain(true);
-
-    const q = questions[current];
-    const correct = idx === q.gabarito;
-    const elapsed = Math.round((Date.now() - qStart) / 1000);
-    setElapsedPerQ(p => [...p, elapsed]);
-
-    // scoring
-    const speedBonus = Math.max(0, 30 - elapsed) * 2;
-    let gainedXp = correct ? 100 + speedBonus : 0;
-
-    let newCombo = correct ? combo + 1 : 0;
-    let newStreak = correct ? streak + 1 : 0;
-    setCombo(newCombo);
-    setStreak(newStreak);
-    setMaxStreak(s => Math.max(s, newStreak));
-
-    if (correct && newCombo >= 3) {
-      const bonus = newCombo >= 5 ? 150 : 75;
-      gainedXp += bonus;
-      setComboText(newCombo >= 5 ? `🔥 COMBO x${newCombo}! +${bonus} XP` : `⚡ COMBO x${newCombo}! +${bonus} XP`);
-      setShowCombo(true);
-      setTimeout(() => setShowCombo(false), 2000);
-    }
-
-    setXp(x => x + gainedXp);
-    setAnswers(a => [...a, { q: q.id, selected: idx, correct, elapsed, xpGained: gainedXp }]);
-  }
-
-  function nextQuestion() {
-    if (current + 1 >= questions.length) {
-      clearInterval(timerRef.current);
-      finishQuiz();
+/** XP: 100 por acerto (+ bônus de velocidade no treino) e combos a partir de 3 acertos seguidos. */
+function computeXp(list, mode) {
+  let combo = 0, max = 0, xp = 0;
+  const per = [];
+  for (const a of list) {
+    let g = 0;
+    if (a && a.answered && a.correct) {
+      combo += 1;
+      max = Math.max(max, combo);
+      g = 100 + (mode === "treino" ? Math.max(0, 30 - (a.elapsed || 0)) * 2 : 0);
+      g += combo >= 5 ? 150 : combo >= 3 ? 75 : 0;
     } else {
-      setCurrent(c => c + 1);
-      setSelected(null);
-      setAnswered(false);
-      setShowExplain(false);
-      setQStart(Date.now());
+      combo = 0;
     }
+    xp += g;
+    per.push(g);
+  }
+  return { xp, maxStreak: max, per };
+}
+
+function normalizeAI(q, i, banca, materia) {
+  const formato = q.formato || (q.alternativas?.length === 2 ? "ce" : "mc");
+  return { ...q, id: q.id || `ai-${Date.now()}-${i}`, banca, materia, formato, assunto: q.assunto || "Questão inédita", nivel: q.nivel || 2, fonte: "", ai: true };
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+export default function SimuladoPage() {
+  // ── navegação ──
+  const [screen, setScreen] = useState("home"); // home | loading | quiz | result
+  const [today, setToday] = useState("");
+
+  // ── perfil (localStorage) ──
+  const [profile, setProfile] = useState(emptyState());
+  useEffect(() => { setProfile(loadState()); setToday(hojeKey()); }, []);
+
+  // ── montador ──
+  const [banca, setBanca] = useState("CEBRASPE");
+  const [escopo, setEscopo] = useState(ESCOPO_TODAS);
+  const [modo, setModo] = useState("treino");
+  const [useAI, setUseAI] = useState(false);
+  const [quizError, setQuizError] = useState("");
+  useEffect(() => { setEscopo(ESCOPO_TODAS); }, [banca]);
+  useEffect(() => { if (escopo === ESCOPO_TODAS) setUseAI(false); }, [escopo]);
+
+  // ── rodada ──
+  const [run, setRun] = useState(null);
+  const runRef = useRef(null);
+  runRef.current = run;
+  // grava no ref na hora: atalhos de teclado em sequência rápida não podem ler estado velho
+  const commit = useCallback((next) => { runRef.current = next; setRun(next); }, []);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [toast, setToast] = useState("");
+  const [confirm, setConfirm] = useState(null); // "finish" | "abandon" | null
+  const spentRef = useRef([]);
+  const qStartRef = useRef(Date.now());
+  const finishedRef = useRef(false);
+
+  // ── resultado ──
+  const [result, setResult] = useState(null);
+  const [tab, setTab] = useState("revisar");
+  const [tutor, setTutor] = useState({ loading: false, text: null });
+  const [mail, setMail] = useState({ nome: "", email: "", loading: false, sent: false, error: "" });
+  const [ringOn, setRingOn] = useState(false);
+
+  useEffect(() => { window.scrollTo({ top: 0 }); }, [screen]);
+
+  // ───────────────────────── iniciar rodadas ─────────────────────────
+  const startRun = useCallback((questions, cfg) => {
+    spentRef.current = [];
+    qStartRef.current = Date.now();
+    finishedRef.current = false;
+    const mode = cfg.mode;
+    const total = mode === "prova" ? questions.reduce((s, q) => s + secPorQuestao(q), 0) : 0;
+    setRun({ id: Date.now(), questions, answers: [], current: 0, mode, banca: cfg.banca, escopo: cfg.escopo, kind: cfg.kind, repeat: !!cfg.repeat, total, useAI: !!cfg.useAI });
+    setTimeLeft(total);
+    setResult(null); setTutor({ loading: false, text: null }); setTab("revisar"); setRingOn(false);
+    setMail((m) => ({ ...m, sent: false, error: "" }));
+    setConfirm(null);
+    setScreen("quiz");
+    trackSiteEvent("quiz_start", { banca: cfg.banca, materia: escopoLabel(cfg.escopo), question_count: questions.length, mode, kind: cfg.kind });
+  }, []);
+
+  async function startCustom() {
+    setQuizError("");
+    let qs = getQuestions(banca, escopo, 99);
+    if (useAI && escopo !== ESCOPO_TODAS) {
+      setScreen("loading");
+      try {
+        const res = await fetch("/api/simulado/questions", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ banca, materia: escopo, quantidade: AI_EXTRA }),
+        });
+        const data = await res.json();
+        if (res.ok && data.source === "ai" && Array.isArray(data.questions)) {
+          qs = [...qs, ...data.questions.map((q, i) => normalizeAI(q, i, banca, escopo))];
+        } else {
+          setQuizError("A IA não respondeu agora, então usamos só as questões revisadas do banco.");
+        }
+      } catch {
+        setQuizError("A IA não respondeu agora, então usamos só as questões revisadas do banco.");
+      }
+    }
+    if (qs.length < 3) { setScreen("home"); setQuizError("Não há questões suficientes nessa combinação."); return; }
+    startRun(qs, { banca, escopo, mode: modo, kind: "custom", useAI });
   }
 
-  function finishQuiz() {
-    trackSiteEvent("quiz_complete", {
-      banca,
-      materia,
-      question_count: questions.length,
-      correct_count: answers.filter((answer) => answer.correct).length,
+  function startDaily() {
+    const qs = getDailyChallenge(today || hojeKey());
+    startRun(qs, { banca: "Desafio do dia", escopo: "Misto", mode: "treino", kind: "daily", repeat: !!profile.daily[today] });
+  }
+
+  function startReview() {
+    const qs = profile.wrong.slice(-15).reverse().map((id) => getQuestionById(id)).filter(Boolean);
+    if (!qs.length) return;
+    startRun(qs, { banca: "Revisão", escopo: "Meus erros", mode: "treino", kind: "review" });
+  }
+
+  function startMixed() {
+    const qs = shuffle(allQuestions()).slice(0, 10).map((q) => getQuestionById(q.id));
+    startRun(qs, { banca: "Misto", escopo: "Todas as bancas", mode: "treino", kind: "mixed" });
+  }
+
+  function replay() {
+    const r = result;
+    if (!r) return;
+    if (r.kind === "daily") return startDaily();
+    if (r.kind === "review") return startReview();
+    if (r.kind === "mixed") return startMixed();
+    setBanca(r.banca); setEscopo(r.escopo); setModo(r.mode);
+    const qs = getQuestions(r.banca, r.escopo, 99);
+    startRun(qs, { banca: r.banca, escopo: r.escopo, mode: r.mode, kind: "custom" });
+  }
+
+  // ───────────────────────── responder ─────────────────────────
+  function bank(i) {
+    const now = Date.now();
+    spentRef.current[i] = (spentRef.current[i] || 0) + (now - qStartRef.current) / 1000;
+    qStartRef.current = now;
+  }
+
+  function showToast(text) { setToast(text); setTimeout(() => setToast(""), 2200); }
+
+  const handleSelect = useCallback((idx) => {
+    const r = runRef.current;
+    if (!r || confirm) return;
+    const i = r.current;
+    const q = r.questions[i];
+    const cur = r.answers[i];
+    const answers = [...r.answers];
+
+    if (r.mode === "treino") {
+      if (cur?.answered) return;
+      bank(i);
+      const correct = idx === q.gabarito;
+      answers[i] = { sel: idx, correct, answered: true, elapsed: Math.round(spentRef.current[i] || 0), flagged: cur?.flagged };
+      const { per } = computeXp(answers, "treino");
+      let trail = 0;
+      for (let k = i; k >= 0 && answers[k]?.correct; k--) trail++;
+      if (correct && trail >= 3) showToast(trail >= 5 ? `🔥 COMBO x${trail}! +150 XP` : `⚡ COMBO x${trail}! +75 XP`);
+      commit({ ...r, answers });
+    } else {
+      const same = cur?.sel === idx;
+      answers[i] = { sel: same ? null : idx, correct: idx === q.gabarito, answered: !same, elapsed: 0, flagged: cur?.flagged };
+      commit({ ...r, answers });
+    }
+  }, [confirm]);
+
+  const toggleFlag = useCallback(() => {
+    const r = runRef.current; if (!r) return;
+    const answers = [...r.answers];
+    const cur = answers[r.current] || { sel: null, answered: false, correct: false, elapsed: 0 };
+    answers[r.current] = { ...cur, flagged: !cur.flagged };
+    commit({ ...r, answers });
+  }, []);
+
+  const goTo = useCallback((i) => {
+    const r = runRef.current; if (!r || i < 0 || i >= r.questions.length) return;
+    bank(r.current);
+    commit({ ...r, current: i });
+  }, []);
+
+  const next = useCallback(() => {
+    const r = runRef.current; if (!r) return;
+    if (r.mode === "treino" && !r.answers[r.current]?.answered) return;
+    if (r.current + 1 >= r.questions.length) {
+      if (r.mode === "prova") setConfirm("finish"); else finishRef.current();
+    } else goTo(r.current + 1);
+  }, [goTo]);
+
+  // ───────────────────────── finalizar ─────────────────────────
+  function finish() {
+    const r = runRef.current;
+    if (!r || finishedRef.current) return;
+    finishedRef.current = true;
+    bank(r.current);
+    setConfirm(null);
+
+    const n = r.questions.length;
+    const list = r.questions.map((q, i) => {
+      const a = r.answers[i] || { sel: null, answered: false, correct: false };
+      return { ...a, elapsed: a.elapsed || Math.round(spentRef.current[i] || 0), q };
     });
-    setScreen(3);
+    const { xp: xpBruto, maxStreak } = computeXp(list, r.mode);
+    const score = list.filter((a) => a.answered && a.correct).length;
+    const wrong = list.filter((a) => a.answered && !a.correct).length;
+    const blank = n - score - wrong;
+    const pct = Math.round((score / n) * 100);
+    const xp = r.repeat ? 0 : xpBruto;
+    const answeredTimes = list.filter((a) => a.answered).map((a) => a.elapsed);
+    const avgTime = answeredTimes.length ? Math.round(answeredTimes.reduce((s, v) => s + v, 0) / answeredTimes.length) : 0;
+    const usaNotaLiquida = list.some((a) => a.q.formato === "ce") && r.banca === "CEBRASPE";
+
+    const out = applyRun(loadState(), {
+      answers: list.filter((a) => !String(a.q.id).startsWith("ai-")).map((a) => ({ id: a.q.id, materia: a.q.materia, correct: a.correct, answered: a.answered })),
+      xp, banca: r.banca, escopo: r.escopo, kind: r.kind, score, total: n, pct,
+      completo: r.kind === "custom" && r.escopo === ESCOPO_TODAS && n >= 20,
+    });
+    saveState(out.state);
+    setProfile(out.state);
+
+    const porMateria = {};
+    list.forEach((a) => {
+      const m = (porMateria[a.q.materia] ||= { ok: 0, total: 0 });
+      m.total += 1; if (a.answered && a.correct) m.ok += 1;
+    });
+    const assuntosErrados = {};
+    list.filter((a) => !a.correct).forEach((a) => { assuntosErrados[a.q.assunto] = (assuntosErrados[a.q.assunto] || 0) + 1; });
+
+    const res = {
+      list, score, wrong, blank, total: n, pct, xp, repeat: r.repeat, maxStreak, avgTime,
+      net: usaNotaLiquida ? score - wrong : null,
+      banca: r.banca, escopo: r.escopo, mode: r.mode, kind: r.kind,
+      timeUsed: r.mode === "prova" ? r.total - Math.max(0, timeLeft) : Math.round(list.reduce((s, a) => s + a.elapsed, 0)),
+      porMateria: Object.entries(porMateria).map(([materia, v]) => ({ materia, ...v })),
+      assuntosErrados: Object.entries(assuntosErrados).sort((a, b) => b[1] - a[1]),
+      unlock: out,
+      nivel: levelInfo(out.state.xp),
+    };
+    setResult(res);
+    setTab(wrong + blank > 0 ? "revisar" : "todas");
+    setScreen("result");
+    setTimeout(() => setRingOn(true), 120);
+    trackSiteEvent("quiz_complete", { banca: r.banca, materia: escopoLabel(r.escopo), question_count: n, correct_count: score, mode: r.mode, kind: r.kind });
+    fetchTutor(res);
   }
+  const finishRef = useRef(finish);
+  finishRef.current = finish;
 
-  // ── Tutor IA: feedback personalizado pós-simulado ───────────────────────
-  async function fetchTutorFeedback() {
-    if (tutorFetched || !questions.length) return;
-    setTutorFetched(true);
-    setTutorLoading(true);
-
-    const finalScore = answers.filter(a => a.correct).length;
-    const finalAvgTime = elapsedPerQ.length
-      ? Math.round(elapsedPerQ.reduce((a, b) => a + b, 0) / elapsedPerQ.length)
-      : 0;
-
-    const erros = answers
-      .map((a, i) => ({ a, q: questions[i] }))
-      .filter(({ a }) => !a.correct)
-      .map(({ a, q }) => ({
-        enunciado: q.enunciado,
-        respostaAluno: q.alternativas[a.selected],
-        respostaCorreta: q.alternativas[q.gabarito],
-      }));
-
+  async function fetchTutor(res) {
+    if (res.total < 5) return;
+    setTutor({ loading: true, text: null });
+    const erros = res.list.filter((a) => a.answered && !a.correct).slice(0, 8).map((a) => ({
+      enunciado: a.q.enunciado,
+      respostaAluno: a.q.alternativas[a.sel],
+      respostaCorreta: a.q.alternativas[a.q.gabarito],
+    }));
     try {
-      const res = await fetch("/api/simulado/tutor-feedback", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nome, banca, materia,
-          score: finalScore, total: questions.length,
-          avgTime: finalAvgTime, maxStreak, erros,
-        }),
+      const r = await fetch("/api/simulado/tutor-feedback", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome: "", banca: res.banca, materia: escopoLabel(res.escopo), score: res.score, total: res.total, avgTime: res.avgTime, maxStreak: res.maxStreak, erros }),
       });
-      const data = await res.json();
-      setTutorFeedback(res.ok ? (data.feedback || null) : null);
+      const data = await r.json();
+      setTutor({ loading: false, text: r.ok ? data.feedback || null : null });
     } catch {
-      setTutorFeedback(null);
-    } finally {
-      setTutorLoading(false);
+      setTutor({ loading: false, text: null });
     }
   }
+
+  // ───────────────────────── efeitos: tempo e teclado ─────────────────────────
+  useEffect(() => {
+    if (screen !== "quiz" || !run || run.mode !== "prova") return;
+    const id = setInterval(() => setTimeLeft((t) => t - 1), 1000);
+    return () => clearInterval(id);
+  }, [screen, run?.id, run?.mode]);
 
   useEffect(() => {
-    if (screen === 3) fetchTutorFeedback();
+    if (screen === "quiz" && run?.mode === "prova" && run.total > 0 && timeLeft <= 0) finishRef.current();
+  }, [timeLeft, screen]);
+
+  const keyRef = useRef(null);
+  keyRef.current = (e) => {
+    const r = runRef.current;
+    if (screen !== "quiz" || !r || confirm) return;
+    if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const q = r.questions[r.current];
+    const k = e.key.toLowerCase();
+    if (q.formato === "ce") {
+      if (k === "c" || k === "1") return handleSelect(0);
+      if (k === "e" || k === "2") return handleSelect(1);
+    } else {
+      const idx = "abcde".indexOf(k);
+      const num = parseInt(k, 10) - 1;
+      if (idx >= 0 && idx < q.alternativas.length) return handleSelect(idx);
+      if (num >= 0 && num < q.alternativas.length) return handleSelect(num);
+    }
+    if (k === "enter" || k === "arrowright") { e.preventDefault(); return next(); }
+    if (k === "arrowleft" && r.mode === "prova") return goTo(r.current - 1);
+    if (k === "f" && r.mode === "prova") return toggleFlag();
+  };
+  useEffect(() => {
+    const h = (e) => keyRef.current && keyRef.current(e);
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
+  }, []);
+
+  useEffect(() => {
+    if (screen !== "quiz") return;
+    const warn = (e) => { e.preventDefault(); e.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
   }, [screen]);
 
-  // ── envio real do e-mail de resultado, via /api/simulado/send-result (Resend) ──
+  // ───────────────────────── e-mail / compartilhar ─────────────────────────
   async function sendResult() {
-    setEmailLoading(true);
-    setEmailError("");
-
-    const finalScore = answers.filter(a => a.correct).length;
-    const finalPct = Math.round((finalScore / questions.length) * 100);
-    const finalAvgTime = elapsedPerQ.length
-      ? Math.round(elapsedPerQ.reduce((a, b) => a + b, 0) / elapsedPerQ.length)
-      : 0;
-
+    setMail((m) => ({ ...m, loading: true, error: "" }));
     try {
       const res = await fetch("/api/simulado/send-result", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email, nome, banca, materia,
-          score: finalScore, total: questions.length, pct: finalPct,
-          xp, maxStreak, avgTime: finalAvgTime,
-          tutorFeedback,
+          email: mail.email, nome: mail.nome, banca: result.banca, materia: escopoLabel(result.escopo),
+          score: result.score, total: result.total, pct: result.pct, xp: result.xp,
+          maxStreak: result.maxStreak, avgTime: result.avgTime, tutorFeedback: tutor.text,
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Falha ao enviar o e-mail.");
-      setEmailSent(true);
+      if (!res.ok) throw new Error(data.error || "Falha ao enviar.");
+      setMail((m) => ({ ...m, loading: false, sent: true }));
     } catch (err) {
-      setEmailError(err.message || "Não foi possível enviar o e-mail agora. Tente novamente.");
-    } finally {
-      setEmailLoading(false);
+      setMail((m) => ({ ...m, loading: false, error: err.message || "Não foi possível enviar agora." }));
     }
   }
 
-  const score = answers.filter(a => a.correct).length;
-  const pct = questions.length ? Math.round((score / questions.length) * 100) : 0;
-  const avgTime = elapsedPerQ.length ? Math.round(elapsedPerQ.reduce((a, b) => a + b, 0) / elapsedPerQ.length) : 0;
-
-  const timeUsed = totalTime - timeLeft;
-  const timerPct = totalTime ? (timeLeft / totalTime) * 100 : 100;
-  const timerColor = timerPct > 50 ? "var(--success)" : timerPct > 25 ? "var(--accent)" : "#ef4444";
-
-  function formatTime(s) {
-    const m = Math.floor(s / 60).toString().padStart(2, "0");
-    const sec = (s % 60).toString().padStart(2, "0");
-    return `${m}:${sec}`;
+  async function share() {
+    if (!result) return;
+    const label = result.kind === "daily" ? "Desafio do Dia" : `simulado ${escopoLabel(result.escopo)} (${result.banca})`;
+    const text = `Fiz o ${label} no Passeja Concursos: ${result.score}/${result.total} (${result.pct}%). Consegue me superar?`;
+    const url = `${window.location.origin}/simulado`;
+    try {
+      if (navigator.share) await navigator.share({ title: "Simulado Passeja", text, url });
+      else { await navigator.clipboard.writeText(`${text} ${url}`); showToast("Copiado! Cole onde quiser."); }
+    } catch { /* cancelado */ }
   }
 
-  function getGrade(p) {
-    if (p >= 90) return { label: "Excelente! 🏆", color: "#10B981", emoji: "🏆" };
-    if (p >= 70) return { label: "Aprovado! ✅", color: "var(--success)", emoji: "✅" };
-    if (p >= 50) return { label: "Quase lá! 💪", color: "var(--accent)", emoji: "💪" };
-    return { label: "Estude mais! 📚", color: "#ef4444", emoji: "📚" };
-  }
+  // ───────────────────────── derivados ─────────────────────────
+  const info = BANCA_INFO[banca];
+  const materias = useMemo(() => getMaterias(banca), [banca]);
+  const nEscopo = countQuestions(banca, escopo) + (useAI && escopo !== ESCOPO_TODAS ? AI_EXTRA : 0);
+  const minutos = Math.round((nEscopo * (info.formato === "ce" ? SEC_CE : SEC_MC)) / 60);
+  const streakAtivo = profile.streak.last === today || profile.streak.last === ontemKey() ? profile.streak.count : 0;
+  const lvl = levelInfo(profile.xp);
+  const dailyDone = profile.daily[today];
+  const fracos = pontosFracos(profile);
 
-  const grade = getGrade(pct);
+  // ═══════════════════════════ RENDER ═══════════════════════════
+  return (
+    <main className="sm simulado-root">
+      {screen === "home" && (
+        <Home {...{ profile, lvl, streakAtivo, streakEmRisco: profile.streak.last !== today && streakAtivo > 0, dailyDone, today, startDaily, startReview, startMixed,
+          banca, setBanca, escopo, setEscopo, modo, setModo, useAI, setUseAI, info, materias, nEscopo, minutos, startCustom, quizError, fracos }} />
+      )}
+
+      {screen === "loading" && (
+        <div className="sm-loading" role="status" aria-live="polite">
+          <div className="dots"><i /><i /><i /><i /></div>
+          <h2>Gerando questões inéditas…</h2>
+          <p className="sm-muted">Se a IA demorar, usamos só as questões revisadas do banco.</p>
+        </div>
+      )}
+
+      {screen === "quiz" && run && (
+        <Quiz {...{ run, timeLeft, toast, confirm, setConfirm, handleSelect, toggleFlag, goTo, next, finish,
+          abandon: () => { finishedRef.current = true; setConfirm(null); setScreen("home"); } }} />
+      )}
+
+      {screen === "result" && result && (
+        <Result {...{ result, tab, setTab, tutor, mail, setMail, sendResult, share, ringOn, toast, profile, today,
+          replay, startReview, goHome: () => setScreen("home"), streakCount: profile.streak.count }} />
+      )}
+    </main>
+  );
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// HOME
+// ═════════════════════════════════════════════════════════════════════════════
+function Home(p) {
+  const { profile, lvl, streakAtivo, streakEmRisco, dailyDone, startDaily, startReview, startMixed, banca, setBanca, escopo, setEscopo, modo, setModo, useAI, setUseAI, info, materias, nEscopo, minutos, startCustom, quizError, fracos } = p;
+  const taxa = profile.answered ? Math.round((profile.correct / profile.answered) * 100) : null;
 
   return (
     <>
-      <main style={{ minHeight: "100vh", background: "var(--bg)", paddingBottom: "80px" }}>
+      <header style={{ margin: "8px 0 18px" }}>
+        <p className="sm-eyebrow">Simulados · gabarito comentado</p>
+        <h1 style={{ fontSize: "clamp(1.7rem, 4.5vw, 2.4rem)", fontWeight: 800, marginTop: 4 }}>Treine como na prova. Evolua a cada dia.</h1>
+        <p className="sm-muted" style={{ maxWidth: "62ch", marginTop: 8 }}>
+          {BANCAS.length} bancas, formato real de cada uma (Certo/Errado no Cebraspe), cronômetro, gabarito comentado com o artigo ou a regra, e um plano para revisar só o que você errou.
+        </p>
+      </header>
 
-        {/* ═══ TELA 0: CONFIGURAÇÃO ═══ */}
-        {screen === 0 && (
-          <div style={{ maxWidth: 640, margin: "0 auto", padding: "48px 16px" }}>
-            {/* Hero */}
-            <div style={{
-              textAlign: "center", marginBottom: 40,
-              background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%)",
-              borderRadius: "var(--radius-xl)", padding: "48px 32px", color: "#fff",
-              position: "relative", overflow: "hidden"
-            }}>
-              <div style={{
-                position: "absolute", top: -30, right: -30, width: 160, height: 160,
-                background: "rgba(255,255,255,0.06)", borderRadius: "50%"
-              }} />
-              <div style={{
-                position: "absolute", bottom: -20, left: -20, width: 100, height: 100,
-                background: "rgba(255,255,255,0.04)", borderRadius: "50%"
-              }} />
-              <div style={{ fontSize: 48, marginBottom: 12 }}>🎯</div>
-              <h1 style={{
-                fontFamily: "var(--font-display)", fontSize: "clamp(1.6rem,4vw,2.2rem)",
-                fontWeight: 800, marginBottom: 12, lineHeight: 1.2
-              }}>Simulado Inteligente</h1>
-              <p style={{ opacity: 0.88, fontSize: "1rem", lineHeight: 1.6, maxWidth: 420, margin: "0 auto" }}>
-                Questões reais de concursos anteriores. Feedback instantâneo. Gamificação para manter você focado.
-              </p>
-              <div style={{ display: "flex", gap: 24, justifyContent: "center", marginTop: 24, flexWrap: "wrap" }}>
-                {[[String(quantidade), "questões"], ["90s", "por questão"], ["XP", "e conquistas"]].map(([v, l]) => (
-                  <div key={l} style={{ textAlign: "center" }}>
-                    <div style={{ fontSize: "1.5rem", fontWeight: 800, fontFamily: "var(--font-mono)" }}>{v}</div>
-                    <div style={{ fontSize: "0.75rem", opacity: 0.75 }}>{l}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
+      {/* jogador */}
+      <section className="sm-player" aria-label="Seu progresso">
+        <div>
+          <div className="lvl">Nível {lvl.idx + 1} · {lvl.nome}</div>
+          <div className="xpbar" role="progressbar" aria-valuenow={lvl.pct} aria-valuemin={0} aria-valuemax={100}><i style={{ width: `${lvl.pct}%` }} /></div>
+          <div className="meta">{lvl.prox ? `Faltam ${lvl.faltam} XP para “${lvl.prox}”` : "Nível máximo atingido"} · {profile.xp} XP</div>
+        </div>
+        <div className="stats">
+          <div className="sm-stat"><b>🔥 {streakAtivo}</b><span>dias seguidos</span></div>
+          <div className="sm-stat"><b>{profile.answered}</b><span>questões</span></div>
+          <div className="sm-stat"><b>{taxa === null ? "—" : `${taxa}%`}</b><span>acertos</span></div>
+        </div>
+      </section>
 
-            {/* Form */}
-            <div style={{
-              background: "var(--surface)", borderRadius: "var(--radius-lg)",
-              padding: 32, border: "1px solid var(--border)", boxShadow: "var(--shadow-md)"
-            }}>
-              <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.25rem", marginBottom: 24, color: "var(--text)" }}>
-                Configure seu simulado
-              </h2>
+      {/* desafio do dia */}
+      <section className="sm-daily" aria-label="Desafio do dia">
+        <div>
+          <p className="sm-eyebrow">Desafio do dia · 5 questões · ~3 min</p>
+          <h2>{dailyDone ? `Hoje você fez ${dailyDone.score}/${dailyDone.total}.` : "Cinco questões, o mesmo desafio para todo mundo."}</h2>
+          <p>
+            {dailyDone
+              ? "Volte amanhã para um desafio novo. Refazer hoje vale como treino livre, sem XP."
+              : streakEmRisco
+                ? `Sua sequência de ${streakAtivo} ${streakAtivo === 1 ? "dia" : "dias"} termina hoje. Faça o desafio para mantê-la.`
+                : "Mistura de bancas e matérias. Concluir hoje mantém sua sequência de estudos."}
+          </p>
+        </div>
+        <button className="sm-btn" onClick={startDaily}>{dailyDone ? "Refazer (sem XP)" : "Jogar agora →"}</button>
+      </section>
 
-              <div style={{ marginBottom: 20 }}>
-                <label style={labelStyle}>Escolha a Banca</label>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
-                  {BANCAS.map(b => (
-                    <button key={b} onClick={() => setBanca(b)} style={{
-                      ...chipStyle,
-                      background: banca === b ? "var(--primary)" : "var(--surface-3)",
-                      color: banca === b ? "#fff" : "var(--text)",
-                      border: banca === b ? "2px solid var(--primary)" : "2px solid var(--border)",
-                      fontWeight: banca === b ? 700 : 500
-                    }}>{b}</button>
-                  ))}
-                </div>
-              </div>
+      {/* atalhos */}
+      <div className="sm-modes">
+        <button className="sm-mode" onClick={startReview} disabled={!profile.wrong.length}>
+          <span className="ic">🔁</span><b>Revisar meus erros {profile.wrong.length ? `(${profile.wrong.length})` : ""}</b>
+          <span>{profile.wrong.length ? "Refaça as questões que você errou. Acertar tira da fila." : "Quando você errar uma questão, ela aparece aqui para revisão."}</span>
+        </button>
+        <button className="sm-mode" onClick={startMixed}>
+          <span className="ic">🎲</span><b>Misto surpresa</b>
+          <span>10 questões sorteadas de todas as bancas e matérias, direto ao ponto.</span>
+        </button>
+      </div>
 
-              <div style={{ marginBottom: 28 }}>
-                <label style={labelStyle}>Escolha a Matéria</label>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 10 }}>
-                  {getMaterias(banca).map(m => (
-                    <button key={m} onClick={() => setMateria(m)} style={{
-                      ...chipStyle,
-                      background: materia === m ? "var(--primary)" : "var(--surface-3)",
-                      color: materia === m ? "#fff" : "var(--text)",
-                      border: materia === m ? "2px solid var(--primary)" : "2px solid var(--border)",
-                      fontWeight: materia === m ? 700 : 500,
-                      textAlign: "left", padding: "14px 18px"
-                    }}>{m}</button>
-                  ))}
-                </div>
-              </div>
+      {/* montador */}
+      <section className="sm-sec" aria-label="Monte seu simulado">
+        <h2>Monte o seu simulado</h2>
+        <p className="sm-muted">Escolha a banca que vai cair na sua prova. Cada uma tem seu estilo e formato.</p>
 
-              <div style={{ marginBottom: 28 }}>
-                <label style={labelStyle}>Quantas questões?</label>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
-                  {[5, 10, 15].map(n => (
-                    <button key={n} onClick={() => setQuantidade(n)} style={{
-                      ...chipStyle,
-                      textAlign: "center",
-                      background: quantidade === n ? "var(--primary)" : "var(--surface-3)",
-                      color: quantidade === n ? "#fff" : "var(--text)",
-                      border: quantidade === n ? "2px solid var(--primary)" : "2px solid var(--border)",
-                      fontWeight: quantidade === n ? 700 : 500
-                    }}>{n} questões</button>
-                  ))}
-                </div>
-                <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: 10, lineHeight: 1.5 }}>
-                  ✨ Questões inéditas geradas por IA a cada simulado — nunca caem as mesmas duas vezes.
-                </p>
-              </div>
+        <div className="sm-step"><i>1</i> Banca</div>
+        <div className="sm-bancas">
+          {BANCAS.map((b) => (
+            <button key={b} className="sm-banca" aria-pressed={banca === b} onClick={() => setBanca(b)}>
+              <span className="dot" aria-hidden />
+              <b>{BANCA_INFO[b].nome}</b>
+              <span className="fmt" style={{ color: BANCA_INFO[b].cor }}>{BANCA_INFO[b].formato === "ce" ? "Certo / Errado" : "Múltipla escolha"}</span>
+              <small>{countQuestions(b)} questões</small>
+            </button>
+          ))}
+        </div>
+        <div className="sm-tip"><b>{info.nome}:</b> {info.resumo} <br /><b>Dica:</b> {info.dica}</div>
 
-              <button onClick={() => setScreen(1)} style={btnPrimaryStyle}>
-                Começar Simulado →
-              </button>
-            </div>
-          </div>
+        <div className="sm-step"><i>2</i> O que treinar</div>
+        <div className="sm-chips" role="group" aria-label="Matéria">
+          <button className="sm-chip" aria-pressed={escopo === ESCOPO_TODAS} onClick={() => setEscopo(ESCOPO_TODAS)}>
+            Simulado completo<small>{countQuestions(banca)}q</small>
+          </button>
+          {materias.map((m) => (
+            <button key={m} className="sm-chip" aria-pressed={escopo === m} onClick={() => setEscopo(m)}>
+              {m}<small>{countQuestions(banca, m)}q</small>
+            </button>
+          ))}
+        </div>
+
+        <div className="sm-step"><i>3</i> Modo</div>
+        <div className="sm-seg" role="group" aria-label="Modo">
+          <button aria-pressed={modo === "treino"} onClick={() => setModo("treino")}>
+            <b>Treino</b><span>Gabarito comentado logo após cada resposta, com bônus de XP por velocidade.</span>
+          </button>
+          <button aria-pressed={modo === "prova"} onClick={() => setModo("prova")}>
+            <b>Modo prova</b><span>Cronômetro geral, navegação livre, marcar para revisar. Gabarito só no final.</span>
+          </button>
+        </div>
+
+        {escopo !== ESCOPO_TODAS && (
+          <label className="sm-check">
+            <input type="checkbox" checked={useAI} onChange={(e) => setUseAI(e.target.checked)} />
+            <span>Adicionar {AI_EXTRA} questões inéditas geradas por IA (beta). Elas aparecem identificadas, não entram na fila de revisão e podem conter erros: confira sempre no gabarito oficial.</span>
+          </label>
         )}
+        {quizError && <p className="sm-err" role="alert">{quizError}</p>}
 
-        {/* ═══ TELA 1: CAPTURA DE EMAIL ═══ */}
-        {screen === 1 && (
-          <div style={{ maxWidth: 500, margin: "0 auto", padding: "48px 16px" }}>
-            <div style={{
-              background: "var(--surface)", borderRadius: "var(--radius-xl)",
-              padding: "40px 32px", border: "1px solid var(--border)", boxShadow: "var(--shadow-lg)",
-              textAlign: "center"
-            }}>
-              <div style={{ fontSize: 56, marginBottom: 16 }}>📬</div>
-              <h2 style={{
-                fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.5rem",
-                marginBottom: 12, color: "var(--text)"
-              }}>Receba seu resultado por e-mail!</h2>
-              <p style={{ color: "var(--text-secondary)", marginBottom: 28, lineHeight: 1.6, fontSize: "0.95rem" }}>
-                Informe seu nome e e-mail para receber uma análise personalizada do seu desempenho com dicas de estudo.
-              </p>
-
-              <div style={{ textAlign: "left", marginBottom: 16 }}>
-                <label style={labelStyle}>Seu nome</label>
-                <input
-                  type="text"
-                  placeholder="Como prefere ser chamado?"
-                  value={nome}
-                  onChange={e => setNome(e.target.value)}
-                  style={inputStyle}
-                />
-              </div>
-              <div style={{ textAlign: "left", marginBottom: 24 }}>
-                <label style={labelStyle}>Seu melhor e-mail</label>
-                <input
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  style={inputStyle}
-                />
-              </div>
-
-              <button onClick={startQuiz} disabled={loadingQuiz} style={{ ...btnPrimaryStyle, opacity: loadingQuiz ? 0.7 : 1, cursor: loadingQuiz ? "wait" : "pointer" }}>
-                {loadingQuiz ? "🧠 Gerando questões com IA..." : "🚀 Iniciar Simulado"}
-              </button>
-
-              <button
-                onClick={startQuiz}
-                disabled={loadingQuiz}
-                style={{ ...btnGhostStyle, marginTop: 12, opacity: loadingQuiz ? 0.7 : 1 }}
-              >
-                Pular e iniciar sem e-mail
-              </button>
-
-              {quizError && (
-                <p style={{ fontSize: "0.82rem", color: "#ef4444", marginTop: 16, lineHeight: 1.5 }}>
-                  ⚠️ {quizError}
-                </p>
-              )}
-
-              <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: 20 }}>
-                🔒 Seus dados são usados apenas para enviar o resultado. Sem spam.
-              </p>
-            </div>
+        <div className="sm-start">
+          <div className="sum">
+            <b>{escopoLabel(escopo)} · {info.nome}</b>
+            {nEscopo} questões · {modo === "prova" ? `cronômetro de ~${minutos} min` : "sem limite de tempo"}
           </div>
-        )}
+          <button className="sm-btn hl" onClick={startCustom}>Começar simulado →</button>
+        </div>
+      </section>
 
-        {/* ═══ TELA 2: QUIZ ═══ */}
-        {screen === 2 && questions.length > 0 && (
-          <div style={{ maxWidth: 780, margin: "0 auto", padding: "24px 16px" }}>
-
-            {/* Combo popup */}
-            {showCombo && (
-              <div style={{
-                position: "fixed", top: 80, left: "50%", transform: "translateX(-50%)",
-                background: "linear-gradient(135deg, #f59e0b, #ef4444)",
-                color: "#fff", borderRadius: 50, padding: "12px 28px",
-                fontWeight: 800, fontSize: "1.1rem", zIndex: 9999,
-                animation: "popIn 0.3s var(--ease-spring)",
-                boxShadow: "0 4px 24px rgba(245,158,11,0.5)",
-                whiteSpace: "nowrap"
-              }}>
-                {comboText}
+      {/* progresso */}
+      <section className="sm-sec sm-two" aria-label="Conquistas e pontos fracos">
+        <div className="sm-card">
+          <h3>Conquistas <small className="sm-muted">({profile.badges.length}/{CONQUISTAS.length})</small></h3>
+          <div className="sm-badges">
+            {CONQUISTAS.map((c) => (
+              <div key={c.id} className={`sm-badge ${profile.badges.includes(c.id) ? "on" : ""}`} title={c.desc}>
+                <span className="ic">{c.icon}</span>{c.nome}
               </div>
-            )}
-
-            {/* HUD */}
-            <div style={{
-              display: "grid", gridTemplateColumns: "1fr auto 1fr",
-              alignItems: "center", marginBottom: 20, gap: 12
-            }}>
-              {/* XP */}
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <div style={{
-                  background: "linear-gradient(135deg, var(--accent), var(--accent-dark))",
-                  borderRadius: 50, padding: "6px 14px",
-                  fontFamily: "var(--font-mono)", fontWeight: 700,
-                  fontSize: "0.9rem", color: "#000"
-                }}>⚡ {xp} XP</div>
-                {streak >= 2 && (
-                  <div style={{
-                    background: "linear-gradient(135deg, #ef4444, #f59e0b)",
-                    borderRadius: 50, padding: "6px 12px",
-                    fontWeight: 700, fontSize: "0.85rem", color: "#fff"
-                  }}>🔥 {streak}</div>
-                )}
-              </div>
-
-              {/* Timer */}
-              <div style={{ textAlign: "center" }}>
-                <div style={{
-                  fontFamily: "var(--font-mono)", fontSize: "1.6rem", fontWeight: 700,
-                  color: timerColor, lineHeight: 1,
-                  transition: "color 0.5s"
-                }}>{formatTime(timeLeft)}</div>
-                <div style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>restante</div>
-              </div>
-
-              {/* Progresso */}
-              <div style={{ textAlign: "right" }}>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.9rem", color: "var(--text-secondary)" }}>
-                  {current + 1} / {questions.length}
-                </div>
-              </div>
-            </div>
-
-            {/* Timer bar */}
-            <div style={{
-              height: 6, background: "var(--border)", borderRadius: 99, marginBottom: 24, overflow: "hidden"
-            }}>
-              <div style={{
-                height: "100%", background: timerColor,
-                width: `${timerPct}%`, borderRadius: 99,
-                transition: "width 1s linear, background 0.5s"
-              }} />
-            </div>
-
-            {/* Indicadores de questão */}
-            <div style={{ display: "flex", gap: 6, marginBottom: 24, flexWrap: "wrap" }}>
-              {questions.map((_, i) => {
-                const ans = answers[i];
-                let bg = "var(--border)";
-                if (ans) bg = ans.correct ? "var(--success)" : "#ef4444";
-                else if (i === current) bg = "var(--primary)";
-                return (
-                  <div key={i} style={{
-                    width: 28, height: 8, borderRadius: 99, background: bg,
-                    transition: "background 0.3s"
-                  }} />
-                );
-              })}
-            </div>
-
-            {/* Card da questão */}
-            <div style={{
-              background: "var(--surface)", borderRadius: "var(--radius-lg)",
-              border: "1px solid var(--border)", boxShadow: "var(--shadow-md)",
-              overflow: "hidden"
-            }}>
-              {/* Header da questão */}
-              <div style={{
-                background: "var(--surface-2)", padding: "16px 24px",
-                borderBottom: "1px solid var(--border)",
-                display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap"
-              }}>
-                <span style={{
-                  background: "var(--primary)", color: "#fff",
-                  borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 700
-                }}>{banca}</span>
-                <span style={{
-                  background: "var(--surface-3)", color: "var(--text-secondary)",
-                  borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem"
-                }}>{materia}</span>
-                <span style={{
-                  background: "var(--surface-3)", color: "var(--text-muted)",
-                  borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem"
-                }}>📅 {questions[current].ano}</span>
-                {questionSource === "ai" && (
-                  <span style={{
-                    background: "rgba(124,58,237,0.12)", color: "#7C3AED",
-                    borderRadius: 50, padding: "4px 12px", fontSize: "0.78rem", fontWeight: 600
-                  }}>✨ Gerada por IA</span>
-                )}
-                <span style={{
-                  marginLeft: "auto", fontSize: "0.78rem", color: "var(--text-muted)"
-                }}>{questions[current].cargo}</span>
-              </div>
-
-              <div style={{ padding: "24px" }}>
-                <p style={{
-                  fontFamily: "var(--font-body)", fontSize: "1.05rem",
-                  lineHeight: 1.7, color: "var(--text)", marginBottom: 24, fontWeight: 500
-                }}>
-                  {questions[current].enunciado}
-                </p>
-
-                {/* Alternativas */}
-                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                  {questions[current].alternativas.map((alt, i) => {
-                    const isSelected = selected === i;
-                    const isCorrect = i === questions[current].gabarito;
-                    let bg = "var(--surface-3)";
-                    let border = "var(--border)";
-                    let color = "var(--text)";
-                    if (answered) {
-                      if (isCorrect) { bg = "rgba(16,185,129,0.12)"; border = "var(--success)"; color = "var(--success)"; }
-                      else if (isSelected && !isCorrect) { bg = "rgba(239,68,68,0.1)"; border = "#ef4444"; color = "#ef4444"; }
-                    } else if (isSelected) {
-                      bg = "rgba(27,58,107,0.08)"; border = "var(--primary)"; color = "var(--primary)";
-                    }
-
-                    return (
-                      <button key={i} onClick={() => handleSelect(i)} disabled={answered} style={{
-                        display: "flex", alignItems: "flex-start", gap: 14,
-                        background: bg, border: `2px solid ${border}`,
-                        borderRadius: "var(--radius)", padding: "14px 18px",
-                        cursor: answered ? "default" : "pointer",
-                        transition: "all 0.25s var(--ease-out)", textAlign: "left",
-                        color, fontFamily: "var(--font-body)", fontSize: "0.95rem", lineHeight: 1.5,
-                        fontWeight: isCorrect && answered ? 600 : 400
-                      }}>
-                        <span style={{
-                          minWidth: 28, height: 28, borderRadius: "50%",
-                          background: answered && isCorrect ? "var(--success)" : answered && isSelected ? "#ef4444" : "var(--border)",
-                          color: (answered && (isCorrect || isSelected)) ? "#fff" : "var(--text-secondary)",
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          fontSize: "0.8rem", fontWeight: 700, fontFamily: "var(--font-mono)", flexShrink: 0
-                        }}>
-                          {answered && isCorrect ? "✓" : answered && isSelected && !isCorrect ? "✗" : String.fromCharCode(65 + i)}
-                        </span>
-                        {alt}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Explicação */}
-                {showExplain && (
-                  <div style={{
-                    marginTop: 20, padding: 18,
-                    background: selected === questions[current].gabarito
-                      ? "rgba(16,185,129,0.08)" : "rgba(239,68,68,0.06)",
-                    border: `1px solid ${selected === questions[current].gabarito ? "var(--success)" : "#ef4444"}`,
-                    borderRadius: "var(--radius)", lineHeight: 1.65
-                  }}>
-                    <div style={{
-                      fontWeight: 700, marginBottom: 8,
-                      color: selected === questions[current].gabarito ? "var(--success)" : "#ef4444",
-                      fontSize: "0.9rem"
-                    }}>
-                      {selected === questions[current].gabarito ? "✅ Resposta correta!" : "❌ Resposta incorreta"}
-                      {selected === questions[current].gabarito && answers.length && (
-                        <span style={{ color: "var(--accent)", marginLeft: 12 }}>+{answers[answers.length - 1]?.xpGained} XP</span>
-                      )}
-                    </div>
-                    <p style={{ color: "var(--text-secondary)", fontSize: "0.92rem", margin: 0 }}>
-                      {questions[current].explicacao}
-                    </p>
-                  </div>
-                )}
-
-                {answered && (
-                  <button onClick={nextQuestion} style={{ ...btnPrimaryStyle, marginTop: 20 }}>
-                    {current + 1 >= questions.length ? "📊 Ver Resultado" : "Próxima Questão →"}
-                  </button>
-                )}
-              </div>
-            </div>
+            ))}
           </div>
-        )}
-
-        {/* ═══ TELA 3: RESULTADO ═══ */}
-        {screen === 3 && (
-          <div style={{ maxWidth: 720, margin: "0 auto", padding: "32px 16px" }}>
-
-            {/* Header resultado */}
-            <div style={{
-              background: `linear-gradient(135deg, ${grade.color}22 0%, ${grade.color}11 100%)`,
-              border: `2px solid ${grade.color}44`,
-              borderRadius: "var(--radius-xl)", padding: "40px 32px",
-              textAlign: "center", marginBottom: 24
-            }}>
-              <div style={{ fontSize: 64, marginBottom: 8 }}>{grade.emoji}</div>
-              <div style={{
-                fontFamily: "var(--font-display)", fontSize: "clamp(2.5rem,8vw,4rem)",
-                fontWeight: 900, color: grade.color, lineHeight: 1,
-                fontVariantNumeric: "tabular-nums"
-              }}>{pct}%</div>
-              <div style={{
-                fontFamily: "var(--font-display)", fontSize: "1.4rem", fontWeight: 700,
-                color: "var(--text)", marginTop: 8
-              }}>{grade.label}</div>
-              <div style={{ color: "var(--text-secondary)", marginTop: 8 }}>
-                {nome ? `Parabéns, ${nome}! ` : ""}
-                {score} de {questions.length} questões corretas — {banca} / {materia}
+        </div>
+        <div className="sm-card">
+          <h3>Onde você mais erra</h3>
+          {fracos.length === 0 ? (
+            <p className="sm-muted" style={{ marginTop: 10 }}>Resolva pelo menos 3 questões de uma matéria e mostramos aqui onde reforçar.</p>
+          ) : (
+            fracos.slice(0, 5).map((f) => (
+              <div key={f.materia} className={`sm-bar ${f.pct < 50 ? "bad" : f.pct >= 75 ? "good" : ""}`}>
+                <div className="row"><span>{f.materia}</span><span>{f.pct}% <small className="sm-muted">({f.total})</small></span></div>
+                <div className="track"><i style={{ width: `${f.pct}%` }} /></div>
               </div>
-            </div>
+            ))
+          )}
+        </div>
+      </section>
 
-            {/* Métricas */}
-            <div style={{
-              display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-              gap: 14, marginBottom: 24
-            }}>
-              {[
-                { icon: "⚡", label: "XP Total", value: xp, mono: true },
-                { icon: "🔥", label: "Maior Sequência", value: `${maxStreak} acertos`, mono: false },
-                { icon: "⏱️", label: "Tempo médio/questão", value: `${avgTime}s`, mono: true },
-                { icon: "🎯", label: "Taxa de acerto", value: `${pct}%`, mono: true },
-              ].map(m => (
-                <div key={m.label} style={{
-                  background: "var(--surface)", borderRadius: "var(--radius)",
-                  border: "1px solid var(--border)", padding: "20px 16px", textAlign: "center",
-                  boxShadow: "var(--shadow-sm)"
-                }}>
-                  <div style={{ fontSize: 28, marginBottom: 6 }}>{m.icon}</div>
-                  <div style={{
-                    fontFamily: m.mono ? "var(--font-mono)" : "var(--font-display)",
-                    fontSize: "1.35rem", fontWeight: 700, color: "var(--text)"
-                  }}>{m.value}</div>
-                  <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: 2 }}>{m.label}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* Gráfico de questões */}
-            <div style={{
-              background: "var(--surface)", borderRadius: "var(--radius-lg)",
-              border: "1px solid var(--border)", padding: 24, marginBottom: 24,
-              boxShadow: "var(--shadow-sm)"
-            }}>
-              <h3 style={{
-                fontFamily: "var(--font-display)", fontWeight: 700, marginBottom: 16,
-                fontSize: "1rem", color: "var(--text)"
-              }}>Desempenho por questão</h3>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                {answers.map((a, i) => (
-                  <div key={i} style={{
-                    width: 44, height: 44, borderRadius: "var(--radius-sm)",
-                    background: a.correct ? "rgba(16,185,129,0.15)" : "rgba(239,68,68,0.1)",
-                    border: `2px solid ${a.correct ? "var(--success)" : "#ef4444"}`,
-                    display: "flex", flexDirection: "column",
-                    alignItems: "center", justifyContent: "center"
-                  }}>
-                    <span style={{ fontSize: "1rem" }}>{a.correct ? "✓" : "✗"}</span>
-                    <span style={{
-                      fontSize: "0.6rem", color: "var(--text-muted)",
-                      fontFamily: "var(--font-mono)"
-                    }}>{a.elapsed}s</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Barra de progresso visual */}
-              <div style={{ marginTop: 16 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.78rem", color: "var(--text-muted)", marginBottom: 6 }}>
-                  <span>Acertos</span><span>{score}/{questions.length}</span>
-                </div>
-                <div style={{ height: 10, background: "var(--border)", borderRadius: 99, overflow: "hidden" }}>
-                  <div style={{
-                    height: "100%", borderRadius: 99,
-                    background: `linear-gradient(90deg, ${grade.color}, ${grade.color}99)`,
-                    width: `${pct}%`, transition: "width 1s var(--ease-out)"
-                  }} />
-                </div>
-              </div>
-            </div>
-
-            {/* Tutor IA */}
-            <div style={{
-              background: "linear-gradient(135deg, rgba(124,58,237,0.08), rgba(124,58,237,0.03))",
-              border: "1px solid rgba(124,58,237,0.25)",
-              borderRadius: "var(--radius-lg)", padding: 24, marginBottom: 24
-            }}>
-              <h3 style={{
-                fontFamily: "var(--font-display)", fontWeight: 700, marginBottom: 14,
-                fontSize: "1rem", color: "var(--text)", display: "flex", alignItems: "center", gap: 8
-              }}>🤖 Feedback do Tutor IA</h3>
-
-              {tutorLoading && (
-                <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
-                  Analisando seu desempenho e montando um plano de estudos personalizado...
-                </p>
-              )}
-
-              {!tutorLoading && tutorFeedback && (
-                <p style={{ color: "var(--text)", fontSize: "0.92rem", lineHeight: 1.7, margin: 0, whiteSpace: "pre-line" }}>
-                  {tutorFeedback}
-                </p>
-              )}
-
-              {!tutorLoading && !tutorFeedback && (
-                <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", margin: 0 }}>
-                  {pct >= 70
-                    ? "Bom desempenho! Continue revisando os pontos que errou e mantenha a consistência nos estudos."
-                    : "Revise com atenção as questões erradas abaixo e volte a treinar essa matéria em alguns dias."}
-                </p>
-              )}
-            </div>
-
-            {/* Revisão de erros */}
-            {answers.some(a => !a.correct) && (
-              <div style={{
-                background: "var(--surface)", borderRadius: "var(--radius-lg)",
-                border: "1px solid var(--border)", padding: 24, marginBottom: 24
-              }}>
-                <h3 style={{
-                  fontFamily: "var(--font-display)", fontWeight: 700, marginBottom: 16,
-                  fontSize: "1rem", color: "var(--text)"
-                }}>📌 Revisão dos erros</h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                  {answers.map((a, i) => {
-                    if (a.correct) return null;
-                    const q = questions[i];
-                    return (
-                      <div key={i} style={{
-                        padding: 14, background: "rgba(239,68,68,0.05)",
-                        border: "1px solid rgba(239,68,68,0.2)", borderRadius: "var(--radius-sm)"
-                      }}>
-                        <p style={{ fontSize: "0.88rem", color: "var(--text)", fontWeight: 500, marginBottom: 8 }}>
-                          Q{i + 1}: {q.enunciado}
-                        </p>
-                        <p style={{ fontSize: "0.82rem", color: "#ef4444", marginBottom: 4 }}>
-                          ✗ Sua resposta: {q.alternativas[a.selected]}
-                        </p>
-                        <p style={{ fontSize: "0.82rem", color: "var(--success)", marginBottom: 8 }}>
-                          ✓ Correta: {q.alternativas[q.gabarito]}
-                        </p>
-                        <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", lineHeight: 1.5 }}>
-                          💡 {q.explicacao}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* CTA email */}
-            {!emailSent && email && (
-              <div style={{
-                background: "linear-gradient(135deg, var(--primary)11, var(--primary-light)08)",
-                border: "1px solid var(--primary)33",
-                borderRadius: "var(--radius-lg)", padding: 24, marginBottom: 24, textAlign: "center"
-              }}>
-                <div style={{ fontSize: 32, marginBottom: 8 }}>📧</div>
-                <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, marginBottom: 8, color: "var(--text)" }}>
-                  Receber resultado por e-mail
-                </h3>
-                <p style={{ color: "var(--text-secondary)", marginBottom: 16, fontSize: "0.9rem" }}>
-                  Enviar análise completa para <strong>{email}</strong>
-                </p>
-                <button onClick={sendResult} disabled={emailLoading} style={btnPrimaryStyle}>
-                  {emailLoading ? "Enviando..." : "📬 Enviar Resultado"}
-                </button>
-                {emailError && (
-                  <p style={{ color: "#ef4444", fontSize: "0.82rem", marginTop: 12 }}>⚠️ {emailError}</p>
-                )}
-              </div>
-            )}
-
-            {!email && !emailSent && (
-              <div style={{
-                background: "var(--surface-2)", borderRadius: "var(--radius-lg)",
-                border: "1px solid var(--border)", padding: 24, marginBottom: 24
-              }}>
-                <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, marginBottom: 12, color: "var(--text)", fontSize: "1rem" }}>
-                  📬 Receber por e-mail
-                </h3>
-                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                  <input
-                    type="email" placeholder="seu@email.com"
-                    value={email} onChange={e => setEmail(e.target.value)}
-                    style={{ ...inputStyle, flex: 1, minWidth: 200 }}
-                  />
-                  <button onClick={sendResult} disabled={emailLoading} style={{ ...btnPrimaryStyle, flex: "0 0 auto", padding: "12px 20px" }}>
-                    {emailLoading ? "Enviando..." : "Enviar"}
-                  </button>
-                </div>
-                {emailError && (
-                  <p style={{ color: "#ef4444", fontSize: "0.82rem", marginTop: 12 }}>⚠️ {emailError}</p>
-                )}
-              </div>
-            )}
-
-            {emailSent && (
-              <div style={{
-                background: "rgba(16,185,129,0.1)", border: "1px solid var(--success)",
-                borderRadius: "var(--radius)", padding: 16, textAlign: "center", marginBottom: 24
-              }}>
-                ✅ E-mail enviado para <strong>{email}</strong>! Confira sua caixa de entrada (e o spam, só por garantia).
-              </div>
-            )}
-
-            {/* Ações */}
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-              <button onClick={() => { setScreen(0); setAnswers([]); setTutorFeedback(null); setTutorFetched(false); }} style={{ ...btnPrimaryStyle, flex: 1 }}>
-                🔄 Novo Simulado
-              </button>
-              <button onClick={() => {
-                setAnswers([]); setCurrent(0); setSelected(null); setAnswered(false);
-                setShowExplain(false); setStreak(0); setMaxStreak(0); setXp(0); setCombo(0);
-                setElapsedPerQ([]); setQStart(Date.now()); setTutorFeedback(null); setTutorFetched(false);
-                setScreen(2);
-              }} style={{ ...btnGhostStyle, flex: 1 }}>
-                ↩️ Refazer esta prova
-              </button>
-            </div>
-          </div>
-        )}
-      </main>
-
-      <style>{`
-        @keyframes popIn {
-          from { transform: translateX(-50%) scale(0.7); opacity: 0; }
-          to   { transform: translateX(-50%) scale(1); opacity: 1; }
-        }
-        button:hover:not(:disabled) { filter: brightness(1.07); transform: translateY(-1px); }
-        button { transition: all 0.2s var(--ease-out); }
-        input:focus { outline: none; border-color: var(--primary) !important; box-shadow: 0 0 0 3px rgba(27,58,107,0.12); }
-      `}</style>
+      {/* provas oficiais */}
+      <section className="sm-sec" aria-label="Provas e gabaritos oficiais">
+        <h2>Prova de verdade, gabarito oficial</h2>
+        <p className="sm-muted">
+          As questões deste simulado são originais, escritas no estilo de cada banca e revisadas com o fundamento legal. Para treinar com provas reais e conferir o gabarito oficial, use as fontes abaixo (gratuitas).
+        </p>
+        <div className="sm-src" style={{ marginTop: 14 }}>
+          <a href={PORTAIS[banca].url} target="_blank" rel="noopener noreferrer" onClick={() => trackSiteEvent("outbound_official_source_click", { source_domain: new URL(PORTAIS[banca].url).hostname })}>
+            <b>{info.nome}: {PORTAIS[banca].label}</b><span>Fonte oficial da banca selecionada.</span><em>Abrir site oficial ↗</em>
+          </a>
+          {ACERVOS.map((a) => (
+            <a key={a.url} href={a.url} target="_blank" rel="noopener noreferrer nofollow" onClick={() => trackSiteEvent("outbound_official_source_click", { source_domain: new URL(a.url).hostname })}>
+              <b>{a.label}</b><span>{a.nota}</span><em>Abrir ↗</em>
+            </a>
+          ))}
+        </div>
+        <p className="sm-fonte-note">
+          Sites externos, de terceiros. Conferimos os links em out/2026, mas os acervos mudam: se algum não abrir, busque pelo nome do concurso no portal da banca. Gabarito oficial é sempre o publicado pela banca.
+        </p>
+      </section>
     </>
   );
 }
 
-// ─── estilos base ─────────────────────────────────────────────────────────────
-const labelStyle = {
-  display: "block", fontWeight: 600, fontSize: "0.85rem",
-  color: "var(--text-secondary)", marginBottom: 10,
-  fontFamily: "var(--font-body)"
-};
-const chipStyle = {
-  borderRadius: "var(--radius-sm)", padding: "12px 16px",
-  cursor: "pointer", fontFamily: "var(--font-body)", fontSize: "0.9rem",
-  transition: "all 0.2s", border: "2px solid transparent"
-};
-const btnPrimaryStyle = {
-  width: "100%", padding: "14px 20px",
-  background: "linear-gradient(135deg, var(--primary), var(--primary-light))",
-  color: "#fff", border: "none", borderRadius: "var(--radius)",
-  fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1rem",
-  cursor: "pointer", boxShadow: "var(--shadow-md)"
-};
-const btnGhostStyle = {
-  width: "100%", padding: "13px 20px",
-  background: "transparent", color: "var(--text-secondary)",
-  border: "1px solid var(--border)", borderRadius: "var(--radius)",
-  fontFamily: "var(--font-body)", fontWeight: 600, fontSize: "0.95rem",
-  cursor: "pointer"
-};
-const inputStyle = {
-  width: "100%", padding: "12px 14px",
-  background: "var(--surface-3)", border: "1.5px solid var(--border)",
-  borderRadius: "var(--radius-sm)", fontFamily: "var(--font-body)",
-  fontSize: "0.95rem", color: "var(--text)", transition: "border-color 0.2s"
-};
+// ═════════════════════════════════════════════════════════════════════════════
+// QUIZ
+// ═════════════════════════════════════════════════════════════════════════════
+function Quiz({ run, timeLeft, toast, confirm, setConfirm, handleSelect, toggleFlag, goTo, next, finish, abandon }) {
+  const { questions, answers, current, mode } = run;
+  const q = questions[current];
+  const a = answers[current];
+  const treino = mode === "treino";
+  const revealed = treino && a?.answered;
+  const { xp, per } = computeXp(answers, "treino");
+  const respondidas = answers.filter((x) => x?.answered).length;
+  const faltam = questions.length - respondidas;
+  const marcadas = answers.filter((x) => x?.flagged).length;
+  const timePct = run.total ? Math.max(0, (timeLeft / run.total) * 100) : 100;
+  const low = run.total && timeLeft < run.total * 0.15;
+  let trail = 0;
+  for (let k = answers.length - 1; k >= 0 && answers[k]?.correct; k--) trail++;
+
+  return (
+    <div className="sm-quiz">
+      {toast && <div className="sm-toast" role="status">{toast}</div>}
+
+      <div className="sm-top">
+        <div className="sm-hud">
+          {treino ? (
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <span className="sm-xp">⚡ {run.repeat ? 0 : xp} XP</span>
+              {trail >= 2 && <span className="sm-flame">🔥 {trail}</span>}
+            </div>
+          ) : (
+            <span className={`sm-timer ${low ? "low" : ""}`} aria-live="off">⏱ {fmt(timeLeft)}</span>
+          )}
+          <span className="sm-muted" style={{ fontWeight: 700 }}>{current + 1} / {questions.length}</span>
+          <button className="sm-link" onClick={() => setConfirm("abandon")}>Sair</button>
+        </div>
+        {!treino && <div className="sm-timebar"><i style={{ width: `${timePct}%`, background: low ? "var(--accent)" : undefined }} /></div>}
+        <div className="sm-nav" role="group" aria-label="Navegação entre questões">
+          {questions.map((_, i) => {
+            const x = answers[i];
+            let cls = "";
+            if (treino && x?.answered) cls = x.correct ? "ok" : "no";
+            else if (!treino && x?.answered) cls = "answered";
+            return (
+              <button key={i} className={`${cls} ${x?.flagged ? "flag" : ""} ${i === current ? "cur" : ""}`}
+                onClick={() => !treino && goTo(i)} disabled={treino} aria-label={`Questão ${i + 1}${x?.answered ? ", respondida" : ""}`}
+                aria-current={i === current}>{i + 1}</button>
+            );
+          })}
+        </div>
+      </div>
+
+      <article className="sm-q">
+        <div className="sm-q-head">
+          <span className="sm-pill ink">{q.banca}</span>
+          <span className="sm-pill">{q.materia}</span>
+          <span className="sm-pill">{q.assunto}</span>
+          {q.ai && <span className="sm-pill ai">✨ Gerada por IA</span>}
+          <span className="right">{["", "Fácil", "Média", "Difícil"][q.nivel]}</span>
+        </div>
+        <div className="sm-q-body">
+          <p className="sm-q-enun">{q.enunciado}</p>
+
+          <div className={q.formato === "ce" ? "sm-ce" : "sm-opts"} role="radiogroup" aria-label="Alternativas">
+            {q.alternativas.map((alt, i) => {
+              let cls = "sm-opt";
+              if (revealed) { if (i === q.gabarito) cls += " right"; else if (i === a.sel) cls += " wrong"; }
+              else if (a?.sel === i) cls += " sel";
+              return (
+                <button key={i} className={cls} onClick={() => handleSelect(i)} disabled={revealed} role="radio" aria-checked={a?.sel === i}>
+                  {q.formato === "ce" ? alt : (<><span className="bub">{revealed && i === q.gabarito ? "✓" : revealed && i === a.sel ? "✗" : String.fromCharCode(65 + i)}</span><span>{alt}</span></>)}
+                </button>
+              );
+            })}
+          </div>
+
+          {revealed && (
+            <div className={`sm-expl ${a.correct ? "ok" : "no"}`} role="status">
+              <b className="t">{a.correct ? `Correto! +${run.repeat ? 0 : per[current]} XP` : `Não foi dessa vez. Gabarito: ${q.formato === "ce" ? q.alternativas[q.gabarito] : String.fromCharCode(65 + q.gabarito)}`}</b>
+              <p>{q.explicacao}</p>
+              {q.fonte && <p className="src">📖 {q.fonte}</p>}
+            </div>
+          )}
+
+          <div className="sm-q-foot">
+            {!treino ? (
+              <>
+                <button className={`sm-link ${a?.flagged ? "flagged" : ""}`} onClick={toggleFlag}>{a?.flagged ? "★ Marcada para revisar" : "☆ Marcar para revisar"}</button>
+                <div style={{ display: "flex", gap: 10 }}>
+                  <button className="sm-btn ghost sm" onClick={() => goTo(current - 1)} disabled={current === 0}>← Anterior</button>
+                  {current + 1 < questions.length
+                    ? <button className="sm-btn sm" onClick={() => goTo(current + 1)}>Próxima →</button>
+                    : <button className="sm-btn hl sm" onClick={() => setConfirm("finish")}>Finalizar prova</button>}
+                </div>
+              </>
+            ) : (
+              <>
+                <a className="sm-link" href="/contato" target="_blank" rel="noopener">Encontrou erro nesta questão?</a>
+                {revealed && <button className="sm-btn" onClick={next}>{current + 1 >= questions.length ? "Ver resultado" : "Próxima →"}</button>}
+              </>
+            )}
+          </div>
+        </div>
+      </article>
+
+      <p className="sm-keys">
+        Teclado: {q.formato === "ce" ? <><kbd>C</kbd> Certo · <kbd>E</kbd> Errado</> : <><kbd>A</kbd>–<kbd>{String.fromCharCode(64 + q.alternativas.length)}</kbd> responde</>} · <kbd>Enter</kbd> avança{!treino && <> · <kbd>←</kbd> volta · <kbd>F</kbd> marca</>}
+      </p>
+
+      {confirm === "finish" && (
+        <div className="sm-modal" role="dialog" aria-modal="true" aria-labelledby="mf">
+          <div>
+            <h3 id="mf">Finalizar a prova?</h3>
+            <p className="sm-muted">
+              {faltam > 0 ? `Você deixou ${faltam} ${faltam === 1 ? "questão" : "questões"} em branco. ` : "Todas as questões foram respondidas. "}
+              {marcadas > 0 ? `${marcadas} marcada(s) para revisar. ` : ""}
+              {run.banca === "CEBRASPE" ? "No Cebraspe, em muitos editais, errar desconta um acerto: em branco não perde ponto." : ""}
+            </p>
+            <div className="row">
+              <button className="sm-btn ghost" onClick={() => setConfirm(null)}>Voltar à prova</button>
+              <button className="sm-btn hl" onClick={finish}>Finalizar</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {confirm === "abandon" && (
+        <div className="sm-modal" role="dialog" aria-modal="true" aria-labelledby="ma">
+          <div>
+            <h3 id="ma">Sair do simulado?</h3>
+            <p className="sm-muted">Você perde o progresso desta rodada. O que você já acumulou antes continua salvo.</p>
+            <div className="row">
+              <button className="sm-btn ghost" onClick={() => setConfirm(null)}>Continuar</button>
+              <button className="sm-btn" onClick={abandon}>Sair</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// RESULTADO
+// ═════════════════════════════════════════════════════════════════════════════
+function Result({ result: r, tab, setTab, tutor, mail, setMail, sendResult, share, ringOn, toast, replay, startReview, goHome, streakCount }) {
+  const C = 2 * Math.PI * 72;
+  const tier = r.pct >= 85 ? ["Resultado de aprovação", "var(--success)"] : r.pct >= 70 ? ["Muito bom, falta pouco", "var(--hl)"] : r.pct >= 50 ? ["Você está no caminho", "var(--hl)"] : ["Base em construção", "var(--accent-light)"];
+  const lista = r.list.map((a, i) => ({ ...a, i }));
+  const filtradas = tab === "revisar" ? lista.filter((a) => !a.answered || !a.correct) : tab === "marcadas" ? lista.filter((a) => a.flagged) : lista;
+  const temMarcadas = lista.some((a) => a.flagged);
+  const { novasConquistas, subiuNivel, streakAumentou } = r.unlock;
+  const erroCount = r.wrong + r.blank;
+
+  return (
+    <div className="sm-res">
+      {toast && <div className="sm-toast" role="status">{toast}</div>}
+
+      <section className="sm-hero">
+        <div className="sm-ring" aria-hidden>
+          <svg width="168" height="168" viewBox="0 0 168 168">
+            <circle cx="84" cy="84" r="72" fill="none" stroke="rgba(128,134,190,.3)" strokeWidth="12" />
+            <circle cx="84" cy="84" r="72" fill="none" stroke={tier[1]} strokeWidth="12" strokeLinecap="round"
+              strokeDasharray={C} strokeDashoffset={ringOn ? C * (1 - r.pct / 100) : C} style={{ transition: "stroke-dashoffset 1.1s var(--ease-out)" }} />
+          </svg>
+          <div className="n">{r.pct}%</div>
+        </div>
+        <h1>{tier[0]}</h1>
+        <p>{r.score} de {r.total} corretas · {r.kind === "custom" ? `${r.banca} · ${escopoLabel(r.escopo)}` : r.banca}</p>
+        {r.net !== null && <span className="net">Nota líquida (acertos − erros): {r.net} de {r.total}</span>}
+      </section>
+
+      {(subiuNivel || novasConquistas.length > 0 || streakAumentou) && (
+        <section className="sm-unlock" aria-live="polite">
+          {subiuNivel && <p><b>🎉 Subiu de nível!</b> Agora você é “{r.nivel.nome}”.</p>}
+          {streakAumentou && <p><b>🔥 Sequência de {streakCount} {streakCount === 1 ? "dia" : "dias"}.</b> Volte amanhã para não perder.</p>}
+          {novasConquistas.map((c) => <p key={c.id}><b>{c.icon} Conquista: {c.nome}.</b> {c.desc}</p>)}
+        </section>
+      )}
+
+      <div className="sm-kpis">
+        <div className="sm-kpi"><b>{r.repeat ? "0" : `+${r.xp}`}</b><span>XP {r.repeat ? "(treino livre)" : "ganho"}</span></div>
+        <div className="sm-kpi"><b>{r.score}/{r.wrong}/{r.blank}</b><span>acertos / erros / branco</span></div>
+        <div className="sm-kpi"><b>{r.avgTime}s</b><span>tempo médio</span></div>
+        <div className="sm-kpi"><b>{r.maxStreak}</b><span>maior sequência</span></div>
+      </div>
+
+      {r.porMateria.length > 1 && (
+        <section className="sm-card sm-block">
+          <h2>Desempenho por matéria</h2>
+          {r.porMateria.map((m) => {
+            const pc = Math.round((m.ok / m.total) * 100);
+            return (
+              <div key={m.materia} className={`sm-bar ${pc < 50 ? "bad" : pc >= 75 ? "good" : ""}`}>
+                <div className="row"><span>{m.materia}</span><span>{m.ok}/{m.total}</span></div>
+                <div className="track"><i style={{ width: `${pc}%` }} /></div>
+              </div>
+            );
+          })}
+        </section>
+      )}
+
+      {r.assuntosErrados.length > 0 && (
+        <section className="sm-card sm-block">
+          <h2>O que revisar primeiro</h2>
+          <p className="sm-muted" style={{ marginBottom: 10 }}>Assuntos das questões que você errou ou deixou em branco:</p>
+          <div className="sm-chips">{r.assuntosErrados.map(([a, n]) => <span key={a} className="sm-pill ink">{a} · {n}</span>)}</div>
+        </section>
+      )}
+
+      {r.total >= 5 && (
+        <section className="sm-tutor sm-block" aria-live="polite">
+          <h2 style={{ fontSize: "1.05rem", marginBottom: 10 }}>🤖 Análise do Tutor IA</h2>
+          {tutor.loading && <p className="sm-muted">Analisando seu desempenho…</p>}
+          {!tutor.loading && tutor.text && <p>{tutor.text}</p>}
+          {!tutor.loading && !tutor.text && (
+            <p className="sm-muted">
+              {erroCount === 0 ? "Gabaritou! Aumente o desafio com um simulado completo no modo prova." : `Comece pelos assuntos acima e depois refaça as questões erradas em “Revisar meus erros”. Errar e corrigir é o que mais rende na reta final.`}
+            </p>
+          )}
+        </section>
+      )}
+
+      <section className="sm-block">
+        <h2>Gabarito comentado</h2>
+        <div className="sm-tabs" role="group" aria-label="Filtrar questões">
+          <button className="sm-chip" aria-pressed={tab === "revisar"} onClick={() => setTab("revisar")}>Para revisar ({erroCount})</button>
+          <button className="sm-chip" aria-pressed={tab === "todas"} onClick={() => setTab("todas")}>Todas ({r.total})</button>
+          {temMarcadas && <button className="sm-chip" aria-pressed={tab === "marcadas"} onClick={() => setTab("marcadas")}>Marcadas</button>}
+        </div>
+        {filtradas.length === 0 && <p className="sm-muted">Nada por aqui. 👏</p>}
+        {filtradas.map((a) => {
+          const q = a.q;
+          const st = !a.answered ? "skip" : a.correct ? "ok" : "no";
+          const L = (i) => (q.formato === "ce" ? q.alternativas[i] : `${String.fromCharCode(65 + i)}) ${q.alternativas[i]}`);
+          return (
+            <article key={a.i} className={`sm-rev ${st}`}>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <span className="sm-pill ink">Q{a.i + 1}</span><span className="sm-pill">{q.materia}</span><span className="sm-pill">{q.assunto}</span>
+                {q.ai && <span className="sm-pill ai">✨ IA</span>}
+              </div>
+              <p className="q">{q.enunciado}</p>
+              {!a.answered && <p className="a">Em branco</p>}
+              {a.answered && !a.correct && <p className="a w">✗ Sua resposta: {L(a.sel)}</p>}
+              <p className="a r">✓ Gabarito: {L(q.gabarito)}</p>
+              <p className="e">{q.explicacao}{q.fonte ? <> <b>({q.fonte})</b></> : null}</p>
+            </article>
+          );
+        })}
+      </section>
+
+      <section className="sm-card sm-block">
+        <h2>Receber a análise por e-mail <small className="sm-muted">(opcional)</small></h2>
+        {mail.sent ? (
+          <p>✅ Enviado para <b>{mail.email}</b>. Confira a caixa de entrada e o spam.</p>
+        ) : (
+          <>
+            <div className="sm-mail">
+              <input type="text" placeholder="Seu nome" value={mail.nome} onChange={(e) => setMail({ ...mail, nome: e.target.value })} aria-label="Seu nome" />
+              <input type="email" placeholder="seu@email.com" value={mail.email} onChange={(e) => setMail({ ...mail, email: e.target.value })} aria-label="Seu e-mail" />
+              <button className="sm-btn sm" onClick={sendResult} disabled={mail.loading || !mail.email}>{mail.loading ? "Enviando…" : "Enviar"}</button>
+            </div>
+            {mail.error && <p className="sm-err" role="alert">{mail.error}</p>}
+            <p className="sm-muted" style={{ fontSize: ".78rem", marginTop: 8 }}>Usamos o e-mail só para enviar este resultado.</p>
+          </>
+        )}
+      </section>
+
+      <div className="sm-actions">
+        {erroCount > 0 && r.kind !== "review" && <button className="sm-btn hl" onClick={startReview}>🔁 Treinar meus erros agora</button>}
+        <button className="sm-btn" onClick={replay}>↻ Refazer</button>
+        <button className="sm-btn ghost" onClick={share}>📤 Compartilhar</button>
+        <button className="sm-btn ghost" onClick={goHome}>Novo simulado</button>
+      </div>
+    </div>
+  );
+}
