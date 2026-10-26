@@ -2307,5 +2307,19 @@
     "status": "erro",
     "issues": [],
     "error": "Todos os provedores falharam — Cerebras: CEREBRAS_API_KEY ausente | Grok: GROK_API_KEY ausente | Groq: Groq(llama-3.3-70b-versatile) HTTP 404 | OpenRouter: OpenRouter HTTP 404 | Gemini: Gemini falhou em todos os modelos (gemini-3.5-flash: HTTP 503 | gemini-2.5-flash: HTTP 404 | gemini-2.5-flash-lite: HTTP 404)"
+  },
+  {
+    "timestamp": "2026-10-26T17:13:31.205Z",
+    "file": "2026-10-26-cref-16-e-trf-3-novidades-salarios-e-estrategias-de-preparacao.md",
+    "slug": "cref-16-e-trf-3-novidades-salarios-e-estrategias-de-preparacao",
+    "title": "Cref 16 e TRF 3: Novidades, Salários e Estratégias de Preparação",
+    "category": "Questões Comentadas",
+    "provider": "Groq",
+    "wordCount": 1878,
+    "fillerCount": 0,
+    "similarity": 21,
+    "similarTo": "concurso-camara-dos-deputados-2026-o-que-mudou-esta-semana-e-o-que-esperar-do-ed",
+    "status": "NEEDS_REVIEW",
+    "issues": []
   }
 ]
