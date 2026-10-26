@@ -15,7 +15,7 @@
       "https://news.google.com/rss/articles/CBMifkFVX3lxTE5YRk1kMGlWUnpRZ251alUtVm5pbTExeVJFbFRzeGdzdWFXZF90SldpNTVWREZvYmswWFFJMnYwWXRKZXoxaGY1ajBRbDR6cm9sb2xuUXowNUdoU296ZVRqOVlNMldwbTJVTHU5aTAwOW5sY0Z3Z1lMQ25XS1ZVQQ?oc=5"
     ],
     "validationIssues": [],
-    "status": "NEEDS_REVIEW",
+    "status": "PUBLISHED",
     "generatedAt": "2026-10-26T17:13:31.196Z",
     "history": [
       {
@@ -25,8 +25,19 @@
       {
         "status": "NEEDS_REVIEW",
         "at": "2026-10-26T17:13:31.197Z"
+      },
+      {
+        "status": "APPROVED",
+        "at": "2026-10-26T21:50:32.438Z"
+      },
+      {
+        "status": "PUBLISHED",
+        "at": "2026-10-26T21:50:32.588Z"
       }
-    ]
+    ],
+    "coverImage": "",
+    "publishedAt": "2026-10-26T21:50:32.588Z",
+    "reviewedAt": "2026-10-26T21:50:32.438Z"
   },
   {
     "id": "2026-10-24-concurso-defensoria-pb-mudancas-recentes-e-o-que-esperar",
