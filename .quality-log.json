@@ -2321,5 +2321,13 @@
     "similarTo": "concurso-camara-dos-deputados-2026-o-que-mudou-esta-semana-e-o-que-esperar-do-ed",
     "status": "NEEDS_REVIEW",
     "issues": []
+  },
+  {
+    "timestamp": "2026-10-27T16:16:00.379Z",
+    "topic": "Concurso DPDF: o que mudou nesta semana e o que esperar do edital",
+    "category": "Informática para Concursos",
+    "status": "erro",
+    "issues": [],
+    "error": "A geração não encontrou um título editorialmente claro. Revise o tema ou as manchetes de origem antes de publicar."
   }
 ]
