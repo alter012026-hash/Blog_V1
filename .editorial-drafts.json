@@ -15,7 +15,7 @@
       "https://news.google.com/rss/articles/CBMiugFBVV95cUxPTUR2dk02b3RYQU8xbF85OTZIU3MyT21zaC1xWTFNWWZJaWtZZDJGQTBjdjJKT09vaGRRdkUwaFRNamRGbGF6OUJIUzhPaVQwVXBLVXlTOVc3UC1BZDdtZ1duUEY5SnBnNlNEZkxoYTlXeWFSQ0x4eEhjVzJnSFV1eUFMTlFUOXpYeTVvME9HQlQ3WFNzam9HdXlxQ0YxRV9SWFUxRnVKUlBQVkZMZ093QzlCQV80OW9KZkE?oc=5"
     ],
     "validationIssues": [],
-    "status": "NEEDS_REVIEW",
+    "status": "PUBLISHED",
     "generatedAt": "2026-10-28T17:02:52.053Z",
     "history": [
       {
@@ -25,8 +25,19 @@
       {
         "status": "NEEDS_REVIEW",
         "at": "2026-10-28T17:02:52.053Z"
+      },
+      {
+        "status": "APPROVED",
+        "at": "2026-10-28T23:42:41.722Z"
+      },
+      {
+        "status": "PUBLISHED",
+        "at": "2026-10-28T23:42:41.849Z"
       }
-    ]
+    ],
+    "coverImage": "",
+    "publishedAt": "2026-10-28T23:42:41.849Z",
+    "reviewedAt": "2026-10-28T23:42:41.722Z"
   },
   {
     "id": "2026-10-26-cref-16-e-trf-3-novidades-salarios-e-estrategias-de-preparacao",
