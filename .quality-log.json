@@ -2329,5 +2329,19 @@
     "status": "erro",
     "issues": [],
     "error": "A geração não encontrou um título editorialmente claro. Revise o tema ou as manchetes de origem antes de publicar."
+  },
+  {
+    "timestamp": "2026-10-28T17:02:52.061Z",
+    "file": "2026-10-28-concursos-regionais-2026-vagas-salarios-e-o-que-esperar-dos-editais-recentes.md",
+    "slug": "concursos-regionais-2026-vagas-salarios-e-o-que-esperar-dos-editais-recentes",
+    "title": "Concursos Regionais 2026: Vagas, Salários e o que Esperar dos Editais Recentes",
+    "category": "Redação e Discursiva",
+    "provider": "Groq",
+    "wordCount": 2028,
+    "fillerCount": 0,
+    "similarity": 15,
+    "similarTo": "concurso-r-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "NEEDS_REVIEW",
+    "issues": []
   }
 ]
