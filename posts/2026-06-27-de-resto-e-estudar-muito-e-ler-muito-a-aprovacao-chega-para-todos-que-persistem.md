@@ -1,6 +1,7 @@
 ---
 title: "De Resto É Estudar Muito e Ler Muito, a Aprovação Chega para Todos que Persistem"
 date: "2026-06-27"
+noindex: true
 category: "Editais"
 excerpt: "Para aqueles que buscam uma carreira estável e com oportunidades de crescimento, os concursos públicos no Brasil são uma excelente opção. No entanto, o..."
 ---

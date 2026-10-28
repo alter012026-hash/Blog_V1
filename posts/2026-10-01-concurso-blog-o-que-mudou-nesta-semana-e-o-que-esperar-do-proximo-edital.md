@@ -1,9 +1,8 @@
 ---
 title: "CGU define banca e UPE lança edital: destaques da semana"
 date: "2026-10-01"
-category: "Cronograma de Estudos"
+category: "Editais"
 excerpt: "A última semana de setembro trouxe um volume incomum de movimentação nos sites de concursos. Em um curto intervalo – de 28 / 09 a 01 / 10 – surgiram três..."
-curiosity: "A banca Cebraspe, antes chamada Cespe/UnB, foi pioneira no Brasil ao adotar, em 1995, a pontuação negativa, onde cada erro desconta pontos da nota final; esse modelo, inicialmente usado apenas em concursos da área de auditoria, hoje é adotado por cerca de 30% dos certames federais, tornando a estratégia de resposta um diferencial decisivo para os candidatos."
 ---
 
 ## Introdução

@@ -39,6 +39,24 @@ Para aqueles que já têm experiência com a revisão espaçada, aqui estão alg
 - **Avalie Regularmente**: Avalie regularmente seu progresso e ajuste sua estratégia de revisão conforme necessário.
 - **Pratique a Aplicação**: Pratique aplicar a legislação em cenários hipotéticos ou em questões de provas, para reforçar sua compreensão e retenção.
 
+## Um calendário de revisão pronto para usar
+
+Não existe um intervalo único e correto, mas um esquema simples e muito usado é revisar o conteúdo **no mesmo dia ou no dia seguinte, depois de 7 dias, depois de 15 e, por fim, depois de 30 dias**. A cada revisão bem-sucedida, o intervalo até a próxima aumenta. Se você errou, o tópico volta para o começo do ciclo.
+
+Veja como isso funciona com prazos da Lei 8.112/1990, que costumam aparecer em provas. Em vez de reler o artigo, transforme cada prazo em uma pergunta:
+
+| Pergunta (frente da ficha) | Resposta (verso) |
+|---|---|
+| Qual o prazo para tomar posse, contado da publicação do ato de provimento? | 30 dias |
+| Depois da posse, em quantos dias o servidor deve entrar em exercício? | 15 dias |
+| Quantos anos de efetivo exercício dão estabilidade (art. 41 da CF)? | 3 anos |
+
+Esse formato de pergunta e resposta é o que torna a revisão eficaz: tentar lembrar da resposta antes de olhar costuma fixar mais do que reler o texto.
+
+## Use questões como revisão
+
+Resolver questões é a forma mais direta de praticar a recuperação ativa. No [simulado do Passeja](/simulado#montar), o que você erra vai para a fila **Revisar meus erros**: a questão volta até você acertá-la, o que na prática funciona como um ciclo de revisão para o seu ponto fraco. Reserve um bloco curto uma vez por semana para zerar essa fila.
+
 ## Desafios e Soluções
 Embora a revisão espaçada seja uma técnica poderosa, ela também pode apresentar desafios:
 - **Manter a Motivação**: Manter a motivação para revisar regularmente pode ser um desafio. Para superar isso, estabeleça metas claras e celebre suas conquistas.

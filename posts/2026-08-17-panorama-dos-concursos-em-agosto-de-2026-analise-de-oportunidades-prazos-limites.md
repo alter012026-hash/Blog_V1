@@ -3,7 +3,6 @@ title: "Panorama dos Concursos em Agosto de 2026: Análise de Oportunidades, Pra
 date: "2026-08-17"
 category: "Materiais Gratuitos"
 excerpt: "O cenário dos concursos públicos no Brasil apresenta uma dinâmica intensa neste meio de ano. Em 17 de agosto de 2026, concurseiros de diferentes regiões..."
-curiosity: "que a obrigatoriedade do concurso público para quase todos os cargos da administração pública no Brasil só foi definitivamente consolidada com a Constituição de 1988? Antes disso, na década de 1930, a criação do Departamento Administrativo do Serviço Público, o Dasp, deu os primeiros passos para profissionalizar o Estado, substituindo o antigo sistema de indicações políticas pelo mérito intelectual dos candidatos nas primeiras provas oficiais do país."
 coverImage: "/images/panorama-dos-concursos-em-agosto-de-2026-analise-de-oportunidades-prazos-limites.jpg"
 ---
 

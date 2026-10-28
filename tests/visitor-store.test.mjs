@@ -1,4 +1,4 @@
-import test from "node:test";
+import test, { mock } from "node:test";
 import assert from "node:assert/strict";
 import {
   CONSENT_VERSION, SESSION_COOKIE, VISITOR_COOKIE, consentValue, parseConsent, parseCookieHeader,
@@ -154,7 +154,11 @@ test("parseSession e parseTimeline convertem o que veio do Redis", () => {
 
 /* ───────────── fluxo completo com Redis simulado ───────────── */
 
-test("fluxo completo: visita nova, páginas, tempo, ação, painel e apagar", async () => {
+test("fluxo completo: visita nova, páginas, tempo, ação, painel e apagar", async (t0) => {
+  // Congela "hoje" em 25/10/2026 (18h em Brasília): o painel lê os últimos dias a partir do
+  // relógio real, e sem isso o teste só passava no próprio dia 25.
+  mock.timers.enable({ apis: ["Date"], now: new Date(Date.UTC(2026, 9, 25, 21, 0)) });
+  t0.after(() => mock.timers.reset());
   const redis = useFakeRedis();
   const t = (min) => new Date(Date.UTC(2026, 9, 25, 15, min)); // 12h00 em Brasília + min
   const a = resolveIds({});

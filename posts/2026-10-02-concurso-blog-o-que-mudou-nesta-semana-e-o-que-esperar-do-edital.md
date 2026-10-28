@@ -1,9 +1,8 @@
 ---
 title: "PMPE, Bombeiros PE e CRECI-ES: editais e vagas em foco"
 date: "2026-10-02"
-category: "Técnicas de Estudo"
+category: "Editais"
 excerpt: "A última semana de setembro trouxe uma avalanche de publicações de editais que mudaram o cenário dos concursos no Brasil. Em apenas três dias, o portal..."
-curiosity: "que a profissionalização dos concursos públicos no Brasil começou na década de 1930? Antes disso, o acesso aos cargos públicos era marcado pelo favoritismo político. Foi em 1938, com a criação do Departamento Administrativo do Serviço Público, o DASP, no governo de Getúlio Vargas, que o país instituiu o concurso público como regra de ingresso no funcionalismo, buscando garantir mais meritocracia e impessoalidade na administração do Estado."
 coverImage: "/images/concurso-blog-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital.jpg"
 takeaways:
   - "vagas e salário de R$12,9 mil para Bombeiros de Pernambuco"

@@ -70,6 +70,22 @@ Manter a perspectiva é crucial para não se deixar levar pela ansiedade e pelo 
 ### 10. Buscar Ajuda Profissional
 Se a ansiedade e o estresse estiverem afetando significativamente sua qualidade de vida ou capacidade de estudo, pode ser necessário buscar ajuda profissional. Isso pode incluir aconselhamento psicológico ou terapia cognitivo-comportamental.
 
+## Treine o dia da prova antes do dia da prova
+
+Boa parte da ansiedade vem do desconhecido: a pressão do tempo, o silêncio da sala, a dúvida sobre o ritmo. Dá para reduzir isso ensaiando.
+
+- **Faça simulados sob condições reais.** Escolha a banca do seu concurso, ligue o cronômetro e responda sem consultar nada. No [simulado do Passeja](/simulado#montar), o **modo prova** tem cronômetro geral, permite marcar questões para revisar e só mostra o gabarito no final, como numa prova de verdade.
+- **Descubra o seu ritmo.** Anote quanto tempo você gasta por questão e em quais matérias trava. Saber que você costuma fechar a prova com 10 minutos de sobra é um calmante concreto.
+- **Tenha uma regra para as difíceis.** Marque, pule e volte depois. Em provas em que o erro desconta ponto (como alguns editais do Cebraspe), saber quando deixar em branco também faz parte da estratégia.
+
+## Uma rotina simples para a última semana
+
+- **Dias anteriores:** revise apenas o que você já estudou, sem matéria nova, e faça um último simulado completo mais cedo na semana, para ter tempo de corrigir os erros.
+- **Véspera:** confira documento, local da prova, trajeto e horário do portão de entrada. Separe tudo antes de dormir e priorize uma boa noite de sono.
+- **No dia:** chegue com folga. Se sentir o coração acelerar, uma respiração lenta, inspirando pelo nariz por cerca de 4 segundos e soltando o ar devagar por cerca de 6, costuma ajudar a baixar a tensão por alguns minutos.
+
+Sentir nervosismo antes da prova é normal. Se a ansiedade for intensa, atrapalhar o sono ou o estudo por semanas, ou vier com sintomas físicos fortes, procure um profissional de saúde: isso é cuidado, não fraqueza.
+
 ## Recursos para Aprender e Praticar
 Além das dicas acima, há vários recursos disponíveis para ajudar na preparação para concursos públicos. Isso inclui:
 - [Estratégia Concursos](https://www.estrategiaconcursos.com.br/): Conheça os cursos do Estratégia Concursos e aproveite para se preparar com materiais de alta qualidade.

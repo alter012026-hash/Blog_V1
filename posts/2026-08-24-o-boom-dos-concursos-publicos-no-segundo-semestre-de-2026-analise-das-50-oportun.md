@@ -3,7 +3,6 @@ title: "O Boom dos Concursos Públicos no Segundo Semestre de 2026: Análise das
 date: "2026-08-24"
 category: "Questões Comentadas"
 excerpt: "O cenário dos concursos públicos no Brasil atinge um de seus momentos mais dinâmicos neste final de agosto de 2026. Em um intervalo de poucos dias, uma..."
-curiosity: "que a obrigatoriedade do concurso público para a contratação de servidores no Brasil só foi plenamente consolidada com a Constituição de 1988? Antes disso, o apadrinhamento político ditava o preenchimento de cargos. Essa mudança histórica impôs o princípio da impessoalidade, garantindo igualdade de condições aos cidadãos e abrindo caminho para o gigantesco mercado de certames atual."
 coverImage: "/images/o-boom-dos-concursos-publicos-no-segundo-semestre-de-2026-analise-das-50-oportun.jpg"
 takeaways:
   - "Detalhes das 600 vagas em Pernambuco e 13 concursos gaúchos."

@@ -3,7 +3,6 @@ title: "Concursos Já Autorizado para Minas Gerais 2026"
 date: "2026-06-27"
 category: "Cronograma de Estudos"
 excerpt: "O panorama de concursos públicos em Minas Gerais ganha contornos mais definidos a cada edição de editais publicados no portal Concursos Já. A plataforma..."
-curiosity: "A Fundação Getúlio Vargas é conhecida por cobrar raciocínio lógico e interpretação de texto em seus concursos."
 coverImage: "/images/concursos-ja-autorizado-para-minas-gerais-2026.jpg"
 ---
 

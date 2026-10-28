@@ -6,6 +6,7 @@
 
 .sm { max-width: 1040px; margin: 0 auto; padding: 20px var(--gutter) 96px; color: var(--text); }
 .sm *, .sm *::before, .sm *::after { box-sizing: border-box; }
+.sm [id] { scroll-margin-top: 84px; }
 .sm button { font-family: inherit; cursor: pointer; }
 .sm button:disabled { cursor: not-allowed; opacity: .55; }
 .sm :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }

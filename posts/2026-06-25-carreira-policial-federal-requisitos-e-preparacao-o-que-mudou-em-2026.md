@@ -1,7 +1,7 @@
 ---
 title: "Carreira Policial Federal: Requisitos e Preparação (O que Mudou em 2026)"
 date: "2026-06-25"
-category: "Carreiras Públicas"
+category: "Editais"
 excerpt: "A Polícia Federal (PF) figura entre as carreiras mais cobiçadas do serviço público brasileiro. Em 2026, a instituição divulgou um edital que trouxe..."
 ---
 

@@ -58,6 +58,7 @@ export default function sitemap() {
   // 🔥 FILTRA POSTS INVÁLIDOS (ESSENCIAL)
   const validPosts = posts.filter((post) => {
     if (!post?.date) return false;
+    if (post.noindex) return false; // artigos marcados noindex não vão ao sitemap
     const d = new Date(post.date);
     return !isNaN(d.getTime());
   });

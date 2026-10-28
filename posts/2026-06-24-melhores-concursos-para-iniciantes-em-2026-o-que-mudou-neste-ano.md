@@ -1,7 +1,7 @@
 ---
 title: "Melhores Concursos para Iniciantes em 2026 – o que Mudou Neste Ano"
 date: "2026-06-24"
-category: "Concursos Abertos"
+category: "Editais"
 excerpt: "O mercado de concursos públicos entrou em 2026 com três tendências claras: digitalização total das fases eliminatórias, valorização de competências..."
 ---
 

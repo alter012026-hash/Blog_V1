@@ -1,9 +1,8 @@
 ---
 title: "Concursos da semana: Câmara, DPE-SP e TJ-PB em destaque"
 date: "2026-10-09"
-category: "Redação e Discursiva"
+category: "Editais"
 excerpt: "A última quinta‑feira (08/10) foi um marco para quem acompanha o universo dos concursos públicos. Em apenas dois dias, o Gran Cursos Online divulgou cinco..."
-curiosity: "Pouco se sabe que o conceito de concurso público no Brasil surgiu ainda no Império, quando, em 1832, o governo imperial realizou a primeira seleção escrita para oficiais da Justiça, exigindo prova prática de conhecimento jurídico e avaliação de moralidade, muito antes de existirem as bancas modernas; esse modelo pioneiro acabou inspirando o sistema meritocrático consagrado na Constituição de 1988."
 takeaways:
   - "Salários de até R$ 32 mil na Câmara e DPE-SP."
   - "Confirmação da FGV para as 50 vagas do TJ-PB."

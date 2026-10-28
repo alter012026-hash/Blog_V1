@@ -66,7 +66,18 @@ export default function SimuladoPage() {
   const [modo, setModo] = useState("treino");
   const [useAI, setUseAI] = useState(false);
   const [quizError, setQuizError] = useState("");
-  useEffect(() => { setEscopo(ESCOPO_TODAS); }, [banca]);
+  // Links vindos dos artigos: /simulado?banca=CEBRASPE&materia=Português#montar
+  useEffect(() => {
+    try {
+      const sp = new URLSearchParams(window.location.search);
+      const b = (sp.get("banca") || "").toUpperCase();
+      const m = sp.get("materia");
+      if (!BANCAS.includes(b)) return;
+      setBanca(b);
+      if (m && getMaterias(b).includes(m)) setEscopo(m);
+      setTimeout(() => document.getElementById("montar")?.scrollIntoView({ behavior: "smooth", block: "start" }), 200);
+    } catch { /* URL inválida: segue com o padrão */ }
+  }, []);
   useEffect(() => { if (escopo === ESCOPO_TODAS) setUseAI(false); }, [escopo]);
 
   // ── rodada ──
@@ -440,7 +451,7 @@ function Home(p) {
       </section>
 
       {/* desafio do dia */}
-      <section className="sm-daily" aria-label="Desafio do dia">
+      <section className="sm-daily" id="desafio" aria-label="Desafio do dia">
         <div>
           <p className="sm-eyebrow">Desafio do dia · 5 questões · ~3 min</p>
           <h2>{dailyDone ? `Hoje você fez ${dailyDone.score}/${dailyDone.total}.` : "Cinco questões, o mesmo desafio para todo mundo."}</h2>
@@ -468,14 +479,14 @@ function Home(p) {
       </div>
 
       {/* montador */}
-      <section className="sm-sec" aria-label="Monte seu simulado">
+      <section className="sm-sec" id="montar" aria-label="Monte seu simulado">
         <h2>Monte o seu simulado</h2>
         <p className="sm-muted">Escolha a banca que vai cair na sua prova. Cada uma tem seu estilo e formato.</p>
 
         <div className="sm-step"><i>1</i> Banca</div>
         <div className="sm-bancas">
           {BANCAS.map((b) => (
-            <button key={b} className="sm-banca" aria-pressed={banca === b} onClick={() => setBanca(b)}>
+            <button key={b} className="sm-banca" aria-pressed={banca === b} onClick={() => { setBanca(b); setEscopo(ESCOPO_TODAS); }}>
               <span className="dot" aria-hidden />
               <b>{BANCA_INFO[b].nome}</b>
               <span className="fmt" style={{ color: BANCA_INFO[b].cor }}>{BANCA_INFO[b].formato === "ce" ? "Certo / Errado" : "Múltipla escolha"}</span>
@@ -552,7 +563,7 @@ function Home(p) {
       </section>
 
       {/* provas oficiais */}
-      <section className="sm-sec" aria-label="Provas e gabaritos oficiais">
+      <section className="sm-sec" id="provas-oficiais" aria-label="Provas e gabaritos oficiais">
         <h2>Prova de verdade, gabarito oficial</h2>
         <p className="sm-muted">
           As questões deste simulado são originais, escritas no estilo de cada banca e revisadas com o fundamento legal. Para treinar com provas reais e conferir o gabarito oficial, use as fontes abaixo (gratuitas).

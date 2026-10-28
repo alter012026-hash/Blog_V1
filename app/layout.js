@@ -55,6 +55,9 @@ export const metadata = {
   authors: [{ name: config.author.name }],
   creator: config.author.name,
   metadataBase: new URL(config.url),
+  // Canônico padrão = a própria URL da página, sem query (?fbclid, ?utm...). Páginas que
+  // definem o seu (blog, artigo, simulado) sobrescrevem este valor.
+  alternates: { canonical: "./" },
   openGraph: {
     type: "website",
     locale: config.locale,

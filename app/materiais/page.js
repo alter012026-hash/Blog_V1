@@ -1,4 +1,5 @@
 import Link from "next/link";
+import SimuladoCta from "../../components/SimuladoCta";
 import config from "../../site.config";
 
 const DRIVE_URL =
@@ -146,6 +147,20 @@ export default function MateriaisPage() {
                 Abrir pasta →
               </div>
             </a>
+          </div>
+        </section>
+
+        {/* PRATIQUE: depois de estudar com o material, testar com questões */}
+        <section className="section section--light reveal">
+          <div className="container">
+            <SimuladoCta
+              cta={{
+                href: "/simulado",
+                titulo: "Estudou? Teste o que aprendeu",
+                texto: "Questões no estilo de cada banca (Cebraspe, FGV, FCC, Vunesp e IBFC) com gabarito comentado e o fundamento de cada resposta. Grátis e sem cadastro.",
+                botao: "Abrir o simulado",
+              }}
+            />
           </div>
         </section>
 

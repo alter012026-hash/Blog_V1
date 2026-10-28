@@ -103,6 +103,17 @@ Essa divisão funciona para concursos com até 150 vagas e provas de 2 a 3 horas
 
 Cronograma semanal (segunda a sexta) com 4 blocos de 2 h cada, reservando 2 h aos sábados para revisão geral e 1 h aos domingos para descanso mental.
 
+### 5.3. Revisão semanal, revisão mensal e saúde
+
+Um cronograma que só distribui matéria nova esquece o que mais pesa na prova: reter o que já foi estudado. Reserve dois momentos fixos de revisão:
+
+- **Revisão semanal (ciclo de 7 dias):** um bloco de 1h30 no fim da semana para refazer as questões que você errou e reler os resumos curtos (cinco linhas por tópico bastam). Quem estuda só o conteúdo novo costuma perceber, duas semanas depois, que já não lembra do começo.
+- **Revisão mensal (ciclo de 30 dias):** um bloco maior para revisar a legislação e os pontos-chave de cada disciplina e, de preferência, fazer um simulado completo sob cronômetro, para medir se o plano está funcionando.
+
+Você pode usar o [Desafio do dia do simulado](/simulado#desafio) como revisão rápida de 3 minutos e a fila "Revisar meus erros" no bloco semanal: ela reúne apenas as questões que você errou.
+
+Sono e atividade física também entram no cronograma, não ficam de fora dele. Adultos em geral precisam de cerca de 7 a 9 horas de sono por noite, e a Organização Mundial da Saúde recomenda pelo menos 150 minutos de atividade física moderada por semana. Estudar até de madrugada e cortar o sono costuma custar mais em memória e atenção do que rende em horas. Se o cansaço ou a ansiedade estiverem atrapalhando de forma persistente, vale conversar com um profissional de saúde.
+
 ## 6. Monitoramento e Ajustes
 
 ### 6.1. Indicadores de desempenho (KPIs)

@@ -1,9 +1,8 @@
 ---
 title: "CGU e DPE-SP: vagas, salários e situação dos editais"
 date: "2026-10-11"
-category: "Questões Comentadas"
+category: "Editais"
 excerpt: "Na última sexta‑feira (09/10/2026) dois editais de grande relevância foram publicados quase simultaneamente: o da Controladoria‑Geral da União (CGU), com..."
-curiosity: "que a obrigatoriedade do concurso público no Brasil nasceu na Constituição de 1934? Antes disso, a nomeação para cargos públicos dependia quase exclusivamente de indicações políticas e favoritismo pessoal. A exigência constitucional visava moralizar a administração pública, garantindo a meritocracia e o acesso democrático aos cargos do Estado, uma transformação histórica que consolidou o modelo de seleção impessoal utilizado até os dias atuais."
 coverImage: "/images/concurso-r-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital.jpg"
 ---
 

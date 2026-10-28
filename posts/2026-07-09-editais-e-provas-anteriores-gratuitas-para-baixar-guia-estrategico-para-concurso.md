@@ -3,7 +3,6 @@ title: "Editais e Provas Anteriores: Como Usar Arquivos Gratuitos para Estudar d
 date: "2026-07-09"
 category: "Materiais Gratuitos"
 excerpt: "Todo candidato que almeja uma vaga no serviço público precisa transformar informação em prática. O ponto de partida são os editais – documentos que..."
-curiosity: "A taxa de retenção de informação aumenta em até 35% quando o aluno produz o próprio resumo, segundo pesquisa da Fundação Getúlio Vargas."
 coverImage: "/images/editais-e-provas-anteriores-gratuitas-para-baixar-guia-estrategico-para-concurso.jpg"
 ---
 

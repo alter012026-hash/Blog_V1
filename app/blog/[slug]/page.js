@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import PostCard from "../../../components/PostCard";
 import AffiliateBox from "../../../components/AffiliateBox";
 import CuriosityCard from "../../../components/CuriosityCard";
+import SimuladoCta from "../../../components/SimuladoCta";
+import { getSimuladoCta } from "../../../lib/simulado-links";
 import TakeawaysCard from "../../../components/TakeawaysCard";
 import ReadProgressEnhanced from "../../../components/ReadProgressEnhanced";
 import NewsletterInline from "../../../components/NewsletterInline";
@@ -87,6 +89,7 @@ export async function generateMetadata({ params }) {
       images: [ogImageUrl],
     },
     alternates: { canonical: pageUrl },
+    ...(post.noindex ? { robots: { index: false, follow: true } } : {}),
   };
 }
 
@@ -314,6 +317,9 @@ export default async function PostPage({ params }) {
                 dangerouslySetInnerHTML={{ __html: contentAfter }}
               />
             )}
+
+            {/* Simulado coerente com o assunto (só aparece se houver match) */}
+            <SimuladoCta cta={getSimuladoCta({ slug: params.slug, title: post.title, targetKeyword: post.targetKeyword })} />
 
             {/* Anúncio fixo no fim do texto, antes dos afiliados */}
             {contentAfter && (

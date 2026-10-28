@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import SimuladoCta from "../../components/SimuladoCta";
 
 const estados = [
   { uf: "sp", nome: "São Paulo" },
@@ -86,6 +87,14 @@ export default function ConcursosPage() {
           </div>
         )}
 
+        <SimuladoCta
+          cta={{
+            href: "/simulado#desafio",
+            titulo: "Enquanto o edital não sai, treine",
+            texto: "Quem começa a estudar antes do edital chega na frente. O Desafio do dia tem 5 questões com gabarito comentado e leva 3 minutos.",
+            botao: "Fazer o Desafio do dia",
+          }}
+        />
       </div>
       </main>
     </>
