@@ -15,7 +15,7 @@
       "https://news.google.com/rss/articles/CBMieEFVX3lxTE40R2pCOGtncTJqV21RMVhEZmRvcW93UTdPOWk2YUoxT3NmSHduN1pwQkFBbGExSTd6UW9rQk1wRDFzd2s2d3FOeTdad1pOc0FfYTdlTGlDbVpwTHVTbXRXbnN4NWtTREpjY0lWLUYyM1d2VGhZMnRuWA?oc=5"
     ],
     "validationIssues": [],
-    "status": "NEEDS_REVIEW",
+    "status": "PUBLISHED",
     "generatedAt": "2026-10-29T17:24:39.613Z",
     "history": [
       {
@@ -25,8 +25,19 @@
       {
         "status": "NEEDS_REVIEW",
         "at": "2026-10-29T17:24:39.613Z"
+      },
+      {
+        "status": "APPROVED",
+        "at": "2026-10-29T22:30:45.550Z"
+      },
+      {
+        "status": "PUBLISHED",
+        "at": "2026-10-29T22:30:45.752Z"
       }
-    ]
+    ],
+    "coverImage": "",
+    "publishedAt": "2026-10-29T22:30:45.752Z",
+    "reviewedAt": "2026-10-29T22:30:45.550Z"
   },
   {
     "id": "2026-10-28-concursos-regionais-2026-vagas-salarios-e-o-que-esperar-dos-editais-recentes",
