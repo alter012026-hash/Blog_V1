@@ -41,7 +41,9 @@ export async function GET(request) {
 
     if (params.get("list") === "1") {
       const offset = Math.max(0, Number(params.get("offset")) || 0);
-      const data = await listSessions({ offset, limit: 30 });
+      const requestedLimit = Number(params.get("limit")) || 30;
+      const limit = Math.max(1, Math.min(50, Math.floor(requestedLimit)));
+      const data = await listSessions({ offset, limit });
       return NextResponse.json({ configured: true, titles: titles(), ...data }, { headers: NO_STORE });
     }
 
