@@ -2343,5 +2343,19 @@
     "similarTo": "concurso-r-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
     "status": "NEEDS_REVIEW",
     "issues": []
+  },
+  {
+    "timestamp": "2026-10-29T17:24:39.621Z",
+    "file": "2026-10-29-vagas-2026-em-go-mt-e-ms-o-que-mudou.md",
+    "slug": "vagas-2026-em-go-mt-e-ms-o-que-mudou",
+    "title": "Vagas 2026 em Go, Mt e Ms: O que Mudou",
+    "category": "Redação e Discursiva",
+    "provider": "Groq",
+    "wordCount": 1965,
+    "fillerCount": 0,
+    "similarity": 23,
+    "similarTo": "concurso-blog-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "NEEDS_REVIEW",
+    "issues": []
   }
 ]
