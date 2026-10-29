@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { downloadTrafficReport } from "./exportReport";
 import {
   BarsH, CSS, Card, Donut, Kpi, Segmented, countryName, fmtDur, nf, shortDay,
 } from "./AnalyticsPanel";
@@ -232,6 +233,7 @@ export default function VisitorsPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [updatedAt, setUpdatedAt] = useState(null);
+  const [exporting, setExporting] = useState(false);
 
   const [list, setList] = useState({ sessions: [], total: 0, titles: {} });
   const [listLoading, setListLoading] = useState(false);
@@ -256,84 +258,6 @@ export default function VisitorsPanel() {
   }, []);
 
   useEffect(() => { load(range); }, [range, load]);
-
-  async function exportCsv() {
-    if (!data) return;
-    setError("");
-    try {
-      // Exporta todas as visitas retidas no índice, em páginas de 50, não apenas as 30 exibidas.
-      const allSessions = [];
-      let offset = 0;
-      let total = Number(list.total) || 0;
-      do {
-        const page = await getJson(`/api/admin/visitors?list=1&offset=${offset}&limit=50`);
-        total = Number(page.total) || total;
-        allSessions.push(...(page.sessions || []));
-        offset += (page.sessions || []).length;
-        if (!page.sessions?.length) break;
-      } while (offset < total);
-
-      const rows = [["secao", "data", "metrica", "dimensao", "valor", "unidade", "observacao"]];
-      const add = (section, date, metric, dimension, value, unit = "quantidade", note = "") => rows.push([section, date || "", metric, dimension || "", value ?? "", unit, note]);
-      const t = data.totals || {};
-      add("Resumo", "", "Período consultado", `${range} dias`, range, "dias");
-      add("Resumo", "", "Visitas com consentimento", "Total", t.sessions, "visitas");
-      add("Resumo", "", "Visitantes únicos por dia somados", "Total", t.visitors, "visitantes-dia", "Não equivale a pessoas únicas no período inteiro.");
-      add("Resumo", "", "Visualizações", "Total", t.views, "visualizações");
-      add("Resumo", "", "Taxa de retorno", "Total", t.returningRate, "%");
-      add("Resumo", "", "Visitas de retorno", "Total", t.returningSessions, "visitas");
-      add("Resumo", "", "Páginas por visita", "Total", t.pagesPerSession, "páginas/visita");
-      add("Resumo", "", "Tempo médio ativo", "Total", t.avgSeconds, "segundos");
-      add("Resumo", "", "Ações registradas", "Total", t.actions, "ações");
-      add("Resumo", "", "Cobertura do rastreamento consentido", "Total", t.coverage, "%", "Percentual estimado em relação às sessões anônimas.");
-      add("Funil", "", "Simulados iniciados", "Simulado", data.funnels?.quiz?.start, "eventos");
-      add("Funil", "", "Simulados concluídos", "Simulado", data.funnels?.quiz?.done, "eventos");
-      add("Funil", "", "Conversão de simulados", "Simulado", data.funnels?.quiz?.rate, "%");
-      add("Funil", "", "Inscrições iniciadas", "Newsletter", data.funnels?.newsletter?.start, "eventos");
-      add("Funil", "", "Inscrições concluídas", "Newsletter", data.funnels?.newsletter?.done, "eventos");
-      add("Funil", "", "Conversão da newsletter", "Newsletter", data.funnels?.newsletter?.rate, "%");
-      for (const p of data.series || []) {
-        add("Série diária", p.date, "Visitas", "Total", p.sessions, "visitas");
-        add("Série diária", p.date, "Visitantes únicos", "Total", p.visitors, "visitantes", "Visitantes únicos por dia.");
-        add("Série diária", p.date, "Visualizações", "Total", p.views, "visualizações");
-        add("Série diária", p.date, "Visitas novas", "Total", p.newSessions, "visitas");
-        add("Série diária", p.date, "Visitas recorrentes", "Total", p.returningSessions, "visitas");
-      }
-      for (const event of data.events || []) {
-        add("Eventos", "", event.name, "Total", event.count, "eventos");
-        for (const dim of event.dims || []) add("Detalhe de eventos", "", event.name, dim.label || dim.key, dim.count, "eventos");
-        for (const page of event.pages || []) add("Eventos por página", "", event.name, page.title || page.path, page.count, "eventos", page.path || "");
-      }
-      for (const item of data.visitNumber || []) add("Frequência de retorno", "", "Número da visita", item.label, item.count, "visitas");
-      for (const item of data.depth || []) add("Profundidade", "", "Páginas por visita", item.label, item.count, "visitas");
-      for (const item of data.duration || []) add("Duração", "", "Tempo ativo por visita", item.label, item.count, "visitas");
-      for (const s of allSessions) {
-        const when = s.start ? new Date(s.start).toISOString() : "";
-        const campaign = s.campaign ? [s.campaign.source, s.campaign.medium, s.campaign.campaign].filter(Boolean).join(" / ") : "";
-        add("Visitas individuais", when, "Visita", s.id, 1, "visita", "Código de visitante: " + (s.visitor || ""));
-        const fields = [
-          ["Canal", s.channel], ["Referenciador", s.referrer], ["Campanha UTM", campaign],
-          ["Página de entrada", s.landing], ["Página de saída", s.exit], ["Páginas vistas", s.pages],
-          ["Tempo ativo", s.seconds], ["Ações", s.events], ["Tipo de dispositivo", s.device],
-          ["Navegador", s.browser], ["Sistema operacional", s.os], ["País", s.country],
-          ["Estado/região", s.region], ["Cidade", s.city], ["Número da visita", s.visitNo],
-          ["Última atividade", s.last ? new Date(s.last).toISOString() : ""],
-        ];
-        for (const [metric, value] of fields) add("Visitas individuais", when, metric, s.id, value, "", "Cada visita é exportada como conjunto de métricas.");
-      }
-      const cell = (value) => `"${String(value ?? "").replace(/"/g, '""')}"`;
-      const csv = "\uFEFF" + rows.map(row => row.map(cell).join(";")).join("\r\n");
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `trafego-visitas-detalhado-${range}d-${new Date().toISOString().slice(0, 10)}.csv`;
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    } catch (e) {
-      setError(`Não foi possível exportar todos os dados: ${e.message}`);
-    }
-  }
 
   async function loadMore() {
     setListLoading(true);
@@ -398,6 +322,12 @@ export default function VisitorsPanel() {
   }
 
   const empty = totals && totals.sessions === 0;
+  async function exportReport() {
+    setExporting(true);
+    setError("");
+    try { await downloadTrafficReport({ range, format: "xlsx" }); } catch (e) { setError(e.message); } finally { setExporting(false); }
+  }
+
   const rangeLabel = RANGES.find((r) => r.value === range)?.label.toLowerCase();
   const spark = (key) => data?.series?.slice(-30).map((p) => p[key]);
 
@@ -418,7 +348,7 @@ export default function VisitorsPanel() {
         <div className="tp-controls">
           <Segmented label="Período" options={RANGES} value={range} onChange={setRange} />
           <button type="button" className="tp-btn" onClick={() => load(range)} disabled={loading}>{loading ? "Atualizando…" : "↻ Atualizar"}</button>
-          <button type="button" className="tp-btn" onClick={exportCsv} disabled={loading || !data}>{loading ? "Preparando dados…" : "⬇ Exportar relatório completo"}</button>
+          <button type="button" className="tp-btn" onClick={exportReport} disabled={exporting} title="Excel com 15 abas (inclui visão geral e dados de quem aceitou cookies)">{exporting ? "Gerando…" : "⬇ Relatório completo (Excel)"}</button>
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { downloadTrafficReport } from "./exportReport";
 
 /* ───────────────────────── constantes ───────────────────────── */
 
@@ -462,6 +463,7 @@ export default function AnalyticsPanel() {
   const [error, setError] = useState("");
   const [live, setLive] = useState(0);
   const [updatedAt, setUpdatedAt] = useState(null);
+  const [exporting, setExporting] = useState("");
 
   const load = useCallback(async (value) => {
     setLoading(true);
@@ -522,75 +524,10 @@ export default function AnalyticsPanel() {
     return out.slice(0, 5);
   }, [data, totals, weekday]);
 
-  function exportCsv() {
-    if (!data) return;
-    // CSV único, organizado por seção para abrir no Excel/LibreOffice e apoiar decisões.
-    // Inclui KPIs, comparação com período anterior, série diária e todos os rankings retornados pela API.
-    const rows = [["secao", "periodo_dias", "data", "metrica", "dimensao", "valor", "unidade", "participacao_pct", "observacao"]];
-    const add = (section, metric, dimension, value, unit = "quantidade", share = "", note = "", date = "") => {
-      rows.push([section, range, date, metric, dimension ?? "", value ?? "", unit, share, note]);
-    };
-    const t = data.totals || {};
-    const share = (value, total) => total ? Math.round((Number(value || 0) / total) * 10000) / 100 : "";
-    const duration = (sec) => sec == null ? "" : sec;
-    add("Resumo", "Visualizações", "Total", t.views, "visualizações");
-    add("Resumo", "Visitantes únicos por dia somados", "Total", t.visitors, "visitantes-dia", "", "Não representa pessoas únicas no período inteiro.");
-    add("Resumo", "Sessões", "Total", t.sessions, "sessões");
-    add("Resumo", "Média de visualizações por dia", "Total", t.avgPerDay, "visualizações/dia");
-    add("Resumo", "Páginas por sessão", "Total", t.pagesPerSession, "páginas/sessão");
-    add("Resumo", "Tempo médio por sessão", "Total", duration(t.avgSeconds), "segundos");
-    add("Resumo", "Taxa de rejeição", "Total", t.bounceRate, "%");
-    add("Resumo", "Rolagem média", "Total", t.avgScroll, "%");
-    add("Resumo", "Visualizações período anterior", "Comparação", t.previousViews, "visualizações");
-    add("Resumo", "Variação de visualizações", "Comparação", t.previousViews ? Math.round(((t.views - t.previousViews) / t.previousViews) * 10000) / 100 : "", "%", "", "Comparação com período anterior de mesma duração, quando disponível.");
-    add("Resumo", "Sessões período anterior", "Comparação", t.previousSessions, "sessões");
-    add("Resumo", "Variação de sessões", "Comparação", t.previousSessions ? Math.round(((t.sessions - t.previousSessions) / t.previousSessions) * 10000) / 100 : "", "%");
-    add("Resumo", "Visualizações hoje", "Hoje", t.today?.views, "visualizações");
-    add("Resumo", "Visualizações ontem", "Ontem", t.yesterday?.views, "visualizações");
-    add("Resumo", "Pessoas online agora", "Tempo real", live, "pessoas");
-    for (const p of data.series || []) {
-      add("Série diária", "Visualizações", "", p.views, "visualizações", share(p.views, t.views), "", p.date);
-      add("Série diária", "Visitantes únicos do dia", "", p.visitors, "visitantes", share(p.visitors, t.visitors), "Visitantes únicos por dia; não somar como pessoas únicas do período.", p.date);
-      add("Série diária", "Sessões", "", p.sessions, "sessões", share(p.sessions, t.sessions), "", p.date);
-    }
-    const groups = [
-      ["Páginas", data.pages, x => x.title, x => x.views, "visualizações"],
-      ["Páginas de entrada", data.landing, x => `${x.title} (${x.path})`, x => x.views, "entradas"],
-      ["Canais", data.channels, x => x.label, x => x.views, "visualizações"],
-      ["Dispositivos", data.devices, x => x.label, x => x.views, "visualizações"],
-      ["Navegadores", data.browsers, x => x.label, x => x.views, "visualizações"],
-      ["Sistemas operacionais", data.systems, x => x.label, x => x.views, "visualizações"],
-      ["Países", data.countries, x => x.code, x => x.views, "visualizações"],
-      ["Estados", data.regions, x => x.code, x => x.views, "visualizações"],
-      ["Cidades", data.cities, x => [x.city, x.region, x.country].filter(Boolean).join(", "), x => x.views, "visualizações"],
-      ["Referenciadores", data.referrers, x => x.source, x => x.views, "visualizações"],
-      ["Tipos de página", data.types, x => x.label, x => x.views, "visualizações"],
-    ];
-    for (const [section, items, label, value, unit] of groups) for (const item of items || []) {
-      add(section, unit, label(item), value(item), unit, share(value(item), section === "Páginas de entrada" ? t.sessions : t.views));
-      if (section === "Páginas") {
-        add(section, "Entradas", label(item), item.entries, "entradas");
-        add(section, "Tempo médio de leitura", label(item), item.avgSeconds, "segundos");
-        add(section, "Caminho", label(item), item.path, "texto");
-      }
-    }
-    for (const [hour, value] of (data.hours || []).entries()) add("Horários", "Visualizações", `${String(hour).padStart(2, "0")}h`, value, "visualizações", share(value, t.views));
-    for (const c of data.campaigns || []) {
-      const label = [c.source, c.medium, c.campaign].filter(Boolean).join(" / ");
-      add("Campanhas UTM", "Visualizações", label, c.views, "visualizações", share(c.views, t.views), "Use para comparar origem, mídia e campanha.");
-    }
-    const csvCell = (value) => {
-      const text = value == null ? "" : String(value);
-      return `"${text.replace(/"/g, '""')}"`;
-    };
-    const csv = "\uFEFF" + rows.map(row => row.map(csvCell).join(";" )).join("\r\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `trafego-relatorio-completo-${range}d-${new Date().toISOString().slice(0,10)}.csv`;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  async function exportReport(format) {
+    setExporting(format);
+    setError("");
+    try { await downloadTrafficReport({ range, format }); } catch (e) { setError(e.message); } finally { setExporting(""); }
   }
 
   if (data && data.configured === false) return <><style>{CSS}</style><div className="tp"><SetupNotice /></div></>;
@@ -619,7 +556,12 @@ export default function AnalyticsPanel() {
         <div className="tp-controls">
           <Segmented label="Período" options={RANGES} value={range} onChange={(v) => { setRange(v); setGroup(DEFAULT_GROUP[v]); }} />
           <button type="button" className="tp-btn" onClick={() => load(range)} disabled={loading}>{loading ? "Atualizando…" : "↻ Atualizar"}</button>
-          {data?.series && <button type="button" className="tp-btn" onClick={exportCsv}>⬇ Exportar CSV</button>}
+          {data?.series && (
+            <>
+              <button type="button" className="tp-btn" onClick={() => exportReport("xlsx")} disabled={!!exporting} title="Excel com 15 abas: resumo, oportunidades, páginas, artigos, canais, horários e mais">{exporting === "xlsx" ? "Gerando…" : "⬇ Relatório completo (Excel)"}</button>
+              <button type="button" className="tp-btn" onClick={() => exportReport("csv")} disabled={!!exporting} title="Só a série diária, em CSV">{exporting === "csv" ? "Gerando…" : "⬇ CSV diário"}</button>
+            </>
+          )}
         </div>
       </div>
 
