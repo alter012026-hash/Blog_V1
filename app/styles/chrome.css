@@ -405,9 +405,7 @@
   max-width: 100%;
   min-height: 280px;          /* reserva o espaço: o texto não pula quando o anúncio carrega */
   margin: 32px auto;
-  overflow: hidden;           /* o anúncio nunca vaza por cima do conteúdo */
-  isolation: isolate;
-  contain: layout paint;
+  min-width: 0;
   background: transparent;
 }
 .ad-slot__label {
@@ -423,7 +421,6 @@
   max-width: 100%;
   min-height: 250px;
   background: transparent !important;
-  overflow: hidden;
 }
 .ad-slot ins.adsbygoogle iframe { max-width: 100% !important; background: transparent; }
 .ad-slot--home { flex: 1; justify-content: center; margin: 0; }

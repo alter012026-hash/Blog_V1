@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import PostCover from "./PostCover";
+import AdSense from "./AdSense";
 import { getCategoryMeta } from "../lib/category-meta";
+import config from "../site.config";
 
 function formatDate(dateStr) {
   const match = String(dateStr || "").match(/(\d{4})-(\d{2})-(\d{2})/);
@@ -15,19 +17,18 @@ function formatDate(dateStr) {
 }
 
 /**
- * Carrossel horizontal de artigos: rolagem com snap (arrastar com o dedo no
- * celular, setas no desktop, teclado com ← →). Ocupa uma faixa de altura
- * fixa em vez de uma lista inteira.
+ * Carrossel de artigos no desktop e faixa de stories rolável no celular.
  */
 export default function LatestCarousel({ posts }) {
   const trackRef = useRef(null);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(true);
   const [thumb, setThumb] = useState({ width: 40, left: 0 });
+  const [showStoryAd, setShowStoryAd] = useState(false);
 
   const update = useCallback(() => {
     const el = trackRef.current;
-    if (!el) return;
+    if (!el || !el.clientWidth || !el.scrollWidth) return;
     const max = el.scrollWidth - el.clientWidth;
     setCanPrev(el.scrollLeft > 4);
     setCanNext(el.scrollLeft < max - 4);
@@ -43,6 +44,23 @@ export default function LatestCarousel({ posts }) {
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, [update, posts]);
+
+  useEffect(() => {
+    const mobileQuery = window.matchMedia("(max-width: 639px)");
+    const updateStoryAd = () => {
+      setShowStoryAd(
+        mobileQuery.matches &&
+        process.env.NODE_ENV === "production" &&
+        config.adsense.enabled &&
+        config.adsense.slots.sidebar &&
+        config.adsense.publisherId !== "ca-pub-XXXXXXXXXXXXXXXX"
+      );
+    };
+
+    updateStoryAd();
+    mobileQuery.addEventListener("change", updateStoryAd);
+    return () => mobileQuery.removeEventListener("change", updateStoryAd);
+  }, []);
 
   function scrollByPage(direction) {
     const el = trackRef.current;
@@ -61,43 +79,79 @@ export default function LatestCarousel({ posts }) {
   if (!posts?.length) return null;
 
   return (
-    <div className="lc" role="region" aria-roledescription="carrossel" aria-label="Novos artigos">
-      <button type="button" className="lc-arrow lc-arrow--prev" onClick={() => scrollByPage(-1)} disabled={!canPrev} aria-label="Artigos anteriores">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
-      </button>
-      <button type="button" className="lc-arrow lc-arrow--next" onClick={() => scrollByPage(1)} disabled={!canNext} aria-label="Próximos artigos">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
-      </button>
+    <div className="lc">
+      <div className="lc-desktop" role="region" aria-roledescription="carrossel" aria-label="Novos artigos">
+        <button type="button" className="lc-arrow lc-arrow--prev" onClick={() => scrollByPage(-1)} disabled={!canPrev} aria-label="Artigos anteriores">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" /></svg>
+        </button>
+        <button type="button" className="lc-arrow lc-arrow--next" onClick={() => scrollByPage(1)} disabled={!canNext} aria-label="Próximos artigos">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+        </button>
 
-      <ul className="lc-track" ref={trackRef} onScroll={update} onKeyDown={onKeyDown}>
-        {posts.map((post) => {
-          const meta = getCategoryMeta(post.category || "Geral");
-          const date = formatDate(post.date);
-          return (
-            <li key={post.slug} className="lc-slide">
-              <article className="lc-card cat" style={{ "--h": meta.hue }} data-vt-card>
-                <div className="lc-media" data-vt-media>
-                  <PostCover slug={post.slug} category={post.category} />
-                  <span className="lc-chip">{post.category || "Geral"}</span>
-                </div>
-                <div className="lc-body">
-                  <h3 className="lc-title">
-                    <Link href={`/blog/${post.slug}`}>{post.title || "Sem título"}</Link>
-                  </h3>
-                  <div className="lc-foot">
-                    {date && <time dateTime={post.date}>{date}</time>}
-                    {post.readingTime && <span>{post.readingTime}</span>}
+        <ul className="lc-track" ref={trackRef} onScroll={update} onKeyDown={onKeyDown}>
+          {posts.map((post) => {
+            const meta = getCategoryMeta(post.category || "Geral");
+            const date = formatDate(post.date);
+            return (
+              <li key={post.slug} className="lc-slide">
+                <article className="lc-card cat" style={{ "--h": meta.hue }} data-vt-card>
+                  <div className="lc-media" data-vt-media>
+                    <PostCover slug={post.slug} category={post.category} />
+                    <span className="lc-chip">{post.category || "Geral"}</span>
                   </div>
-                </div>
-              </article>
-            </li>
-          );
-        })}
-      </ul>
+                  <div className="lc-body">
+                    <h3 className="lc-title">
+                      <Link href={`/blog/${post.slug}`}>{post.title || "Sem título"}</Link>
+                    </h3>
+                    <div className="lc-foot">
+                      {date && <time dateTime={post.date}>{date}</time>}
+                      {post.readingTime && <span>{post.readingTime}</span>}
+                    </div>
+                  </div>
+                </article>
+              </li>
+            );
+          })}
+        </ul>
 
-      <div className="lc-progress" aria-hidden="true">
-        <span style={{ width: `${thumb.width}%`, left: `${thumb.left}%` }} />
+        <div className="lc-progress" aria-hidden="true">
+          <span style={{ width: `${thumb.width}%`, left: `${thumb.left}%` }} />
+        </div>
       </div>
+
+      <ul className="lc-story-track" aria-label="Stories de novos artigos">
+        {posts.slice(0, 4).map((post) => <StorySlide key={post.slug} post={post} />)}
+        {showStoryAd && posts.length > 4 && (
+          <li className="lc-story-ad-slide" aria-label="Publicidade">
+            <AdSense
+              slot={config.adsense.slots.sidebar}
+              placement="home"
+              format="auto"
+            />
+          </li>
+        )}
+        {posts.slice(4).map((post) => <StorySlide key={post.slug} post={post} />)}
+      </ul>
     </div>
+  );
+}
+
+function StorySlide({ post }) {
+  const date = formatDate(post.date);
+
+  return (
+    <li className="lc-story-slide">
+      <Link className="lc-story-card" href={`/blog/${post.slug}`} aria-label={`Ler artigo: ${post.title || "Sem título"}`}>
+        <PostCover slug={post.slug} category={post.category} className="lc-story-cover" />
+        <span className="lc-story-topline">
+          <span className="lc-story-ring" aria-hidden="true" />
+          <span>{post.category || "Geral"}</span>
+        </span>
+        <span className="lc-story-caption">
+          <span className="lc-story-eyebrow">{date || "Novo artigo"}</span>
+          <span className="lc-story-title">{post.title || "Sem título"}</span>
+        </span>
+      </Link>
+    </li>
   );
 }
