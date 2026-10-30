@@ -2357,5 +2357,19 @@
     "similarTo": "concurso-blog-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
     "status": "NEEDS_REVIEW",
     "issues": []
+  },
+  {
+    "timestamp": "2026-10-30T17:02:22.455Z",
+    "file": "2026-10-30-novos-editais-139-vagas-332-temporarios-o-que-mudou.md",
+    "slug": "novos-editais-139-vagas-332-temporarios-o-que-mudou",
+    "title": "Novos Editais: 139 Vagas + 332 Temporários – o que Mudou",
+    "category": "Técnicas de Estudo",
+    "provider": "Groq",
+    "wordCount": 1789,
+    "fillerCount": 0,
+    "similarity": 20,
+    "similarTo": "concurso-blog-o-que-mudou-nesta-semana-e-o-que-esperar-do-edital",
+    "status": "NEEDS_REVIEW",
+    "issues": []
   }
 ]
