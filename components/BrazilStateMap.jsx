@@ -1,16 +1,14 @@
 import { brazilStates } from "../lib/brazil-states";
-
-const TILE_WIDTH = 42;
-const TILE_HEIGHT = 40;
+import { brazilStateBoundaries } from "../lib/brazil-state-boundaries";
 
 export default function BrazilStateMap() {
   return (
     <div className="state-map-wrap">
       <svg
         className="state-map"
-        viewBox="0 0 400 476"
+        viewBox="0 0 500 520"
         role="group"
-        aria-label="Mapa interativo do Brasil. Escolha um estado para ver os concursos relacionados."
+        aria-label="Mapa interativo do Brasil. Toque em um estado para ver concursos relacionados."
       >
         {brazilStates.map((state) => (
           <a
@@ -18,44 +16,27 @@ export default function BrazilStateMap() {
             href={`/blog?estado=${encodeURIComponent(state.code)}`}
             className="state-map-link"
             aria-label={`Ver concursos em ${state.name}`}
+            style={{ "--state-color": state.color }}
           >
-            <g transform={`translate(${state.x} ${state.y})`}>
-              <rect
-                className="state-map-tile"
-                width={TILE_WIDTH}
-                height={TILE_HEIGHT}
-                rx="9"
-                fill={state.color}
-              />
-              <text
-                className="state-map-code"
-                x={TILE_WIDTH / 2}
-                y={TILE_HEIGHT / 2 + 5}
-                textAnchor="middle"
-              >
-                {state.code}
-              </text>
-              <title>{`${state.name} — ver concursos relacionados`}</title>
-            </g>
+            <path
+              className="state-map-shape"
+              d={brazilStateBoundaries[state.code].path}
+            />
+            <text
+              className="state-map-code"
+              x={brazilStateBoundaries[state.code].label[0]}
+              y={brazilStateBoundaries[state.code].label[1]}
+              textAnchor="middle"
+              dominantBaseline="central"
+              aria-hidden="true"
+            >
+              {state.code}
+            </text>
+            <title>{`Ver concursos em ${state.name}`}</title>
           </a>
         ))}
       </svg>
-      <form action="/blog" method="get" className="state-map-picker">
-        <label htmlFor="home-state-picker">Escolha seu estado</label>
-        <div className="state-map-picker-controls">
-          <select id="home-state-picker" name="estado" defaultValue="">
-            <option value="" disabled>Selecione um estado</option>
-            {brazilStates
-              .slice()
-              .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"))
-              .map((state) => (
-                <option key={state.code} value={state.code}>{state.name}</option>
-              ))}
-          </select>
-          <button className="btn btn--hl" type="submit">Ver concursos</button>
-        </div>
-      </form>
-      <p className="state-map-hint">Toque em um estado ou selecione-o na lista.</p>
+      <p className="state-map-hint">Toque em um estado do mapa para ver os concursos relacionados.</p>
     </div>
   );
 }

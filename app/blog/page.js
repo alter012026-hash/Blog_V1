@@ -1,4 +1,5 @@
 import Link from "next/link";
+import SwipeHint from "../../components/SwipeHint";
 import PostCard from "../../components/PostCard";
 import { getAllPosts, getAllCategories } from "../../lib/posts";
 import { getCategoryMeta } from "../../lib/category-meta";
@@ -91,6 +92,7 @@ export default async function BlogPage({ searchParams }) {
                 </Link>
               ))}
             </div>
+            {categories.length > 2 && <SwipeHint>Arraste para ver mais categorias</SwipeHint>}
           </div>
 
           {estado && (

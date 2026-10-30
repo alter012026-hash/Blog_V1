@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { getCategoryMeta } from "../lib/category-meta";
+import SwipeHint from "./SwipeHint";
 
 /**
  * Temas em formato "chip": uma bolinha de cartão-resposta (código da
@@ -64,6 +65,7 @@ export default function CategoryCards({ categories }) {
           );
         })}
       </ul>
+      {categories.length > 3 && <SwipeHint>Arraste para ver mais temas</SwipeHint>}
     </nav>
   );
 }

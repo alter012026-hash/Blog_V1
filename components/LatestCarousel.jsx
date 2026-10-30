@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import PostCover from "./PostCover";
+import SwipeHint from "./SwipeHint";
 import { getCategoryMeta } from "../lib/category-meta";
 
 function formatDate(dateStr) {
@@ -102,6 +103,7 @@ export default function LatestCarousel({ posts }) {
       <ul className="lc-story-track" role="region" aria-label="Stories de novos artigos">
         {posts.map((post) => <StorySlide key={post.slug} post={post} />)}
       </ul>
+      {posts.length > 2 && <SwipeHint>Arraste para ver mais artigos</SwipeHint>}
     </div>
   );
 }

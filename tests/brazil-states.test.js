@@ -1,12 +1,22 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { brazilStates, getBrazilState, postMatchesBrazilState } = require("../lib/brazil-states");
+const { brazilStateBoundaries } = require("../lib/brazil-state-boundaries");
 
 test("lists all 26 states and the Federal District with unique codes", () => {
   assert.equal(brazilStates.length, 27);
   assert.equal(new Set(brazilStates.map((state) => state.code)).size, 27);
   assert.equal(getBrazilState("df").name, "Distrito Federal");
   assert.equal(getBrazilState("XX"), null);
+});
+
+test("provides a clickable map boundary and label for every state", () => {
+  assert.deepEqual(Object.keys(brazilStateBoundaries).sort(), brazilStates.map((state) => state.code).sort());
+  for (const boundary of Object.values(brazilStateBoundaries)) {
+    assert.match(boundary.path, /^M.+Z$/);
+    assert.equal(boundary.label.length, 2);
+    assert.ok(boundary.label.every((coordinate) => Number.isFinite(coordinate) && coordinate >= 0 && coordinate <= 520));
+  }
 });
 
 test("matches state names and capitals in article titles or excerpts", () => {
