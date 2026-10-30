@@ -3,9 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import PostCover from "./PostCover";
-import AdSense from "./AdSense";
 import { getCategoryMeta } from "../lib/category-meta";
-import config from "../site.config";
 
 function formatDate(dateStr) {
   const match = String(dateStr || "").match(/(\d{4})-(\d{2})-(\d{2})/);
@@ -24,7 +22,6 @@ export default function LatestCarousel({ posts }) {
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(true);
   const [thumb, setThumb] = useState({ width: 40, left: 0 });
-  const [showStoryAd, setShowStoryAd] = useState(false);
 
   const update = useCallback(() => {
     const el = trackRef.current;
@@ -44,23 +41,6 @@ export default function LatestCarousel({ posts }) {
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, [update, posts]);
-
-  useEffect(() => {
-    const mobileQuery = window.matchMedia("(max-width: 639px)");
-    const updateStoryAd = () => {
-      setShowStoryAd(
-        mobileQuery.matches &&
-        process.env.NODE_ENV === "production" &&
-        config.adsense.enabled &&
-        config.adsense.slots.sidebar &&
-        config.adsense.publisherId !== "ca-pub-XXXXXXXXXXXXXXXX"
-      );
-    };
-
-    updateStoryAd();
-    mobileQuery.addEventListener("change", updateStoryAd);
-    return () => mobileQuery.removeEventListener("change", updateStoryAd);
-  }, []);
 
   function scrollByPage(direction) {
     const el = trackRef.current;
@@ -119,18 +99,8 @@ export default function LatestCarousel({ posts }) {
         </div>
       </div>
 
-      <ul className="lc-story-track" aria-label="Stories de novos artigos">
-        {posts.slice(0, 4).map((post) => <StorySlide key={post.slug} post={post} />)}
-        {showStoryAd && posts.length > 4 && (
-          <li className="lc-story-ad-slide" aria-label="Publicidade">
-            <AdSense
-              slot={config.adsense.slots.sidebar}
-              placement="home"
-              format="auto"
-            />
-          </li>
-        )}
-        {posts.slice(4).map((post) => <StorySlide key={post.slug} post={post} />)}
+      <ul className="lc-story-track" role="region" aria-label="Stories de novos artigos">
+        {posts.map((post) => <StorySlide key={post.slug} post={post} />)}
       </ul>
     </div>
   );
