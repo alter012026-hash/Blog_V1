@@ -15,7 +15,7 @@
       "https://news.google.com/rss/articles/CBMickFVX3lxTE1ta2FCMHBzeE56NzRPeE5tc2NsTVotMXRtM1J4RXBMbDhPU01wTUV2ZW1adzIzZzlpSVY0ZmQyNnhWXzhvWGx6d2k4WGFZQWlJRU0tYnRadVc5eC1vd203NTVkdnl5Wk14NDJYSklyVWFEZw?oc=5"
     ],
     "validationIssues": [],
-    "status": "NEEDS_REVIEW",
+    "status": "PUBLISHED",
     "generatedAt": "2026-10-30T17:02:22.446Z",
     "history": [
       {
@@ -25,8 +25,19 @@
       {
         "status": "NEEDS_REVIEW",
         "at": "2026-10-30T17:02:22.446Z"
+      },
+      {
+        "status": "APPROVED",
+        "at": "2026-10-30T20:37:14.862Z"
+      },
+      {
+        "status": "PUBLISHED",
+        "at": "2026-10-30T20:37:15.005Z"
       }
-    ]
+    ],
+    "coverImage": "",
+    "publishedAt": "2026-10-30T20:37:15.005Z",
+    "reviewedAt": "2026-10-30T20:37:14.862Z"
   },
   {
     "id": "2026-10-29-vagas-2026-em-go-mt-e-ms-o-que-mudou",
